@@ -1,0 +1,235 @@
+.pageWrapper {
+  padding: 40px 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - var(--navbar-height));
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+@media (min-width: 640px) {
+  .pageWrapper {
+    padding: 48px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pageWrapper {
+    padding: 64px 32px;
+  }
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+/* Category Pills */
+.filters {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.pill {
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all var(--transition-fast) var(--ease-out);
+  white-space: nowrap;
+}
+
+.pill:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.pillActive {
+  color: #000000;
+  background: var(--gradient-brand);
+  border-color: transparent;
+  box-shadow: 0 8px 16px rgba(245, 158, 11, 0.25);
+}
+
+/* Bento Layout section */
+.gridSection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .gridSection {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .gridSection {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Bento Card (Takes 2 cols on Desktop/Tablet) */
+.bentoCard {
+  grid-column: span 2;
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-glass);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  border: 1px solid var(--bg-glass-border);
+  aspect-ratio: 4 / 3;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+@media (min-width: 768px) {
+  .bentoCard {
+    aspect-ratio: 2 / 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bentoCard {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.bentoCard:hover {
+  box-shadow: 0 20px 40px rgba(245, 158, 11, 0.15);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.bentoImage {
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.bentoCard:hover .bentoImage {
+  transform: scale(1.03);
+}
+
+.bentoBadge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: var(--accent-amber);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 3;
+}
+
+.bentoOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.3) 60%,
+    transparent 100%
+  );
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  gap: 8px;
+}
+
+.bentoMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bentoType {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.bentoDate {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.bentoTitle {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.bentoActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.playBtn {
+  background: #ffffff;
+  color: #000000;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--duration-fast);
+}
+
+.playBtn:hover {
+  background: var(--gradient-brand);
+  transform: translateY(-1px);
+}
+
+.addBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: all var(--duration-fast);
+}
+
+.addBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}

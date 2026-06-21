@@ -1,0 +1,177 @@
+.pageWrapper {
+  padding: 0 0 64px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  overflow-x: hidden;
+}
+
+/* ===== Hero Header ===== */
+.hero {
+  position: relative;
+  padding: 80px 16px 60px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 600px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2rem; /* Reduced for mobile so it fits */
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  word-break: break-word; /* Prevent overflow */
+}
+
+@media (min-width: 640px) {
+  .title {
+    font-size: 3.5rem;
+  }
+}
+
+.titleHighlight {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .subtitle {
+    font-size: 1.25rem;
+  }
+}
+
+/* ===== Row Sections ===== */
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .sections {
+    gap: 56px;
+  }
+}
+
+/* Divider between sections */
+.divider {
+  height: 1px;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+/* ===== Loading & Error States ===== */
+.loadingState, .errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 200px;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.errorState button {
+  padding: 8px 16px;
+  background: var(--bg-surface-hover);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.errorState button:hover {
+  background: var(--bg-surface);
+  border-color: var(--primary);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+}
+
+.refreshButton:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.05);
+  transform: translateY(-2px);
+}
+
+.refreshButton:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.refreshButton svg {
+  color: var(--accent-amber);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.refreshButton:hover svg {
+  transform: rotate(180deg);
+}

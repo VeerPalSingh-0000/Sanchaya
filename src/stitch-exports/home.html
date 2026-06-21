@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CINEVERSE - Home</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Outfit:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#ffb95f",
+                    "tertiary": "#cecbce",
+                    "surface-variant": "#2e3545",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#ffb0cd",
+                    "surface-container-lowest": "#070e1d",
+                    "on-background": "#dce2f7",
+                    "on-primary-container": "#613b00",
+                    "surface-container-highest": "#2e3545",
+                    "inverse-surface": "#dce2f7",
+                    "secondary": "#ffb0cd",
+                    "primary-fixed": "#ffddb8",
+                    "surface-container-low": "#141b2b",
+                    "surface-tint": "#ffb95f",
+                    "on-tertiary-container": "#444346",
+                    "on-secondary-container": "#ffbad3",
+                    "on-primary-fixed": "#2a1700",
+                    "outline-variant": "#534434",
+                    "tertiary-fixed": "#e5e1e4",
+                    "on-primary-fixed-variant": "#653e00",
+                    "tertiary-fixed-dim": "#c8c6c8",
+                    "outline": "#a08e7a",
+                    "inverse-primary": "#855300",
+                    "error-container": "#93000a",
+                    "on-primary": "#472a00",
+                    "surface-container": "#191f2f",
+                    "on-tertiary-fixed-variant": "#474649",
+                    "surface": "#000000",
+                    "on-tertiary-fixed": "#1c1b1d",
+                    "secondary-container": "#aa0266",
+                    "surface-bright": "#323949",
+                    "surface-container-high": "#232a3a",
+                    "primary-container": "#f59e0b",
+                    "on-secondary-fixed-variant": "#8c0053",
+                    "inverse-on-surface": "#293040",
+                    "on-secondary-fixed": "#3e0022",
+                    "background": "#000000",
+                    "error": "#ffb4ab",
+                    "tertiary-container": "#b3b0b3",
+                    "on-secondary": "#640039",
+                    "on-surface": "#dce2f7",
+                    "on-surface-variant": "#d8c3ad",
+                    "on-tertiary": "#313032",
+                    "on-error": "#690005",
+                    "primary": "#ffc174",
+                    "surface-dim": "#000000",
+                    "secondary-fixed": "#ffd9e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "8px",
+                    "container-max": "1440px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "headline-lg": [
+                            "Outfit"
+                    ],
+                    "display-xl": [
+                            "Outfit"
+                    ],
+                    "display-xl-mobile": [
+                            "Outfit"
+                    ],
+                    "headline-lg-mobile": [
+                            "Outfit"
+                    ],
+                    "label-sm": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "letterSpacing": "0em",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-xl": [
+                            "64px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "display-xl-mobile": [
+                            "40px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "1",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        /* Hide scrollbar for clean carousel */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased overflow-x-hidden min-h-screen font-body-md text-body-md">
+<!-- Immersive Background Animation -->
+<div class="fixed inset-0 z-[-1] pointer-events-none">
+<div class="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background"></div>
+</div>
+<!-- TopNavBar (Desktop) -->
+<nav class="hidden md:flex sticky top-0 z-50 justify-between items-center px-margin-desktop py-4 w-full bg-surface/40 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-primary/5 fixed top-0 w-full">
+<!-- Brand -->
+<div class="font-display-xl text-display-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            CINEVERSE
+        </div>
+<!-- Navigation Links -->
+<ul class="flex space-x-8 font-headline-lg text-headline-lg font-body-md text-body-md">
+<!-- Explore/Home semantic match -->
+<li><a class="text-primary border-b-2 border-primary pb-1 hover:bg-white/5 transition-all duration-300 active:scale-95 transition-transform" href="#">Movies</a></li>
+<li><a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 active:scale-95 transition-transform" href="#">TV Shows</a></li>
+<li><a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 active:scale-95 transition-transform" href="#">My List</a></li>
+<li><a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 active:scale-95 transition-transform" href="#">Discover</a></li>
+</ul>
+<!-- Trailing Actions -->
+<div class="flex items-center space-x-6">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 p-2 rounded-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-2xl shadow-primary/5 hover:bg-white/5 transition-all duration-300 cursor-pointer active:scale-95 transition-transform">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A hyper-realistic cinematic portrait of an abstract glowing neon avatar representing a user profile. The aesthetic is extremely high-end, utilizing deep OLED black backgrounds contrasting with vibrant, electric blue and magenta highlights. Soft specular lighting creates a premium 3D glassmorphic effect. The mood is futuristic and deeply immersive." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB68KOw6YLWXrsuRJkcfFnoDNGhfmzP7YoAywDvQmVIm1bQvN8WwwREwkLONRPzE27dW_0IeHtLEmYVFcWk8ofOnI3qTZEXyyAGo1KgWDATSVzio6dsuId3g1xQKNlQNhhG9ta8NYGqyHQ3SInHdDf-inUqGmwXJje4tTkj45itybsOtfLS9cuu0HP2J-Hr9deRap5PlCRqsaZrUSB9tEbq9ugIHJU-C-ArtztX9LflcvIuv3sVYuiGSC6rbd7gB8SctpNOHBQFBb9O"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="w-full mx-auto pb-[120px] md:pb-24 pt-24 md:pt-12">
+<!-- Search & Filters Section -->
+<section class="mb-12 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<!-- Search Bar -->
+<div class="relative w-full max-w-2xl mx-auto md:mx-0 mb-6">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</div>
+<input class="w-full bg-surface-container/60 backdrop-blur-xl border border-white/10 rounded-full py-4 pl-12 pr-4 text-on-surface focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.5)] placeholder-on-surface-variant font-body-md text-body-md" placeholder="Search movies, shows, genres..." type="text"/>
+</div>
+<!-- Glassmorphic Pill Filters -->
+<div class="flex space-x-4 overflow-x-auto no-scrollbar pb-2">
+<button class="px-6 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-surface font-label-sm text-label-sm whitespace-nowrap active:scale-95 transition-transform shadow-[0_10px_20px_rgba(245,158,11,0.2)]">All</button>
+<button class="px-6 py-2 rounded-full bg-surface-container/40 backdrop-blur-lg border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-white/10 font-label-sm text-label-sm whitespace-nowrap transition-all active:scale-95">Movies</button>
+<button class="px-6 py-2 rounded-full bg-surface-container/40 backdrop-blur-lg border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-white/10 font-label-sm text-label-sm whitespace-nowrap transition-all active:scale-95">Series</button>
+<button class="px-6 py-2 rounded-full bg-surface-container/40 backdrop-blur-lg border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-white/10 font-label-sm text-label-sm whitespace-nowrap transition-all active:scale-95">Anime</button>
+</div>
+</section>
+<!-- Hero Carousel Section -->
+<section class="mb-16 relative w-full overflow-hidden px-4 md:px-0">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-6">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background">Trending Now</h2>
+</div>
+<div class="relative w-full flex items-center justify-center py-10">
+<!-- Left Arrow -->
+<button class="absolute left-4 md:left-margin-desktop z-20 bg-surface-container/30 hover:bg-surface-container/50 backdrop-blur-md border border-white/10 text-white p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all active:scale-90 hidden md:block">
+<span class="material-symbols-outlined text-3xl">chevron_left</span>
+</button>
+<!-- Carousel Track -->
+<div class="flex items-center justify-center space-x-[-15%] md:space-x-[-10%] w-full max-w-[1200px]">
+<!-- Previous Poster (Partial) -->
+<div class="relative w-[200px] md:w-[280px] aspect-[2/3] rounded-xl overflow-hidden opacity-40 scale-75 blur-[2px] transition-all duration-500 z-0">
+<img alt="Hero Poster" class="absolute inset-0 w-full h-full object-cover" data-alt="A stunning hyper-realistic poster for a superhero action movie. The scene depicts a dynamic figure swinging through a futuristic neon-lit city at night, heavy rain reflecting vibrant pink and blue city lights. Extremely high contrast, deep OLED blacks, and a premium glassmorphic visual style evoking high-end entertainment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTWY6JH2I85MSG9qvz3bMBlE3R0-oq9sOAMAsdVyHfOWMXPtEu9u7d03dZa9xb5Cjd9ROzNuirQShaB-cERHbkO5dGXqhrfo5CU1GQmNljfGPT1VagQ206DlLg8fI8KfcK1zesYG3haCy2OhWhho1jhdTpct6B1xVk2IH9sMwIfiR0AXhsnwlw_YlBoz2B9jO-Wl28jkSq5urWEjbnVOmxblKLrWRcMK7LUr7DCung4No9hh6nn7tGFC78NT7iZC5-hVF-mJYgBjUM"/>
+</div>
+<!-- Active Poster (Featured) -->
+<div class="relative w-[260px] md:w-[400px] aspect-[2/3] rounded-2xl overflow-hidden group cursor-pointer border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.7)] z-10 hover:shadow-[0_0_60px_rgba(245,158,11,0.4)] transition-all duration-500 hover:scale-105">
+<img alt="Dune Poster" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A highly detailed cinematic poster for a sci-fi epic movie resembling 'Dune'. The visual features vast, sweeping desert dunes under a huge, glowing twin-sun sky. Deep cinematic shadows contrast with vibrant golden hour orange lighting. A lone, silhouetted figure stands in the foreground. Premium dark-mode aesthetic with OLED blacks and highly saturated cinematic color grading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQo_y1iy4FT3r-FKkki3tDV20LGYU7HCvz63gjOmozkD2_vru91DF_s3adq76pc-Vsa9aUn2CIvqQy6-k3jUZrudctKfRqojGXcSexEKWCqg6r4zD8j-CfNsErbM5xKO9tKUrS9za3v4FwtLlp_Glfb78UNQTdkNchbsLRbNmHya0CIIUnye-Sc4b9tQXeV6WveJr4JcE8ud0DNdoqZk6HBKjig4_a5RKTY9t9BWd73j8fIg7DH0arFZDeC_7Ba-0QO3Ju3kkZFkFN"/>
+<!-- Floating Badge -->
+<div class="absolute top-4 left-4 bg-primary text-surface font-label-sm text-label-sm px-4 py-1.5 rounded-full shadow-lg z-10 font-bold tracking-wider">
+            #1 IN MOVIES
+        </div>
+<!-- Gradient Glow on Hover -->
+<div class="absolute inset-0 border-2 border-transparent group-hover:border-primary/50 rounded-2xl transition-all duration-500 z-20 pointer-events-none mix-blend-overlay"></div>
+<!-- Glassmorphic Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="absolute bottom-0 left-0 right-0 p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out flex flex-col justify-end h-full">
+<div>
+<h3 class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-on-background mb-2">Desert Sands</h3>
+<div class="flex items-center space-x-3 text-primary font-body-md text-body-md mb-6">
+<span class="flex items-center"><span class="material-symbols-outlined text-[20px] mr-1" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span> 9.8</span>
+<span class="text-on-surface-variant">•</span>
+<span class="text-on-surface-variant">2024</span>
+<span class="text-on-surface-variant">•</span>
+<span class="text-on-surface-variant border border-white/20 rounded px-2 py-0.5 text-sm">PG-13</span>
+</div>
+<div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+<button class="flex-1 bg-primary text-surface py-3 rounded-lg font-label-sm text-label-sm hover:bg-primary-container transition-colors flex items-center justify-center space-x-2 font-bold shadow-[0_10px_20px_rgba(245,158,11,0.3)]">
+<span class="material-symbols-outlined" data-icon="play_arrow" data-weight="fill" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<span>Play Now</span>
+</button>
+<button class="bg-white/10 backdrop-blur-md border border-white/20 text-on-background p-3 rounded-lg hover:bg-white/20 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Next Poster (Partial) -->
+<div class="relative w-[200px] md:w-[280px] aspect-[2/3] rounded-xl overflow-hidden opacity-40 scale-75 blur-[2px] transition-all duration-500 z-0">
+<img alt="Anime Poster" class="absolute inset-0 w-full h-full object-cover" data-alt="A breathtaking anime style poster with a cyberpunk aesthetic. High-tech sprawling metropolis drenched in neon rain, glowing signs in vibrant cyan and magenta against deep OLED black shadows. A lone silhouette looks over the futuristic city from a high vantage point. Premium, high-definition cinematic visual quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx91JWBxC386stjxZ0rGRDAOeMfPzunrQzy_3s8_GRKmz1J19ZJlPkT5do7pVMnOQT9kOvwhdSUpzH5Sk7XgDNShpHskGZMdiG_h51VBP7EeIIrHNN2CxvrrJq78p0x97KYd_ULMZruAkIPegPyR1bFeEQ1yMA5II3CsY92fF09-AqQ-hehT9wOPBNyPZ2lmOpl4nvfF2auAcysmdNp5dvi70yo9hsyj74jaaSyZ407hvkmyq-rsqWRudD3E-WAS5-Qr6vKd25cEOk"/>
+</div>
+</div>
+<!-- Right Arrow -->
+<button class="absolute right-4 md:right-margin-desktop z-20 bg-surface-container/30 hover:bg-surface-container/50 backdrop-blur-md border border-white/10 text-white p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all active:scale-90 hidden md:block">
+<span class="material-symbols-outlined text-3xl">chevron_right</span>
+</button>
+</div>
+<!-- Pagination Dots -->
+<div class="flex justify-center items-center space-x-2 mt-8">
+<div class="w-8 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/20 hover:bg-white/40 cursor-pointer transition-colors"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/20 hover:bg-white/40 cursor-pointer transition-colors"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/20 hover:bg-white/40 cursor-pointer transition-colors"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/20 hover:bg-white/40 cursor-pointer transition-colors"></div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 bg-surface-container/60 backdrop-blur-lg fixed bottom-4 mx-margin-mobile rounded-full w-[calc(100%-40px)] border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-3 font-label-sm text-label-sm hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span>Home</span>
+</a>
+<!-- Search -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 font-label-sm text-label-sm hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="search">search</span>
+<span>Search</span>
+</a>
+<!-- Library -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 font-label-sm text-label-sm hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="subscriptions">subscriptions</span>
+<span>Library</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 font-label-sm text-label-sm hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span>Profile</span>
+</a>
+</nav>
+<style>
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</body></html>

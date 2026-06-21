@@ -1,71 +1,93 @@
-/** Supported media types in the tracker */
+// ─── Media Types ────────────────────────────────────────────────────────────
+
 export type MediaType = 'movie' | 'series' | 'anime';
 
-/** Possible watchlist statuses */
-export type WatchlistStatus =
+export type MediaFilter = 'all' | MediaType;
+
+export type WatchStatus =
   | 'plan_to_watch'
   | 'watching'
   | 'completed'
   | 'on_hold'
   | 'dropped';
 
-/** Genre representation */
+// ─── Core Data Structures ───────────────────────────────────────────────────
+
 export interface Genre {
   id: number;
   name: string;
 }
 
-/** Unified media item used across the entire app */
 export interface Media {
-  /** Internal DB id (optional for search results) */
-  id?: string;
-  /** External service id (TMDb or AniList) */
+  id: string;
   externalId: string;
-  /** Which type of media this is */
   type: MediaType;
-  /** Display title */
   title: string;
-  /** Original language title */
   originalTitle?: string;
-  /** Overview / synopsis */
-  overview?: string;
-  /** Poster image path (relative for TMDb, absolute for AniList) */
-  posterPath?: string;
-  /** Backdrop image path */
-  backdropPath?: string;
-  /** Rating out of 10 */
-  rating?: number;
-  /** Total number of votes */
-  voteCount?: number;
-  /** Release date or first air date (ISO string) */
+  overview: string;
+  posterUrl: string;
+  backdropUrl?: string;
+  genres: Genre[];
+  rating: number;
+  voteCount: number;
   releaseDate?: string;
-  /** Year extracted for quick display */
-  year?: number;
-  /** Genre list */
-  genres?: Genre[];
-  /** Runtime in minutes (movies) or episode count (series/anime) */
+  status: string;
+  seasons?: Season[];
+  totalEpisodes?: number;
+  studios?: string[];
+  trailer?: string;
+}
+
+export interface Season {
+  number: number;
+  name: string;
+  episodeCount: number;
+  overview: string;
+  posterUrl?: string;
+  airDate?: string;
+  episodes?: Episode[];
+}
+
+export interface Episode {
+  number: number;
+  name: string;
+  overview: string;
+  airDate?: string;
+  stillUrl?: string;
   runtime?: number;
-  /** Episode count for series/anime */
-  episodeCount?: number;
-  /** Season count for series */
-  seasonCount?: number;
-  /** Current airing status */
-  status?: string;
-  /** Data source */
-  source?: 'tmdb' | 'anilist';
-  /** User's personal watchlist status */
-  watchlistStatus?: WatchlistStatus;
-  /** User's personal rating (1-10) */
-  userRating?: number;
+  rating?: number;
 }
 
-/** Search results envelope */
-export interface SearchResults {
-  items: Media[];
+// ─── Watchlist ───────────────────────────────────────────────────────────────
+
+export interface WatchlistItem {
+  id: string;
+  externalId: string;
+  mediaType: MediaType;
+  title: string;
+  posterUrl: string;
+  backdropUrl?: string;
+  genres: Genre[];
+  rating: number;
+  status: WatchStatus;
+  progress?: number;
+  totalEpisodes?: number;
+  addedAt: string;
+  updatedAt: string;
+}
+
+// ─── Search & Recommendations ───────────────────────────────────────────────
+
+export interface SearchResult {
+  results: Media[];
   totalResults: number;
-  page: number;
   totalPages: number;
+  page: number;
 }
 
-/** Filter type for search/browse */
-export type MediaFilter = 'all' | MediaType;
+export interface RecommendationResult {
+  media: Media;
+  matchedGenres: string[];
+  matchScore: number;
+  reason: string;
+}

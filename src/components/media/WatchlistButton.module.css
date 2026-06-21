@@ -1,0 +1,48 @@
+.button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.add {
+  background: var(--accent-indigo);
+  color: white;
+}
+
+.add:hover {
+  background: #4f46e5;
+}
+
+.remove {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.remove:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--border-subtle);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

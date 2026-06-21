@@ -1,0 +1,323 @@
+/* ===== Navbar ===== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--navbar-height);
+  z-index: 50;
+  background: rgba(12, 19, 34, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  transition:
+    background var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.navbar.scrolled {
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+/* ===== Logo ===== */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoIcon {
+  display: flex;
+  align-items: center;
+}
+
+.logoText {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 2px;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== Nav Links (Desktop) ===== */
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+}
+
+.navLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.navLink:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.navLink.active {
+  color: var(--text-primary);
+}
+
+/* Gradient underline + glow for active */
+.navLink.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--gradient-brand);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5), 0 0 4px rgba(168, 85, 247, 0.4);
+}
+
+/* ===== Right Section ===== */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ===== Avatar ===== */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.avatar::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: var(--gradient-brand);
+  z-index: -1;
+  opacity: 0.6;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.avatar:hover {
+  color: var(--text-primary);
+}
+
+.avatar:hover::before {
+  opacity: 1;
+}
+
+/* ===== Bottom Nav (Mobile Only) ===== */
+.bottomNav {
+  display: none;
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  height: 64px;
+  background: rgba(12, 19, 34, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  z-index: 50;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.bottomNavInner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  padding: 0 12px;
+}
+
+.bottomNavLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 600;
+  height: 46px;
+  width: 68px;
+  border-radius: 9999px;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.bottomNavLink svg {
+  width: 20px;
+  height: 20px;
+  transition: transform var(--duration-fast);
+}
+
+.bottomNavLink:hover {
+  color: var(--text-primary);
+}
+
+.bottomNavLink.active {
+  color: #000000;
+  background: var(--gradient-brand);
+  box-shadow: 0 8px 20px rgba(255, 193, 116, 0.35);
+}
+
+.bottomNavLink.active svg {
+  transform: scale(1.05);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .navLinks {
+    display: none;
+  }
+
+  .bottomNav {
+    display: block;
+  }
+}
+
+/* ===== Profile Dropdown ===== */
+.profileContainer {
+  position: relative;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background: rgba(15, 20, 35, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  animation: slideDown 0.2s var(--ease-out);
+  z-index: 60;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdownHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.userName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  margin-top: 0;
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.dropdownItems {
+  padding: 8px 0;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--duration-fast);
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dropdownItem svg {
+  color: var(--text-muted);
+  transition: color var(--duration-fast);
+}
+
+.dropdownItem:hover svg {
+  color: var(--accent-cyan);
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 4px 0;
+}
+
+.dangerItem:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.dangerItem:hover svg {
+  color: #ef4444;
+}

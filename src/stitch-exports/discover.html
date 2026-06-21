@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CINEVERSE - Discover</title>
+<!-- Google Fonts: Outfit & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Outfit:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Design System Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#ffb95f",
+                    "tertiary": "#cecbce",
+                    "surface-variant": "#2e3545",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#ffb0cd",
+                    "surface-container-lowest": "#070e1d",
+                    "on-background": "#dce2f7",
+                    "on-primary-container": "#613b00",
+                    "surface-container-highest": "#2e3545",
+                    "inverse-surface": "#dce2f7",
+                    "secondary": "#ffb0cd",
+                    "primary-fixed": "#ffddb8",
+                    "surface-container-low": "#141b2b",
+                    "surface-tint": "#ffb95f",
+                    "on-tertiary-container": "#444346",
+                    "on-secondary-container": "#ffbad3",
+                    "on-primary-fixed": "#2a1700",
+                    "outline-variant": "#534434",
+                    "tertiary-fixed": "#e5e1e4",
+                    "on-primary-fixed-variant": "#653e00",
+                    "tertiary-fixed-dim": "#c8c6c8",
+                    "outline": "#a08e7a",
+                    "inverse-primary": "#855300",
+                    "error-container": "#93000a",
+                    "on-primary": "#472a00",
+                    "surface-container": "#191f2f",
+                    "on-tertiary-fixed-variant": "#474649",
+                    "surface": "#0c1322",
+                    "on-tertiary-fixed": "#1c1b1d",
+                    "secondary-container": "#aa0266",
+                    "surface-bright": "#323949",
+                    "surface-container-high": "#232a3a",
+                    "primary-container": "#f59e0b",
+                    "on-secondary-fixed-variant": "#8c0053",
+                    "inverse-on-surface": "#293040",
+                    "on-secondary-fixed": "#3e0022",
+                    "background": "#000000",
+                    "error": "#ffb4ab",
+                    "tertiary-container": "#b3b0b3",
+                    "on-secondary": "#640039",
+                    "on-surface": "#dce2f7",
+                    "on-surface-variant": "#d8c3ad",
+                    "on-tertiary": "#313032",
+                    "on-error": "#690005",
+                    "primary": "#ffc174",
+                    "surface-dim": "#0c1322",
+                    "secondary-fixed": "#ffd9e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "8px",
+                    "container-max": "1440px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Outfit"],
+                    "display-xl": ["Outfit"],
+                    "display-xl-mobile": ["Outfit"],
+                    "headline-lg-mobile": ["Outfit"],
+                    "label-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }],
+                    "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                    "display-xl": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "display-xl-mobile": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                    "label-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #000000; /* Absolute OLED black */
+            color: #dce2f7; /* on-background */
+        }
+        
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, #111827 0%, #1f2937 50%, #111827 100%);
+            background-size: 200% 100%;
+            animation: shimmerEffect 2s infinite linear;
+        }
+
+        @keyframes shimmerEffect {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-body-md overflow-x-hidden">
+<!-- Top Navigation Bar (Shared Component) -->
+<nav class="hidden md:flex sticky top-0 z-50 justify-between items-center px-margin-desktop py-4 w-full bg-surface/40 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-primary/5">
+<div class="flex items-center gap-12">
+<!-- Brand -->
+<a class="font-display-xl text-display-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent" href="#">
+                CINEVERSE
+            </a>
+<!-- Navigation Links -->
+<ul class="flex items-center gap-8 font-headline-lg text-headline-lg font-body-md text-body-md">
+<li>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 duration-300 px-3 py-2 rounded-md" href="#">Movies</a>
+</li>
+<li>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 duration-300 px-3 py-2 rounded-md" href="#">TV Shows</a>
+</li>
+<li>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 duration-300 px-3 py-2 rounded-md" href="#">My List</a>
+</li>
+<li>
+<a class="text-primary border-b-2 border-primary pb-1 hover:bg-white/5 transition-all duration-300 px-3 py-2 rounded-md" href="#">Discover</a>
+</li>
+</ul>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 duration-300 p-2 rounded-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-white/10 overflow-hidden cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="A macro portrait photograph of a futuristic cyborg user with subtle neon glowing accents on their skin, set against a completely pitch black background. The lighting is cinematic and moody, reflecting the premium dark aesthetic of a high-end streaming service profile picture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRvz2SosJmgeD6XUYsN95q60HQfqPNIrTN-RNLmH_1Axqv2UNi0-2q2u76-lW-MpHDqJaRvIcDlWLwawVx2-ahhiRV_0BW947aCK5ZCVfNdo8mFbAEazaxsNBh10dJX4ffDgsDbeqoYr1FWnflYWJrK_Qwr_x5n5u4KVCoRLvYWo7ABWfdw9HsbK2sZ84wJr70TPFW0WgmzUHCFYs-huSCNHEa2XD8ir-O6d_pjj7lt7znoJdpsGrkad3VtpZdrjual7PfszOw67PO"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8 pb-32 md:pb-16 flex flex-col gap-12">
+<!-- Header Section -->
+<header class="flex flex-col gap-6">
+<h1 class="font-display-xl-mobile text-display-xl-mobile md:font-display-xl md:text-display-xl text-on-surface tracking-tight">
+                Discover New Horizons
+            </h1>
+<!-- Filter Pills -->
+<div class="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
+<button class="bg-gradient-to-r from-primary to-secondary text-background font-bold shadow-[0_10px_20px_rgba(245,158,11,0.2)] font-label-sm text-label-sm px-5 py-2.5 rounded-full whitespace-nowrap active:scale-95 transition-transform">
+                    All Categories
+                </button>
+<button class="glass-panel text-on-surface font-label-sm text-label-sm px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors whitespace-nowrap active:scale-95">
+                    Sci-Fi Epics
+                </button>
+<button class="glass-panel text-on-surface font-label-sm text-label-sm px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors whitespace-nowrap active:scale-95">
+                    Cyberpunk Anime
+                </button>
+<button class="glass-panel text-on-surface font-label-sm text-label-sm px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors whitespace-nowrap active:scale-95">
+                    Neo-Noir
+                </button>
+<button class="glass-panel text-on-surface font-label-sm text-label-sm px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors whitespace-nowrap active:scale-95">
+                    Cosmic Horror
+                </button>
+<button class="glass-panel text-on-surface font-label-sm text-label-sm px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors whitespace-nowrap active:scale-95">
+                    Space Operas
+                </button>
+</div>
+</header>
+<!-- Dynamic Grid Content -->
+<section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-gutter">
+<!-- Bento Feature Card (Takes 2 cols on Desktop/Tablet) -->
+<article class="col-span-2 relative overflow-hidden rounded-xl aspect-[4/3] md:aspect-[2/3] lg:aspect-[4/3] group cursor-pointer glass-panel">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A highly cinematic, ultra-wide shot of a massive ringworld structure in deep space. The lighting is dramatic, with a bright distant star casting harsh shadows across the metallic surface. The mood is epic and awe-inspiring, utilizing deep OLED blacks and vibrant, energetic amber and violet accents to create a sense of infinite depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmmN9Y2-cLjyhsGFnWrTS6l-h12qoPEAoBsUTmIDJPA0fHxB6HmCVvaHogaxvCnCeVnaoDRVGML66Hruf54zSaAuPImL3n-Ro6CnarwgUOC6KkphwNlgKM1z07b5dkp4BgpTJzB3KNZ7eT5PIzC1fqoQHGZkcj3ry_GuGYnkDZw2eWTJjyOZhMRC1pW7jWuFA4kPC5OTBd5h50Z6Xs5ZP_lL5aQ61VIP2RK2dY5GFqQi2Ii_-gMoLKm5CiQCm9tYtxS9Gz92vjQeul"/>
+<!-- Floating Badge -->
+<div class="absolute top-4 left-4 bg-primary text-on-primary font-label-sm text-label-sm px-3 py-1 rounded-full shadow-lg z-10">
+                    Trending
+                </div>
+<!-- Glassmorphic Hover Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent backdrop-blur-[2px] opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 gap-3">
+<div class="flex items-center gap-2">
+<span class="text-primary font-label-sm text-label-sm border border-primary/30 bg-primary/10 px-2 py-0.5 rounded">SERIES</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">2024 • Sci-Fi</span>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">The Aether Paradox</h2>
+<div class="flex items-center gap-4 mt-2">
+<button class="bg-white text-surface font-label-sm text-label-sm px-4 py-2 rounded-full flex items-center gap-2 hover:bg-tertiary transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Play
+                        </button>
+<button class="w-10 h-10 rounded-full bg-surface/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-on-surface hover:bg-white/20 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Standard Poster Cards -->
+<!-- Card 1 -->
+<article class="relative overflow-hidden rounded-xl aspect-[2/3] group cursor-pointer glass-panel">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A stylized anime poster featuring a cyberpunk city at night under heavy rain. Neon lights reflect off wet pavement. A lone figure with glowing cybernetic eyes stands in the foreground holding a glowing katana. The palette relies heavily on deep blacks, bright cyan, and magenta, evoking a premium, dark aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALXegD2DVHiU8Am1axvwU9z-jK8zNJ83rqwGQDiCrA4x54rbb4rY1mldFJV4Zj2f8KcqM4ckXaK7IcPjH3P6cwQokfwGPXDAc3iZGEzjuzNCukgWcRaOf1YDQECf14JkjZ-U_fRKVBhF8jcffhRbr4k4u51NtkPCdnzmYfnPOVSou8ieS48252dLTn0x2FZCE7t85HUYOLrORIeHNRejE4Ra-VqCTa9TWK9pA7wCTN68zc9_QUFCZa16R3n4M2QL6mFlw236QzY9bU"/>
+<div class="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center border-t border-white/10 mt-auto h-full">
+<span class="material-symbols-outlined text-display-xl text-primary mb-4" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Neon Drift</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Anime • Action</p>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="relative overflow-hidden rounded-xl aspect-[2/3] group cursor-pointer glass-panel">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A mysterious movie poster showing a dense, fog-filled forest at twilight. Silhouette of a giant, ancient tree with glowing blue runes carved into its bark. The mood is eerie and ethereal, utilizing deep OLED blacks and soft, luminous blue accents to create an immersive sense of depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu85m2vRDSke5A1hb8OZXHXDsMNhPb5lRVQFnprFDlXPaGIj7Q_G_wKRmAWdB-cN910sjF069EHMOr3PQU6XrismYKJYeEWYv5bznLfcjBFgjOMFuEcMrCeZKjqHGp3nRbVvD2ERLzsY7gLFydFElVnrAABtPdo4wWcRmf3FDzlRJmIhCT9P8sOMHNJYIStt5oTZFb6eAZSaTKLBG8XAzbmSXzKz_71j5sUZLmDY3yNyJLCjNaR0nIY1WmewSf0xFwZHSsHisdY5xA"/>
+<div class="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center border-t border-white/10 mt-auto h-full">
+<span class="material-symbols-outlined text-display-xl text-primary mb-4" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Whispering Woods</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Movie • Fantasy</p>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="relative overflow-hidden rounded-xl aspect-[2/3] group cursor-pointer glass-panel">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A dark and gritty detective thriller poster. A close-up of a shattered mirror reflecting a tired detective's eye, lit by the harsh amber glow of a streetlamp in a pitch-black room. The aesthetic is extremely minimalistic and glassmorphic, focusing on shadow and a single pop of vibrant amber light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzpgC9D6O7IARrCdDNEQ8B3-z9I4VcQVNb12zgG0ABfucIiOUWZRZ2y9zxbPklbG-yWR7opUId2OuB73SUvYEUclv4nmiFLvTY1xXQX3Z6A0YkZdiZoMEYIMP8IC8xPvPYlzKhPiZXOsZoPsAAJKTRj69xaVUO58BfE3f2LvkxvuSXqXPJJJ4Ch7Sr4jSlbST7v7No9pcG8R0ICQ_4RoW9UEp8M70XgYd84b2HcBaOR_pLsjKewezzkI05x18-Ghd9_6ETo-A4ihRJ"/>
+<div class="absolute top-2 left-2 bg-secondary text-on-secondary font-label-sm text-label-sm px-2 py-0.5 rounded shadow-lg z-10">
+                    New Episode
+                </div>
+<div class="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center border-t border-white/10 mt-auto h-full">
+<span class="material-symbols-outlined text-display-xl text-primary mb-4" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Shattered Glass</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Series • Noir</p>
+</div>
+</article>
+<!-- Card 4 -->
+<article class="relative overflow-hidden rounded-xl aspect-[2/3] group cursor-pointer glass-panel hidden md:block">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="An abstract, high-concept sci-fi poster featuring a sleek, silver spaceship passing through a vibrant, swirling wormhole. The background is an absolute black void. The wormhole uses high-energy gradients of electric blue and bright orange, mirroring the sophisticated polish of a top-tier streaming platform UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbsb4Kb5hFmPKwb7WjG6Cdmq4FwiQm7WLHieM7XlYOSDISw9VjdqBJ3a0f98dSL26g3tGMBW6I90CHScMJ9VB_rulx3K_LZoba702KI6Z1UdhOf4DYALOWxwBGN3YMpf3ytHMQLclmmPDyxdX7-eXrQ4FPMTmr7g6kQxQR7FTleafwiCEzfjiejTsrF01x_camsrEUOD8yuLpuQuiCGJqtTv5tunuBJsrLcNkMnxoLGiYaWKtcyjIcJZoTxvMQGbudQ7cjX3_xRkEA"/>
+<div class="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center border-t border-white/10 mt-auto h-full">
+<span class="material-symbols-outlined text-display-xl text-primary mb-4" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Event Horizon</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Movie • Sci-Fi</p>
+</div>
+</article>
+<!-- Card 5 -->
+<article class="relative overflow-hidden rounded-xl aspect-[2/3] group cursor-pointer glass-panel hidden lg:block">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A minimalist apocalyptic poster showing a vast, barren desert of dark grey sand under a completely black sky. A single, glowing red artifact sits half-buried in the foreground. The image relies heavily on negative space and deep shadows to convey a premium, cinematic sense of scale and desolation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdYx57TkpaA-5Rd9xf1D54EPFtHGRr1QiI37xU5fGRGjb1usQCJJmPGmv5nsUzMTzh9hqZOWsq3f2J9mXXDB__RbvYjExyHDEwg5m9cFWR9FLR9caaXsOCAdVjUg3iw5Nhq4z8r_-tzR8nhDdytFjw1Ova3yhFOV6G_fGmuWG0DkLqk7MYOmC518F0rlLwOKC3ddhKW7Q8ps7fRdf8ny3ZBqz1vZdU8YhzzGtM6f2dxvaNxlVgstYYeu2iPg2AUzujxXke-ci3pOyJ"/>
+<div class="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center border-t border-white/10 mt-auto h-full">
+<span class="material-symbols-outlined text-display-xl text-primary mb-4" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Remnant</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Series • Drama</p>
+</div>
+</article>
+</section>
+<!-- Shimmering Skeleton Loaders Section -->
+<section class="mt-8">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface-variant mb-6 opacity-70">Loading more titles...</h3>
+<div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-gutter">
+<!-- Skeleton 1 -->
+<div class="relative overflow-hidden rounded-xl aspect-[2/3] glass-panel shimmer border-none"></div>
+<!-- Skeleton 2 -->
+<div class="relative overflow-hidden rounded-xl aspect-[2/3] glass-panel shimmer border-none" style="animation-delay: 0.1s;"></div>
+<!-- Skeleton 3 -->
+<div class="relative overflow-hidden rounded-xl aspect-[2/3] glass-panel shimmer border-none" style="animation-delay: 0.2s;"></div>
+<!-- Skeleton 4 -->
+<div class="relative overflow-hidden rounded-xl aspect-[2/3] glass-panel shimmer border-none hidden md:block" style="animation-delay: 0.3s;"></div>
+<!-- Skeleton 5 -->
+<div class="relative overflow-hidden rounded-xl aspect-[2/3] glass-panel shimmer border-none hidden lg:block" style="animation-delay: 0.4s;"></div>
+<!-- Skeleton 6 -->
+<div class="relative overflow-hidden rounded-xl aspect-[2/3] glass-panel shimmer border-none hidden lg:block" style="animation-delay: 0.5s;"></div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Shared Component for Mobile) -->
+<nav class="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4">
+<div class="bg-surface-container/60 backdrop-blur-lg fixed bottom-4 mx-margin-mobile rounded-full w-[calc(100%-40px)] border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex justify-around items-center p-2 font-label-sm text-label-sm">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-white/10 animate-bounce-short active:scale-90 transition-all rounded-full" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+                Home
+            </a>
+<!-- Active State mapped to Search for Discover intent -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-3 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">search</span>
+                Search
+            </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-white/10 animate-bounce-short active:scale-90 transition-all rounded-full" href="#">
+<span class="material-symbols-outlined mb-1">subscriptions</span>
+                Library
+            </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-white/10 animate-bounce-short active:scale-90 transition-all rounded-full" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+                Profile
+            </a>
+</div>
+</nav>
+</body></html>

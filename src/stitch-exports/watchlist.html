@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CINEVERSE - My Watchlist</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Outfit:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#ffb95f",
+                        "tertiary": "#cecbce",
+                        "surface-variant": "#2e3545",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#ffb0cd",
+                        "surface-container-lowest": "#070e1d",
+                        "on-background": "#dce2f7",
+                        "on-primary-container": "#613b00",
+                        "surface-container-highest": "#2e3545",
+                        "inverse-surface": "#dce2f7",
+                        "secondary": "#ffb0cd",
+                        "primary-fixed": "#ffddb8",
+                        "surface-container-low": "#141b2b",
+                        "surface-tint": "#ffb95f",
+                        "on-tertiary-container": "#444346",
+                        "on-secondary-container": "#ffbad3",
+                        "on-primary-fixed": "#2a1700",
+                        "outline-variant": "#534434",
+                        "tertiary-fixed": "#e5e1e4",
+                        "on-primary-fixed-variant": "#653e00",
+                        "tertiary-fixed-dim": "#c8c6c8",
+                        "outline": "#a08e7a",
+                        "inverse-primary": "#855300",
+                        "error-container": "#93000a",
+                        "on-primary": "#472a00",
+                        "surface-container": "#191f2f",
+                        "on-tertiary-fixed-variant": "#474649",
+                        "surface": "#0c1322",
+                        "on-tertiary-fixed": "#1c1b1d",
+                        "secondary-container": "#aa0266",
+                        "surface-bright": "#323949",
+                        "surface-container-high": "#232a3a",
+                        "primary-container": "#f59e0b",
+                        "on-secondary-fixed-variant": "#8c0053",
+                        "inverse-on-surface": "#293040",
+                        "on-secondary-fixed": "#3e0022",
+                        "background": "#0c1322",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#b3b0b3",
+                        "on-secondary": "#640039",
+                        "on-surface": "#dce2f7",
+                        "on-surface-variant": "#d8c3ad",
+                        "on-tertiary": "#313032",
+                        "on-error": "#690005",
+                        "primary": "#ffc174",
+                        "surface-dim": "#0c1322",
+                        "secondary-fixed": "#ffd9e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "container-max": "1440px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Outfit"],
+                        "display-xl": ["Outfit"],
+                        "display-xl-mobile": ["Outfit"],
+                        "headline-lg-mobile": ["Outfit"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-xl": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-xl-mobile": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #000000; /* Absolute OLED black */
+            color: #dce2f7; /* on-background */
+        }
+        
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, #111827 0%, #1f2937 50%, #111827 100%);
+            background-size: 200% 100%;
+            animation: shimmerEffect 2s infinite linear;
+        }
+
+        @keyframes shimmerEffect {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-32 md:pb-0">
+<!-- Top Navigation (Desktop) -->
+<nav class="hidden md:flex sticky top-0 z-50 justify-between items-center px-margin-desktop py-4 w-full bg-surface/40 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-primary/5">
+<div class="flex items-center gap-12">
+<span class="font-display-xl text-display-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">CINEVERSE</span>
+<div class="flex gap-8 font-headline-lg text-headline-lg font-body-md text-body-md">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 px-3 py-2 rounded-lg" href="#">Movies</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 px-3 py-2 rounded-lg" href="#">TV Shows</a>
+<a class="text-primary border-b-2 border-primary pb-1 px-3 py-2 rounded-lg active:scale-95 transition-transform" href="#">My List</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 px-3 py-2 rounded-lg" href="#">Discover</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[28px]">search</span></button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[28px]">notifications</span></button>
+<img alt="User Profile" class="w-10 h-10 rounded-full border border-white/20 object-cover" data-alt="A sleek, high-resolution user profile avatar depicting a subtle, glowing neon outline of a futuristic character head. The lighting is cinematic, utilizing deep shadows and vibrant primary brand colors to match the premium, glassmorphic aesthetic of an entertainment platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoPHXJHAEa7HHQIJiAamOE6kkzWMv5-pdGYUBpOMZUaRefT7ycIxkN1RyuAzm8knN-n8NCKlSXPfTT7ZVl5EaYz2YMGHWRlt5EGU0wzfX0wm7q4JP4d4ksiltyoMgrMmHQnjPjbUdMeVeF4-JlOWKuPSma3Gx0arIK_Jc27FpSMxd-agSw18z2UEScNNH0v86Dr7ZAYHF9RArBvBPiq6-CBgRkF-oiB4F9vYPZlIYLt6IC_yFyPysRPw-PSaZgHSjCrGQtUds-Q1lG"/>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8">
+<header class="mb-12">
+<h1 class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl font-bold mb-8">My Watchlist</h1>
+<!-- Controls -->
+<div class="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
+<button class="px-6 py-2 rounded-full font-body-md text-body-md whitespace-nowrap bg-gradient-to-r from-primary to-secondary text-background font-bold shadow-[0_10px_20px_rgba(245,158,11,0.2)]">Watching</button>
+<button class="px-6 py-2 rounded-full font-body-md text-body-md whitespace-nowrap glass-panel text-on-surface hover:bg-white/10 transition-colors">Plan to Watch</button>
+<button class="px-6 py-2 rounded-full font-body-md text-body-md whitespace-nowrap glass-panel text-on-surface hover:bg-white/10 transition-colors">Completed</button>
+</div>
+</header>
+<!-- Content Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-gutter">
+<!-- Media Card 1 (Watching) -->
+<div class="glass-panel rounded-xl overflow-hidden relative group cursor-pointer aspect-[2/3] hover:shadow-[0_20px_40px_rgba(245,158,11,0.15)] transition-all duration-300">
+<img alt="Neon Genesis" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A striking cinematic poster for a sci-fi series. A lone figure stands on a dark, reflective surface overlooking a sprawling, neon-lit cyberpunk city at night. Deep OLED blacks dominate the background, accented by vibrant orange and magenta neon lights. Premium, high-definition aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_z0dNw490opHxrPWrtaTFZoC1JQ1IG-azSEX_MRzihTnLYfKGAaR4-Gu3BWnzsujCZcx-9slapYgBfSyIdclnWE96WwTHQS8nWdhpZJgQWxp64npFs19iT2oPtGOi1E2Sp9DBCtTccVOONJCQrSJzkRY1KfAy9FsJGCPX0uQa5NTI48lnxuN5lHJvWaFeZ83gASwG3AMLur96JnHc4S_r7nSNVJoSpPp0V-Ee47xuAJQ74AwO7GYfG1PmbcYs2aSl_4e20_mpM49w"/>
+<!-- Badge -->
+<div class="absolute top-3 left-3 bg-primary/90 text-background font-label-sm text-label-sm px-2 py-1 rounded-DEFAULT backdrop-blur-md">NEW EP</div>
+<!-- Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<!-- Content Info -->
+<div class="absolute bottom-0 w-full p-4">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-semibold mb-3 truncate">Neon Genesis</h3>
+<!-- Progress Bar -->
+<div class="w-full h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-md">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-[65%]"></div>
+</div>
+<div class="flex justify-between mt-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span>S2 E4</span>
+<span>65%</span>
+</div>
+</div>
+</div>
+<!-- Media Card 2 (Watching) -->
+<div class="glass-panel rounded-xl overflow-hidden relative group cursor-pointer aspect-[2/3] hover:shadow-[0_20px_40px_rgba(245,158,11,0.15)] transition-all duration-300">
+<img alt="Shattered Glass" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A moody, high-contrast poster for a thriller series. A close-up of a shattered glass window reflecting a dimly lit, rain-slicked city street. The color palette relies heavily on deep shadows, cool blues, and a single, sharp accent of primary amber light. Immersive, high-end entertainment style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDe1O8koZ5JcaO3wc4_bPFBEpSQ7_zHlNNT6hpW-MDvlu84SkJ8NJ2CrDdcQRqVLlMSmlDafe1rkOZgieDy6QRGtI2Qc32ljNm8Cdh6S1Nkyo2J0-f2CZOY-DJ--66iR_E-iadqiC-p3DnPk2pxHNiz5CSs96v-chWJ1FGrXY5LubUS-117Sbb7BfElcnNl9qBUFZsqxPB1tSgCZWy2aBTvl1sb06IChOdz6STon5VdJ_b6Lrgu8R5zrKUj0qSEMZJtu9wxu0XGo698"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute bottom-0 w-full p-4">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-semibold mb-3 truncate">Shattered Glass</h3>
+<!-- Progress Bar -->
+<div class="w-full h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-md">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-[30%]"></div>
+</div>
+<div class="flex justify-between mt-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span>S1 E2</span>
+<span>30%</span>
+</div>
+</div>
+</div>
+<!-- Media Card 3 (Watching) -->
+<div class="glass-panel rounded-xl overflow-hidden relative group cursor-pointer aspect-[2/3] hover:shadow-[0_20px_40px_rgba(245,158,11,0.15)] transition-all duration-300">
+<img alt="Obsidian Peaks" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="An expansive cinematic landscape shot for a fantasy series. Majestic, dark obsidian mountains piercing through thick, glowing violet clouds. The scene is lit by a soft, otherworldly light that highlights the intricate details of the terrain against the deep black void of space above. Premium streaming platform quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1sEMQDpYAbCcPl2tBtGFzlFH1_ohexZecMbPJHkNW4sDsJ1FNx6s9eyWeJaS9kfqWUNMWraPohextpPppsNu8n3eG07eKj4_1_EG4DcYJUsMd0eXdqw4FcZ6xMZs4i-oE-8JffKDoHUm_H9Ih650EBzYvFARn-uzRTvqzFaYdyFfKf465KAqltSzInLP7s6fMgSFhxlS1aWJ2LMiMrRqImOZRI0nZy82sEavglJA2aHrs5MtEHCv1xuIydIFyj4csItGmiHu8CeQX"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute bottom-0 w-full p-4">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-semibold mb-3 truncate">Obsidian Peaks</h3>
+<!-- Progress Bar -->
+<div class="w-full h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-md">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-[85%]"></div>
+</div>
+<div class="flex justify-between mt-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span>S3 E9</span>
+<span>85%</span>
+</div>
+</div>
+</div>
+<!-- Skeleton Loaders (Empty State / Fetching) -->
+<div class="glass-panel rounded-xl overflow-hidden relative aspect-[2/3] shimmer border-none"></div>
+<div class="glass-panel rounded-xl overflow-hidden relative aspect-[2/3] shimmer border-none hidden md:block"></div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile) -->
+<nav class="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 bg-surface-container/60 backdrop-blur-lg fixed bottom-4 mx-margin-mobile rounded-full w-[calc(100%-40px)] border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] font-label-sm text-label-sm">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">home</span>
+            Home
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">search</span>
+            Search
+        </a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-3 hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" style="font-variation-settings: 'FILL' 1;">subscriptions</span>
+            Library
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-white/10 animate-bounce-short active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">person</span>
+            Profile
+        </a>
+</nav>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

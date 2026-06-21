@@ -1,0 +1,311 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CINEVERSE - Settings Panel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "surface-variant": "#2e3545",
+                            "on-error-container": "#ffdad6",
+                            "tertiary": "#cecbce",
+                            "error": "#ffb4ab",
+                            "on-tertiary-fixed": "#1c1b1d",
+                            "background": "#0c1322",
+                            "on-secondary-container": "#ffbad3",
+                            "primary-fixed-dim": "#ffb95f",
+                            "surface-container-low": "#141b2b",
+                            "on-primary-fixed": "#2a1700",
+                            "primary": "#ffc174",
+                            "on-primary": "#472a00",
+                            "on-tertiary-container": "#444346",
+                            "inverse-primary": "#855300",
+                            "surface-container-lowest": "#070e1d",
+                            "outline": "#a08e7a",
+                            "on-secondary-fixed": "#3e0022",
+                            "on-tertiary": "#313032",
+                            "on-secondary-fixed-variant": "#8c0053",
+                            "surface-container-high": "#232a3a",
+                            "secondary-container": "#aa0266",
+                            "primary-fixed": "#ffddb8",
+                            "error-container": "#93000a",
+                            "tertiary-fixed-dim": "#c8c6c8",
+                            "surface": "#0c1322",
+                            "secondary": "#ffb0cd",
+                            "on-tertiary-fixed-variant": "#474649",
+                            "on-primary-fixed-variant": "#653e00",
+                            "primary-container": "#f59e0b",
+                            "tertiary-fixed": "#e5e1e4",
+                            "on-background": "#dce2f7",
+                            "on-secondary": "#640039",
+                            "surface-dim": "#0c1322",
+                            "on-primary-container": "#613b00",
+                            "tertiary-container": "#b3b0b3",
+                            "surface-container": "#191f2f",
+                            "outline-variant": "#534434",
+                            "surface-bright": "#323949",
+                            "secondary-fixed": "#ffd9e4",
+                            "on-error": "#690005",
+                            "inverse-surface": "#dce2f7",
+                            "on-surface-variant": "#d8c3ad",
+                            "surface-tint": "#ffb95f",
+                            "secondary-fixed-dim": "#ffb0cd",
+                            "surface-container-highest": "#2e3545",
+                            "on-surface": "#dce2f7",
+                            "inverse-on-surface": "#293040"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "margin-mobile": "20px",
+                            "container-max": "1440px",
+                            "unit": "8px",
+                            "gutter": "24px",
+                            "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                            "display-xl": ["Outfit"],
+                            "headline-lg": ["Outfit"],
+                            "display-xl-mobile": ["Outfit"],
+                            "headline-lg-mobile": ["Outfit"],
+                            "label-sm": ["Inter"],
+                            "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                            "display-xl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                            "display-xl-mobile": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                            "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                            "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #000000; /* Pure OLED Black */
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(245, 158, 11, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 176, 205, 0.05), transparent 25%);
+        }
+        
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #ffc174, #ffb0cd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #f59e0b, #aa0266);
+        }
+        
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #f59e0b;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background: linear-gradient(135deg, #f59e0b, #aa0266);
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+        .toggle-label {
+            width: 48px;
+            height: 24px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .toggle-label:after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        /* Custom Range Slider */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ffc174;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md min-h-screen overflow-x-hidden">
+<!-- Main Content Mockup (to show context) -->
+<main class="p-8 md:p-margin-desktop opacity-40 transition-opacity duration-500 blur-sm pointer-events-none">
+<h1 class="font-display-xl text-display-xl text-primary mb-8">Discover</h1>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="aspect-[2/3] glass-card rounded-xl"></div>
+<div class="aspect-[2/3] glass-card rounded-xl"></div>
+<div class="aspect-[2/3] glass-card rounded-xl"></div>
+<div class="aspect-[2/3] glass-card rounded-xl"></div>
+</div>
+</main>
+<!-- Slide-out Settings Panel -->
+<!-- Overlay -->
+<div class="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm transition-opacity duration-300"></div>
+<!-- Panel -->
+<aside class="fixed top-0 right-0 h-full w-full md:w-[480px] z-50 transform transition-transform duration-500 ease-out translate-x-0 glass-panel shadow-[-20px_0_40px_rgba(0,0,0,0.8)] overflow-y-auto border-l border-white/10">
+<!-- Header -->
+<header class="sticky top-0 z-10 glass-panel px-6 py-5 flex justify-between items-center border-b border-white/10">
+<div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg gradient-text">Settings</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase tracking-widest">Account &amp; Community</p>
+</div>
+<button aria-label="Close Settings" class="p-2 rounded-full hover:bg-white/10 transition-colors text-on-surface-variant hover:text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">close</span>
+</button>
+</header>
+<div class="p-6 space-y-8">
+<!-- Account Section -->
+<section class="glass-card rounded-xl p-5">
+<h3 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">person</span> Account
+                </h3>
+<div class="flex items-center gap-4 mb-6">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/30 p-[2px]">
+<img alt="Profile Picture" class="w-full h-full object-cover rounded-full" data-alt="A cinematic close-up portrait of a user profile picture, softly lit with neon amber and pink rim lights against a deep OLED black background, reflecting a premium entertainment app aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAAHXxIa1hPzp9Yotek8DpjXGTG4cfJ5JW-Kzs8qM9grPN7IbqxguP5flOIFAJOTqHHFKC_GhojJf7o3d0VqrjPCh0jCdAXRLfS63I7Y9NF2BHXDz7U9L0d00pxEKObqDyHW7DTDx424RWiVW1mXenp7FMEFjflQusljxnSJTQ19hTcmgIdTZ3IMwaPdDaHeYFjMKtECoy6WZG2g4K6ayk4KjbcqbD0x-mxp3cnO0YTxV1TExEpUusgooPqbkrGHkoPmZoT1XyU13e">
+</div>
+<div>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-white">Alex Mercer</p>
+<p class="font-body-md text-body-md text-on-surface-variant">alex.mercer@cineverse.com</p>
+</div>
+</div>
+
+</section>
+<!-- Notifications Section -->
+<section class="glass-card rounded-xl p-5">
+<h3 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">notifications</span> Notifications
+                </h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<div>
+<p class="font-body-md text-body-md text-white">Push Notifications</p>
+<p class="text-[13px] text-on-surface-variant">Receive alerts on your device</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer opacity-0 z-10" id="toggle-push" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle-push"></label>
+</div>
+</div>
+<div class="h-px w-full bg-white/5"></div>
+<div class="flex justify-between items-center">
+<div>
+<p class="font-body-md text-body-md text-white">Email Updates</p>
+<p class="text-[13px] text-on-surface-variant">Weekly summaries and offers</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer opacity-0 z-10" id="toggle-email" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle-email"></label>
+</div>
+</div>
+<div class="h-px w-full bg-white/5"></div>
+<div class="flex justify-between items-center">
+<div>
+<p class="font-body-md text-body-md text-white">New Content Alerts</p>
+<p class="text-[13px] text-on-surface-variant">When watched shows return</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer opacity-0 z-10" id="toggle-content" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle-content"></label>
+</div>
+</div>
+</div>
+</section>
+<!-- Appearance Section -->
+
+<!-- Privacy Section -->
+<section class="glass-card rounded-xl p-5"><h3 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">groups</span> Support &amp; Community</h3><div class="space-y-4"><button class="w-full flex justify-between items-center p-3 rounded-lg hover:bg-white/5 transition-colors group"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">star</span><span class="font-body-md text-white">Star on GitHub</span></div><span class="material-symbols-outlined text-on-surface-variant group-hover:text-white transition-colors">open_in_new</span></button><div class="h-px w-full bg-white/5"></div><button class="w-full flex justify-between items-center p-3 rounded-lg hover:bg-white/5 transition-colors group"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">coffee</span><span class="font-body-md text-white">Buy Me a Coffee</span></div><span class="material-symbols-outlined text-on-surface-variant group-hover:text-white transition-colors">open_in_new</span></button></div></section><section class="glass-card rounded-xl p-5 mb-8">
+<h3 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">lock</span> Privacy
+                </h3>
+<div class="space-y-4 mb-6">
+<div class="flex justify-between items-center">
+<div>
+<p class="font-body-md text-body-md text-white">Public Watchlist</p>
+<p class="text-[13px] text-on-surface-variant">Allow friends to see lists</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer opacity-0 z-10" id="toggle-watchlist" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle-watchlist"></label>
+</div>
+</div>
+<div class="h-px w-full bg-white/5"></div>
+<div class="flex justify-between items-center">
+<div>
+<p class="font-body-md text-body-md text-white">Share Activity</p>
+<p class="text-[13px] text-on-surface-variant">Show currently watching</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer opacity-0 z-10" id="toggle-activity" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle-activity"></label>
+</div>
+</div>
+</div>
+<button class="w-full py-3 rounded-lg bg-white/5 border border-white/10 text-error font-label-sm text-label-sm uppercase tracking-wider hover:bg-error/10 transition-colors flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+                    Clear History
+                </button>
+</section>
+<!-- Bottom spacing for scrolling -->
+<div class="h-4"></div>
+</div>
+</aside>
+
+
+</body></html>

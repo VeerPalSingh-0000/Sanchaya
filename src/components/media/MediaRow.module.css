@@ -1,0 +1,112 @@
+.rowContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 0 16px;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 12px;
+  }
+}
+
+@media (min-width: 640px) {
+  .header { padding: 0 24px; }
+}
+
+@media (min-width: 1024px) {
+  .header { padding: 0 32px; }
+}
+
+@media (min-width: 1280px) {
+  .header { padding: 0 48px; }
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.scrollContainer {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 16px 24px 16px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar for cleaner look, but keep functionality */
+  scrollbar-width: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Spacer elements to align scroll content with the main container padding */
+.spacer {
+  flex-shrink: 0;
+  width: calc((100vw - var(--container-max)) / 2 + 16px);
+}
+
+@media (max-width: 1400px) {
+  .spacer {
+    width: 0;
+  }
+}
+
+@media (min-width: 640px) {
+  .scrollContainer { padding: 8px 24px 24px 24px; }
+}
+
+@media (min-width: 1024px) {
+  .scrollContainer { padding: 8px 32px 32px 32px; gap: 20px; }
+}
+
+@media (min-width: 1280px) {
+  .scrollContainer { padding: 8px 48px 32px 48px; gap: 24px; }
+}
+
+.cardWrapper {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  width: 160px;
+}
+
+@media (min-width: 640px) {
+  .cardWrapper { width: 180px; }
+}
+
+@media (min-width: 1024px) {
+  .cardWrapper { width: 200px; }
+}
+
+@media (min-width: 1280px) {
+  .cardWrapper { width: 220px; }
+}

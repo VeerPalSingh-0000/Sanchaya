@@ -1,0 +1,157 @@
+.pageWrapper {
+  padding: 40px 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - var(--navbar-height));
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+@media (min-width: 640px) {
+  .pageWrapper {
+    padding: 48px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pageWrapper {
+    padding: 64px 32px;
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  max-width: 42rem;
+}
+
+/* Empty state */
+.emptyState {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+  padding: 64px 24px;
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.emptyTitle {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.emptyText {
+  color: var(--text-secondary);
+  max-width: 24rem;
+  line-height: 1.6;
+}
+
+.emptyLink {
+  margin-top: 8px;
+}
+
+/* ===== Watchlist Tabs & Filters ===== */
+.controlsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .controlsRow {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.controlsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .controlsGroup {
+    align-items: flex-end;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.tabButton {
+  padding: 8px 20px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all var(--transition-fast) var(--ease-out);
+  text-transform: capitalize;
+}
+
+.tabButton:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.tabButtonActive {
+  color: #000000;
+  background: var(--gradient-brand);
+  border-color: transparent;
+  box-shadow: 0 8px 16px rgba(245, 158, 11, 0.25);
+}
+
+.tabButtonActive:hover {
+  color: #000000;
+  background: var(--gradient-brand);
+}

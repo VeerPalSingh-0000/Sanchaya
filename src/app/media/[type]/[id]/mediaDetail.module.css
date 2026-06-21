@@ -1,0 +1,200 @@
+.pageWrapper {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  padding-bottom: 64px;
+}
+
+.backdropHeader {
+  position: relative;
+  height: 40vh;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .backdropHeader {
+    height: 60vh;
+  }
+}
+
+.backdropImage {
+  object-fit: cover;
+  opacity: 0.3;
+}
+
+.backdropFallback {
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-primary);
+  opacity: 0.2;
+}
+
+.backdropGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg-primary), transparent);
+}
+
+.contentContainer {
+  position: relative;
+  z-index: 10;
+  margin-top: -8rem;
+}
+
+.detailsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .detailsWrapper {
+    flex-direction: row;
+  }
+}
+
+.posterWrapper {
+  flex-shrink: 0;
+  width: 16rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .posterWrapper {
+    margin: 0;
+  }
+}
+
+.poster {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+}
+
+.posterImage {
+  object-fit: cover;
+}
+
+.infoSection {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 16px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 3rem;
+  }
+}
+
+.originalTitle {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.metaText {
+  color: var(--text-secondary);
+}
+
+.genresRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.overviewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.overviewText {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 56rem;
+}
+
+.seasonsSection {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.seasonsGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.seasonCard {
+  padding: 24px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.seasonPoster {
+  position: relative;
+  width: 6rem;
+  aspect-ratio: 2 / 3;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .seasonPoster {
+    display: block;
+  }
+}
+
+.seasonTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.seasonMeta {
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.seasonOverview {
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-size: 0.875rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
