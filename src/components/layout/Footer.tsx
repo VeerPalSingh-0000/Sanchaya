@@ -8,7 +8,7 @@ export default function Footer() {
         {/* Attribution (required by TMDb & AniList ToS) */}
         <div className={styles.attribution}>
           <p className={styles.brand}>
-            Built with <span className={styles.brandName}>CINEVERSE</span>
+            Built with <span className={styles.brandName}>Sanchaya</span>
           </p>
           <p className={styles.credits}>
             Data provided by{' '}
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
 
         <p className={styles.copy}>
-          &copy; {new Date().getFullYear()} CINEVERSE. All rights reserved.
+          &copy; {new Date().getFullYear()} Sanchaya. All rights reserved.
         </p>
       </div>
     </footer>

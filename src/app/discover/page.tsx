@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import type { Media } from '@/types/media';
 
 export const metadata: Metadata = {
-  title: 'Discover | CINEVERSE',
+  title: 'Discover | Sanchaya',
   description: 'Discover new movies, series, and anime in an immersive bento layout.',
 };
 

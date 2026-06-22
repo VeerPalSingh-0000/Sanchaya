@@ -22,9 +22,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'CINEVERSE | Your Unified Media Tracker',
+  title: 'Sanchaya | Your Unified Media Tracker',
   description:
-    'Track your favorite movies, TV series, and anime all in one place. Discover, rate, and organize your watchlist with CINEVERSE.',
+    'Track your favorite movies, TV series, and anime all in one place. Discover, rate, and organize your watchlist with Sanchaya.',
   keywords: ['media tracker', 'movies', 'anime', 'tv series', 'watchlist'],
 };
 

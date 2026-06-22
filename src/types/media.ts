@@ -24,6 +24,7 @@ export interface Media {
   type: MediaType;
   title: string;
   originalTitle?: string;
+  originCountry?: string;
   overview: string;
   posterUrl: string;
   backdropUrl?: string;
@@ -46,6 +47,9 @@ export interface Season {
   posterUrl?: string;
   airDate?: string;
   episodes?: Episode[];
+  mediaId?: string;
+  mediaType?: MediaType;
+  format?: string;
 }
 
 export interface Episode {

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Media, MediaFilter } from '@/types/media';
 import { performSearch } from '@/app/actions';
-import styles from './SearchBar.module.css';
 
 const FILTER_OPTIONS: { value: MediaFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -112,10 +111,12 @@ function SearchBarInner() {
   };
 
   return (
-    <div className={styles.wrapper} ref={wrapperRef}>
+    <div className="w-full relative z-[100] flex flex-col gap-3" ref={wrapperRef}>
       {/* Search input */}
-      <div className={`${styles.inputWrapper} ${focused ? styles.focused : ''}`}>
-        <span className={styles.searchIcon}>
+      <div className={`relative flex items-center w-full h-14 bg-white/5 backdrop-blur-md border rounded-full px-5 transition-all duration-300 shadow-[0_20px_40px_rgba(0,0,0,0.5)] z-20 ${
+        focused ? 'bg-white/10 border-primary shadow-[0_0_24px_rgba(245,158,11,0.15)]' : 'border-white/10'
+      }`}>
+        <span className={`flex items-center justify-center mr-3 transition-colors duration-300 ${focused ? 'text-primary' : 'text-on-surface-variant'}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />
             <path d="M21 21l-4.35-4.35" />
@@ -124,7 +125,7 @@ function SearchBarInner() {
         <input
           ref={inputRef}
           type="text"
-          className={styles.input}
+          className="grow bg-transparent border-none outline-none text-on-surface font-body-md text-lg w-full placeholder-on-surface-variant/50"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
@@ -132,7 +133,7 @@ function SearchBarInner() {
           aria-label="Search media"
         />
         {searching && (
-          <span className={styles.spinner} aria-label="Searching">
+          <span className="text-primary animate-spin flex items-center justify-center ml-3" aria-label="Searching">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
             </svg>
@@ -140,7 +141,7 @@ function SearchBarInner() {
         )}
         {query && !searching && (
           <button
-            className={styles.clear}
+            className="text-on-surface-variant flex items-center justify-center ml-3 p-1 rounded-full cursor-pointer hover:text-on-surface hover:bg-white/10 transition-all"
             onClick={() => {
               setQuery('');
               inputRef.current?.focus();
@@ -155,56 +156,63 @@ function SearchBarInner() {
       </div>
 
       {/* Type filter pills */}
-      <div className={styles.filters}>
-        {FILTER_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            className={`${styles.pill} ${filter === opt.value ? styles.pillActive : ''}`}
-            onClick={() => handleFilterChange(opt.value)}
-          >
-            {opt.label}
-          </button>
-        ))}
+      <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-1">
+        {FILTER_OPTIONS.map((opt) => {
+          const active = filter === opt.value;
+          return (
+            <button
+              key={opt.value}
+              className={`px-6 py-2 rounded-full font-label-sm text-[12px] whitespace-nowrap font-bold transition-all active:scale-95 ${
+                active
+                  ? 'bg-gradient-to-r from-primary to-secondary text-surface shadow-[0_10px_20px_rgba(245,158,11,0.2)]'
+                  : 'bg-surface-container/40 backdrop-blur-lg border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-white/10'
+              }`}
+              onClick={() => handleFilterChange(opt.value)}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Dropdown Overlay */}
       {focused && query.trim() && (
-        <div className={styles.dropdown}>
+        <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-surface-container-high/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] max-h-[400px] overflow-y-auto z-50 flex flex-col py-2 no-scrollbar">
           {searching && !results.length ? (
-            <div className={styles.dropdownEmpty}>Searching...</div>
+            <div className="p-6 text-center text-on-surface-variant">Searching...</div>
           ) : results.length > 0 ? (
             results.map((media) => (
               <Link
                 key={media.id}
                 href={`/media/${media.type}/${media.externalId}`}
-                className={styles.dropdownItem}
+                className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-white/5 focus:bg-white/5 transition-all text-left no-underline"
                 onClick={() => setFocused(false)}
               >
                 {media.posterUrl ? (
-                  <div className={styles.dropdownImageWrapper}>
+                  <div className="relative w-12 h-16 shrink-0 rounded-lg overflow-hidden bg-white/5 border border-white/10">
                     <Image
                       src={media.posterUrl}
                       alt={media.title}
                       fill
                       sizes="3rem"
-                      className={styles.dropdownImage}
+                      className="object-cover"
                     />
                   </div>
                 ) : (
-                  <div className={styles.dropdownImage} />
+                  <div className="w-12 h-16 shrink-0 rounded-lg bg-white/5 border border-white/10" />
                 )}
-                <div className={styles.dropdownInfo}>
-                  <div className={styles.dropdownTitle}>{media.title}</div>
-                  <div className={styles.dropdownMeta}>
-                    <span className={styles.dropdownType}>{media.type}</span>
+                <div className="flex flex-col gap-1 overflow-hidden">
+                  <div className="font-headline-lg text-base font-bold text-on-surface truncate">{media.title}</div>
+                  <div className="flex items-center gap-2 text-sm text-on-surface-variant">
+                    <span className="bg-white/10 border border-white/10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-on-surface">{media.type}</span>
                     {media.releaseDate && <span>{new Date(media.releaseDate).getFullYear()}</span>}
-                    {media.rating > 0 && <span>★ {media.rating.toFixed(1)}</span>}
+                    {media.rating > 0 && <span className="text-primary-fixed-dim">★ {media.rating.toFixed(1)}</span>}
                   </div>
                 </div>
               </Link>
             ))
           ) : hasSearched ? (
-            <div className={styles.dropdownEmpty}>
+            <div className="p-6 text-center text-on-surface-variant">
               No results found for "{query}"
             </div>
           ) : null}
@@ -217,8 +225,8 @@ function SearchBarInner() {
 export default function SearchBar() {
   return (
     <Suspense fallback={
-      <div className={styles.inputWrapper}>
-        <span className={styles.searchIcon}>
+      <div className="relative flex items-center w-full h-14 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-5 transition-all duration-300 shadow-[0_20px_40px_rgba(0,0,0,0.5)] z-20">
+        <span className="flex items-center justify-center mr-3 text-on-surface-variant">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />
             <path d="M21 21l-4.35-4.35" />
@@ -226,7 +234,7 @@ export default function SearchBar() {
         </span>
         <input
           type="text"
-          className={styles.input}
+          className="grow bg-transparent border-none outline-none text-on-surface font-body-md text-lg w-full placeholder-on-surface-variant/50"
           placeholder="Search movies, shows, genres..."
           disabled
         />

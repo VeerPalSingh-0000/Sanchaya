@@ -6,15 +6,25 @@ import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
 
 const NAV_LINKS = [
-  { href: '/', label: 'Movies', icon: 'home' },
+  { href: '/', label: 'Home', icon: 'home' },
   { href: '/watchlist', label: 'My List', icon: 'subscriptions' },
-  { href: '/discover', label: 'Discover', icon: 'search' },
+  { href: '/discover', label: 'Discover', icon: 'explore' },
 ] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [guestName, setGuestName] = useState('Guest User');
+
+  useEffect(() => {
+    if (!session) {
+      const savedName = localStorage.getItem('sanchaya_guest_name');
+      if (savedName) {
+        setGuestName(savedName);
+      }
+    }
+  }, [session]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,11 +47,24 @@ export default function Navbar() {
       <nav className="hidden md:flex sticky top-0 z-50 justify-between items-center px-margin-desktop py-4 w-full bg-surface/40 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-primary/5">
         <div className="flex items-center gap-12">
           {/* Brand */}
-          <Link href="/" className="font-display-xl text-[2rem] font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            CINEVERSE
+          <Link href="/" className="flex items-center gap-3 group">
+            <svg className="w-8 h-8 transition-transform duration-500 group-hover:scale-110" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffc174" />
+                  <stop offset="100%" stopColor="#ffb0cd" />
+                </linearGradient>
+              </defs>
+              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="url(#logoGrad)" />
+              <path d="M2 17l10 5 10-5" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12l10 5 10-5" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="font-display-xl text-[1.8rem] font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent tracking-tight">
+              Sanchaya
+            </span>
           </Link>
           {/* Navigation Links */}
-          <ul className="flex items-center gap-8 font-headline-lg text-[1rem] font-body-md">
+          <ul className="flex items-center gap-8 text-[1rem] font-body-md">
             {NAV_LINKS.map((link) => {
               const active = isActive(link.href);
               return (
@@ -78,62 +101,81 @@ export default function Navbar() {
             </div>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-3 w-64 rounded-2xl bg-surface-container-high/95 backdrop-blur-3xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.8)] p-2 flex flex-col gap-1 z-50 transform origin-top-right transition-all">
-                {session?.user ? (
-                  <div className="px-4 py-4 border-b border-white/10 mb-2 bg-gradient-to-br from-primary/10 to-transparent rounded-t-xl">
-                    <p className="text-sm font-bold text-on-surface">{session.user.name}</p>
-                    <p className="text-xs text-on-surface-variant truncate">{session.user.email}</p>
-                  </div>
-                ) : (
-                  <div className="px-4 py-4 border-b border-white/10 mb-2 flex items-center gap-3 bg-gradient-to-br from-surface-variant/50 to-transparent rounded-t-xl">
-                    <div className="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[20px] text-on-surface-variant">person</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-on-surface">Guest User</p>
-                      <p className="text-xs text-on-surface-variant">Sign in to save list</p>
-                    </div>
-                  </div>
-                )}
+              <div className="absolute right-0 mt-4 w-72 rounded-3xl bg-[#0a0f18]/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(255,193,116,0.15)] p-3 flex flex-col gap-2 z-50 transform origin-top-right transition-all">
                 
-                <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-white/10 rounded-xl transition-all hover:pl-5" onClick={() => setDropdownOpen(false)}>
-                  <span className="material-symbols-outlined text-[18px] text-primary">settings</span>
-                  Preferences
+                {/* Profile Header */}
+                <div className="relative overflow-hidden rounded-2xl p-4 mb-2 group border border-white/5 bg-white/5">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-surface-variant/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full border-2 border-primary/30 overflow-hidden bg-surface flex-shrink-0">
+                      {session?.user?.image ? (
+                         <img className="w-full h-full object-cover" src={session.user.image} alt="User Profile" />
+                      ) : (
+                         <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
+                           <span className="material-symbols-outlined text-[24px]">person</span>
+                         </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <p className="text-base font-bold text-on-surface truncate group-hover:text-primary transition-colors">
+                        {session?.user ? session.user.name : guestName}
+                      </p>
+                      <p className="text-xs text-on-surface-variant truncate">
+                        {session?.user ? session.user.email : 'Sign in to save list'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <Link href="/settings" className="flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-white/5 group transition-all" onClick={() => setDropdownOpen(false)}>
+                  <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-inner border border-white/5">
+                    <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors group-hover:rotate-45 duration-300">settings</span>
+                  </div>
+                  <span className="text-sm font-medium text-on-surface group-hover:translate-x-1 transition-transform">Preferences</span>
                 </Link>
                 
-                <a href="https://github.com/VeerPalSingh-0000/Sanchaya" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-on-surface hover:bg-white/10 rounded-xl transition-all hover:pl-5">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[18px] text-[#2ea043]">star</span>
-                    Star on GitHub
+                <a href="https://github.com/VeerPalSingh-0000/Sanchaya" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-3 py-3 rounded-xl hover:bg-[#2ea043]/10 group transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-[#2ea043]/20 transition-colors shadow-inner border border-white/5">
+                      <span className="material-symbols-outlined text-[18px] text-[#2ea043] group-hover:scale-110 transition-transform">star</span>
+                    </div>
+                    <span className="text-sm font-medium text-on-surface group-hover:text-[#2ea043] group-hover:translate-x-1 transition-transform">Star on GitHub</span>
                   </div>
-                  <span className="material-symbols-outlined text-[14px] text-on-surface-variant">open_in_new</span>
+                  <span className="material-symbols-outlined text-[16px] text-on-surface-variant opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all">arrow_forward</span>
                 </a>
 
-                <a href="https://buymeacoffee.com/veerpalsingh" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-on-surface hover:bg-[#FFDD00]/10 rounded-xl transition-all hover:pl-5">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[18px] text-[#FFDD00]">local_cafe</span>
-                    Buy me a coffee
+                <a href="https://buymeacoffee.com/veerpalsingh" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-3 py-3 rounded-xl hover:bg-[#FFDD00]/10 group transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-[#FFDD00]/20 transition-colors shadow-inner border border-white/5">
+                      <span className="material-symbols-outlined text-[18px] text-[#FFDD00] group-hover:-rotate-12 transition-transform">local_cafe</span>
+                    </div>
+                    <span className="text-sm font-medium text-on-surface group-hover:text-[#FFDD00] group-hover:translate-x-1 transition-transform">Buy me a coffee</span>
                   </div>
-                  <span className="material-symbols-outlined text-[14px] text-on-surface-variant">open_in_new</span>
+                  <span className="material-symbols-outlined text-[16px] text-on-surface-variant opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all">arrow_forward</span>
                 </a>
                 
-                <div className="border-b border-white/10 my-1"></div>
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent my-1"></div>
                 
                 {session ? (
                   <button 
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/10 rounded-xl transition-all hover:pl-5 text-left" 
+                    className="flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-error/10 group transition-all text-left w-full" 
                     onClick={() => { setDropdownOpen(false); signOut(); }}
                   >
-                    <span className="material-symbols-outlined text-[18px]">logout</span>
-                    Sign Out
+                    <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-error/20 transition-colors shadow-inner border border-white/5">
+                      <span className="material-symbols-outlined text-[18px] text-error group-hover:-translate-x-1 transition-transform">logout</span>
+                    </div>
+                    <span className="text-sm font-medium text-error group-hover:translate-x-1 transition-transform">Sign Out</span>
                   </button>
                 ) : (
                   <button 
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-primary hover:bg-primary/10 rounded-xl transition-all hover:pl-5 text-left font-bold" 
+                    className="flex items-center gap-4 px-3 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 group transition-all text-left w-full border border-primary/20 hover:border-primary/40 shadow-[0_0_15px_rgba(255,193,116,0.1)]" 
                     onClick={() => { setDropdownOpen(false); signIn(); }}
                   >
-                    <span className="material-symbols-outlined text-[18px]">login</span>
-                    Sign In
+                    <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors shadow-inner">
+                      <span className="material-symbols-outlined text-[18px] text-primary group-hover:translate-x-1 transition-transform">login</span>
+                    </div>
+                    <span className="text-sm font-bold text-primary group-hover:translate-x-1 transition-transform">Sign In</span>
                   </button>
                 )}
               </div>

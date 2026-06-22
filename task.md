@@ -1,4 +1,4 @@
-# Media Tracker — Task List
+# Sanchaya — Task List
 
 ## Phase 1: Foundation & API Integration
 - [x] **Setup & Configuration**

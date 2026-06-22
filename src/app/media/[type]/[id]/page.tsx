@@ -1,9 +1,11 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getMovieDetails, getTVDetails, getTVSeasonDetails } from '@/lib/tmdb';
-import { getAnimeDetails, getAnimeSeasons } from '@/lib/anilist';
+import { getAnimeDetails, getAnimeSeasons, searchAnime } from '@/lib/anilist';
 import Badge from '@/components/ui/Badge';
 import WatchlistButton from '@/components/media/WatchlistButton';
+import AnimeTimeline from './AnimeTimeline';
 import type { MediaType } from '@/types/media';
 import styles from './mediaDetail.module.css';
 
@@ -19,9 +21,27 @@ export default async function MediaDetailPage({
 
   if (type === 'movie') {
     media = await getMovieDetails(id);
+    if (media?.originCountry === 'JP' && media.genres.some(g => g.name === 'Animation')) {
+      const animeMatch = await searchAnime(media.originalTitle || media.title, 1, 1);
+      if (animeMatch.results.length > 0) {
+        seasons = await getAnimeSeasons(animeMatch.results[0].externalId);
+      }
+    }
   } else if (type === 'series') {
     media = await getTVDetails(id);
-    if (media?.seasons && media.seasons.length > 0) {
+    
+    // Check if it's actually an anime (Japanese Animation)
+    let isAnime = false;
+    if (media?.originCountry === 'JP' && media.genres.some(g => g.name === 'Animation')) {
+      isAnime = true;
+      const animeMatch = await searchAnime(media.originalTitle || media.title, 1, 1);
+      if (animeMatch.results.length > 0) {
+        seasons = await getAnimeSeasons(animeMatch.results[0].externalId);
+      }
+    }
+
+    // Fallback to TMDB seasons if it's not an anime OR if AniList didn't find any seasons
+    if ((!isAnime || !seasons || seasons.length === 0) && media?.seasons && media.seasons.length > 0) {
       // Sort seasons: normal seasons (1,2,3...) first, then Specials (0)
       const sortedSeasons = [...media.seasons].sort((a, b) => {
         if (a.number === 0) return 1;
@@ -30,10 +50,16 @@ export default async function MediaDetailPage({
       });
 
       // Fetch details for the *first proper season* to show episodes as an example
-      const firstSeason = await getTVSeasonDetails(id, sortedSeasons[0].number);
-      if (firstSeason) {
-        seasons = [firstSeason, ...sortedSeasons.slice(1)];
-      } else {
+      try {
+        const firstSeason = await getTVSeasonDetails(id, sortedSeasons[0].number);
+        if (firstSeason) {
+          seasons = [firstSeason, ...sortedSeasons.slice(1)];
+        } else {
+          seasons = sortedSeasons;
+        }
+      } catch (error) {
+        // Fallback if season fetch fails (e.g. ECONNRESET)
+        console.error('Failed to fetch first season details', error);
         seasons = sortedSeasons;
       }
     }
@@ -125,35 +151,9 @@ export default async function MediaDetailPage({
           </div>
         </div>
 
-        {/* Seasons Section */}
+        {/* Aesthetic Minimalist Timeline */}
         {seasons && seasons.length > 0 && (
-          <div className={styles.seasonsSection}>
-            <h3 className={styles.sectionTitle}>Seasons & Episodes</h3>
-            <div className={styles.seasonsGrid}>
-              {seasons.map((season) => (
-                <div key={season.number} className={`glass-card ${styles.seasonCard}`}>
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    {season.posterUrl && (
-                      <div className={styles.seasonPoster}>
-                        <Image src={season.posterUrl} alt={season.name} fill sizes="6rem" className={styles.posterImage} />
-                      </div>
-                    )}
-                    <div>
-                      <h4 className={styles.seasonTitle}>{season.name}</h4>
-                      <p className={styles.seasonMeta}>
-                        {season.episodeCount} Episodes
-                      </p>
-                      {season.overview && (
-                        <p className={styles.seasonOverview}>
-                          {season.overview}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <AnimeTimeline seasons={seasons} type={type} media={media} />
         )}
       </div>
     </div>

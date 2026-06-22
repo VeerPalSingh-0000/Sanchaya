@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import type { Media } from '@/types/media';
 
 export const metadata: Metadata = {
-  title: 'Recommendations | CINEVERSE',
+  title: 'Recommendations | Sanchaya',
   description: 'Personalized media recommendations based on your watchlist.',
 };
 

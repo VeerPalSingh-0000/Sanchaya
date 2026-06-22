@@ -44,7 +44,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
         });
     } else {
       try {
-        const stored = localStorage.getItem('cineverse_watchlist');
+        const stored = localStorage.getItem('sanchaya_watchlist') || localStorage.getItem('cineverse_watchlist');
         if (stored) {
           setWatchlist(JSON.parse(stored));
         }
@@ -58,7 +58,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted || session) return;
     try {
-      localStorage.setItem('cineverse_watchlist', JSON.stringify(watchlist));
+      localStorage.setItem('sanchaya_watchlist', JSON.stringify(watchlist));
     } catch (e) {
       console.error('Failed to save watchlist to local storage', e);
     }

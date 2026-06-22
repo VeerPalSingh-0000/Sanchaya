@@ -58,4 +58,19 @@ body {
   background-color: #000000;
   color: #dce2f7;
   overflow-x: hidden;
+  transition: background-color 0.5s ease, background-image 0.5s ease;
+}
+
+body.theme-oled {
+  background-color: #000000 !important;
+}
+
+body.theme-midnight {
+  background-color: #090d16 !important;
+  background-image: radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.04) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(255, 176, 205, 0.04) 0px, transparent 50%) !important;
+  background-attachment: fixed;
+}
+
+body.theme-slate {
+  background-color: #121316 !important;
 }

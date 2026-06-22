@@ -2,7 +2,7 @@ import type { Media, Genre, Season, Episode, SearchResult } from '@/types/media'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const BASE_URL = 'https://api.themoviedb.org/3';
+const BASE_URL = 'https://api.tmdb.org/3';
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/';
 
 export const IMAGE_SIZES = {
@@ -40,6 +40,7 @@ interface TMDbMovie {
   overview: string;
   poster_path: string | null;
   backdrop_path: string | null;
+  origin_country?: string[];
   genre_ids?: number[];
   genres?: TMDbGenre[];
   vote_average: number;
@@ -60,6 +61,7 @@ interface TMDbTV {
   overview: string;
   poster_path: string | null;
   backdrop_path: string | null;
+  origin_country?: string[];
   genre_ids?: number[];
   genres?: TMDbGenre[];
   vote_average: number;
@@ -119,6 +121,7 @@ interface TMDbMultiResult {
   overview?: string;
   poster_path: string | null;
   backdrop_path: string | null;
+  origin_country?: string[];
   genre_ids?: number[];
   vote_average: number;
   vote_count: number;
@@ -211,7 +214,7 @@ async function tmdbFetch<T>(
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       const res = await fetch(url.toString(), {
-        next: { revalidate: 3600 }, // cache for 1 hour
+        next: { revalidate: 0 }, // bust cache for development
         signal: controller.signal,
       });
 
@@ -248,6 +251,7 @@ function mapMovieToMedia(movie: TMDbMovie): Media {
     type: 'movie',
     title: movie.title,
     originalTitle: movie.original_title,
+    originCountry: movie.origin_country?.[0],
     overview: movie.overview ?? '',
     posterUrl: getImageUrl(movie.poster_path),
     backdropUrl: movie.backdrop_path
@@ -285,6 +289,7 @@ function mapTVToMedia(tv: TMDbTV): Media {
     type: 'series',
     title: tv.name,
     originalTitle: tv.original_name,
+    originCountry: tv.origin_country?.[0],
     overview: tv.overview ?? '',
     posterUrl: getImageUrl(tv.poster_path),
     backdropUrl: tv.backdrop_path
@@ -317,6 +322,7 @@ function mapMultiResultToMedia(item: TMDbMultiResult): Media | null {
       type: 'movie',
       title: item.title ?? 'Unknown',
       originalTitle: item.original_title,
+      originCountry: item.origin_country?.[0],
       overview: item.overview ?? '',
       posterUrl: getImageUrl(item.poster_path),
       backdropUrl: item.backdrop_path
@@ -336,6 +342,7 @@ function mapMultiResultToMedia(item: TMDbMultiResult): Media | null {
     type: 'series',
     title: item.name ?? 'Unknown',
     originalTitle: item.original_name,
+    originCountry: item.origin_country?.[0],
     overview: item.overview ?? '',
     posterUrl: getImageUrl(item.poster_path),
     backdropUrl: item.backdrop_path
@@ -499,14 +506,15 @@ export async function getTVSeasonDetails(
   tvId: string,
   seasonNumber: number,
 ): Promise<Season | null> {
+  const cleanId = tvId.replace('tmdb-tv-', '');
   try {
     const detail = await tmdbFetch<TMDbSeasonDetail>(
-      `/tv/${tvId}/season/${seasonNumber}`,
+      `/tv/${cleanId}/season/${seasonNumber}`,
     );
     return mapSeasonDetail(detail);
   } catch (error) {
     console.error(
-      `TMDb getTVSeasonDetails(${tvId}, ${seasonNumber}) error:`,
+      `TMDb getTVSeasonDetails(${cleanId}, ${seasonNumber}) error:`,
       error,
     );
     return null;

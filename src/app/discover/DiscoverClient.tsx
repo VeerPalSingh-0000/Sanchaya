@@ -1,54 +1,65 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import type { Media, MediaType } from '@/types/media';
-import MediaCard from '@/components/media/MediaCard';
-import { useWatchlist } from '@/lib/contexts/WatchlistContext';
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import type { Media, MediaType } from "@/types/media";
+import MediaCard from "@/components/media/MediaCard";
+import { useWatchlist } from "@/lib/contexts/WatchlistContext";
 
 interface DiscoverClientProps {
   items: Media[];
 }
 
-type FilterCategory = 'all' | 'action' | 'adventure' | 'drama' | 'romance' | 'comedy' | 'scifi' | 'fantasy';
+type FilterCategory =
+  | "all"
+  | "action"
+  | "adventure"
+  | "drama"
+  | "romance"
+  | "comedy"
+  | "scifi"
+  | "fantasy";
 
 export default function DiscoverClient({ items }: DiscoverClientProps) {
-  const [activeCategory, setActiveCategory] = useState<FilterCategory>('all');
+  const [activeCategory, setActiveCategory] = useState<FilterCategory>("all");
+
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
 
   // Categories definition
   const categories = [
-    { id: 'all', label: 'All Genres' },
-    { id: 'action', label: 'Action' },
-    { id: 'adventure', label: 'Adventure' },
-    { id: 'drama', label: 'Drama' },
-    { id: 'romance', label: 'Romance' },
-    { id: 'comedy', label: 'Comedy' },
-    { id: 'scifi', label: 'Sci-Fi' },
-    { id: 'fantasy', label: 'Fantasy' },
+    { id: "all", label: "All Genres" },
+    { id: "action", label: "Action" },
+    { id: "adventure", label: "Adventure" },
+    { id: "drama", label: "Drama" },
+    { id: "romance", label: "Romance" },
+    { id: "comedy", label: "Comedy" },
+    { id: "scifi", label: "Sci-Fi" },
+    { id: "fantasy", label: "Fantasy" },
   ] as const;
 
   // Filter logic
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
-      if (activeCategory === 'all') return true;
-      const genres = (item.genres ?? []).map(g => g.name.toLowerCase());
-      
+      if (activeCategory === "all") return true;
+      const genres = (item.genres ?? []).map((g) => g.name.toLowerCase());
+
       switch (activeCategory) {
-        case 'action':
-          return genres.some(g => g.includes('action'));
-        case 'adventure':
-          return genres.some(g => g.includes('adventure'));
-        case 'drama':
-          return genres.some(g => g.includes('drama'));
-        case 'romance':
-          return genres.some(g => g.includes('romance'));
-        case 'comedy':
-          return genres.some(g => g.includes('comedy'));
-        case 'scifi':
-          return genres.some(g => g.includes('sci-fi') || g.includes('science fiction'));
-        case 'fantasy':
-          return genres.some(g => g.includes('fantasy'));
+        case "action":
+          return genres.some((g) => g.includes("action"));
+        case "adventure":
+          return genres.some((g) => g.includes("adventure"));
+        case "drama":
+          return genres.some((g) => g.includes("drama"));
+        case "romance":
+          return genres.some((g) => g.includes("romance"));
+        case "comedy":
+          return genres.some((g) => g.includes("comedy"));
+        case "scifi":
+          return genres.some(
+            (g) => g.includes("sci-fi") || g.includes("science fiction"),
+          );
+        case "fantasy":
+          return genres.some((g) => g.includes("fantasy"));
         default:
           return true;
       }
@@ -78,7 +89,7 @@ export default function DiscoverClient({ items }: DiscoverClientProps) {
         <h1 className="font-display-xl-mobile text-[40px] md:font-display-xl md:text-[64px] text-on-surface tracking-tight font-bold">
           Discover New Horizons
         </h1>
-        
+
         {/* Category Pills */}
         <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
           {categories.map((cat) => (
@@ -103,7 +114,10 @@ export default function DiscoverClient({ items }: DiscoverClientProps) {
           {/* Bento Feature Card (Takes 2 cols on Desktop) */}
           {featuredItem && (
             <article className="col-span-2 relative overflow-hidden rounded-xl aspect-[4/3] md:aspect-[2/3] lg:aspect-[4/3] group cursor-pointer glass-panel">
-              <Link href={`/media/${featuredItem.type}/${featuredItem.externalId}`} className="block w-full h-full">
+              <Link
+                href={`/media/${featuredItem.type}/${featuredItem.externalId}`}
+                className="block w-full h-full"
+              >
                 {featuredItem.posterUrl ? (
                   <img
                     src={featuredItem.posterUrl}
@@ -112,10 +126,12 @@ export default function DiscoverClient({ items }: DiscoverClientProps) {
                   />
                 ) : (
                   <div className="absolute inset-0 bg-surface-container flex flex-col items-center justify-center p-4">
-                    <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-30 mb-2">image</span>
+                    <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-30 mb-2">
+                      image
+                    </span>
                   </div>
                 )}
-                
+
                 <div className="absolute top-4 left-4 bg-primary text-on-primary font-label-sm text-[12px] font-bold px-3 py-1 rounded-full shadow-lg z-10">
                   Featured
                 </div>
@@ -123,28 +139,51 @@ export default function DiscoverClient({ items }: DiscoverClientProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent backdrop-blur-[2px] opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 gap-3 z-20">
                   <div className="flex items-center gap-2">
                     <span className="text-primary font-label-sm text-[10px] border border-primary/30 bg-primary/10 px-2 py-0.5 rounded font-bold uppercase">
-                      {featuredItem.type === 'movie' ? 'Movie' : featuredItem.type === 'series' ? 'Series' : 'Anime'}
+                      {featuredItem.type === "movie"
+                        ? "Movie"
+                        : featuredItem.type === "series"
+                          ? "Series"
+                          : "Anime"}
                     </span>
                     <span className="text-on-surface-variant font-label-sm text-[10px] font-bold">
-                      {featuredItem.releaseDate ? new Date(featuredItem.releaseDate).getFullYear() : 'TBA'} 
-                      {featuredItem.genres?.[0] ? ` • ${featuredItem.genres[0].name}` : ''}
+                      {featuredItem.releaseDate
+                        ? new Date(featuredItem.releaseDate).getFullYear()
+                        : "TBA"}
+                      {featuredItem.genres?.[0]
+                        ? ` • ${featuredItem.genres[0].name}`
+                        : ""}
                     </span>
                   </div>
-                  <h2 className="font-headline-lg-mobile text-[24px] font-bold text-on-surface leading-tight">{featuredItem.title}</h2>
+                  <h2 className="font-headline-lg-mobile text-[24px] font-bold text-on-surface leading-tight">
+                    {featuredItem.title}
+                  </h2>
                   <div className="flex items-center gap-4 mt-2">
                     <button className="bg-white text-surface font-label-sm text-[12px] font-bold px-4 py-2 rounded-full flex items-center gap-2 hover:bg-tertiary transition-colors">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> View Details
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        play_arrow
+                      </span>{" "}
+                      View Details
                     </button>
-                    <button 
+                    <button
                       onClick={handleFeaturedWatchlistToggle}
                       className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors border ${
-                        isFeaturedAdded 
-                          ? 'bg-primary text-surface border-transparent' 
-                          : 'bg-surface/50 backdrop-blur-md text-on-surface hover:bg-white/20 border-white/20'
+                        isFeaturedAdded
+                          ? "bg-primary text-surface border-transparent"
+                          : "bg-surface/50 backdrop-blur-md text-on-surface hover:bg-white/20 border-white/20"
                       }`}
                     >
-                      <span className="material-symbols-outlined" style={isFeaturedAdded ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                        {isFeaturedAdded ? 'check' : 'add'}
+                      <span
+                        className="material-symbols-outlined"
+                        style={
+                          isFeaturedAdded
+                            ? { fontVariationSettings: "'FILL' 1" }
+                            : {}
+                        }
+                      >
+                        {isFeaturedAdded ? "check" : "add"}
                       </span>
                     </button>
                   </div>
