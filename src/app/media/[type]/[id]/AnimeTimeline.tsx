@@ -19,76 +19,22 @@ export default function AnimeTimeline({
 }: AnimeTimelineProps) {
   const [mainStoryOnly, setMainStoryOnly] = useState(false);
 
-  // Show toggle for anime and animated content (with or without format data)
   const isAnime =
     type === "anime" ||
     (media?.originCountry === "JP" &&
       media?.genres.some((g) => g.name === "Animation"));
 
+  // Clean, metadata-driven filtering
   const displayedSeasons = mainStoryOnly
     ? seasons.filter((s) => {
-        const format = s.format?.toUpperCase() || "";
-        const name = (s.name || "").toLowerCase();
-        const episodeCount = s.episodeCount || 0;
-
-        // Hide these explicit format types
-        if (["OVA", "ONA", "SPECIAL", "ONAD", "MUSIC"].includes(format)) {
-          return false;
+        // If we have AniList metadata, use it as the source of truth
+        if (s.relationType) {
+          // These 4 relationships dictate the Canon "Main" Timeline
+          const canonRelations = ["CURRENT", "PREQUEL", "SEQUEL", "PARENT"];
+          return canonRelations.includes(s.relationType.toUpperCase());
         }
-
-        // Hide common filler/special content keywords
-        const fillerKeywords = [
-          "special",
-          "ova",
-          "onad",
-          "chibi",
-          "theater",
-          "comedy",
-          "parody",
-          "shorts",
-          "mini",
-          "omake",
-          "bonus",
-          "extra",
-          "lost girls",
-          "no regrets",
-          "crimson bow",
-          "junior high",
-          "sd",
-          "chibi",
-          "abridged",
-          "dub",
-          "dubbed",
-          "recap",
-          "recap",
-          "recap compilation",
-        ];
-
-        // Check if name contains any filler keywords
-        for (const keyword of fillerKeywords) {
-          if (name.includes(keyword)) {
-            return false;
-          }
-        }
-
-        // Hide very short seasons (1-2 episodes) as they're usually specials
-        if (episodeCount > 0 && episodeCount <= 2) {
-          return false;
-        }
-
-        // Hide filler movies specifically (but allow canon story movies)
-        if (format.toUpperCase() === "MOVIE") {
-          // Hide comedy/filler movies
-          if (
-            name.includes("junior high") ||
-            name.includes("chibi") ||
-            name.includes("theater")
-          ) {
-            return false;
-          }
-          // Canon movies like "Final Season Part X" and story movies are allowed
-        }
-
+        
+        // Fallback for non-anime TMDB data that lacks AniList graphs
         return true;
       })
     : seasons;

@@ -50,6 +50,7 @@ export interface Season {
   mediaId?: string;
   mediaType?: MediaType;
   format?: string;
+  relationType?: string;
 }
 
 export interface Episode {
