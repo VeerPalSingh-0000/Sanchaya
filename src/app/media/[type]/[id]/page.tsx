@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getMovieDetails, getTVDetails, getTVSeasonDetails } from '@/lib/tmdb';
+import { getMovieDetails, getTVDetails, getTVSeasonDetails, getCollectionDetails } from '@/lib/tmdb';
 import { getAnimeDetails, getAnimeSeasons, searchAnime } from '@/lib/anilist';
 import Badge from '@/components/ui/Badge';
 import WatchlistButton from '@/components/media/WatchlistButton';
@@ -28,6 +28,8 @@ export default async function MediaDetailPage({
       if (animeMatch.results.length > 0) {
         seasons = await getAnimeSeasons(animeMatch.results[0].externalId);
       }
+    } else if (media?.franchiseId && media.franchiseId.startsWith('tmdb-collection-')) {
+      seasons = await getCollectionDetails(media.franchiseId);
     }
   } else if (type === 'series') {
     media = await getTVDetails(id);

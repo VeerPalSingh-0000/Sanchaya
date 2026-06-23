@@ -133,6 +133,24 @@ interface TMDbMultiResult {
   vote_count: number;
 }
 
+interface TMDbCollectionPart {
+  id: number;
+  title: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  release_date?: string;
+}
+
+interface TMDbCollection {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  parts: TMDbCollectionPart[];
+}
+
 interface TMDbPagedResponse<T> {
   results: T[];
   total_results: number;
@@ -602,5 +620,36 @@ export async function discoverByGenres(
   } catch (error) {
     console.error('TMDb discoverByGenres error:', error);
     return { results: [], totalResults: 0, totalPages: 0, page: 1 };
+  }
+}
+
+/**
+ * Get full collection details including all parts, mapped to Season interface.
+ */
+export async function getCollectionDetails(id: string): Promise<Season[] | null> {
+  const cleanId = id.replace('tmdb-collection-', '');
+  try {
+    const collection = await tmdbFetch<TMDbCollection>(`/collection/${cleanId}`);
+    
+    // Sort parts chronologically by release date
+    const sortedParts = [...collection.parts].sort((a, b) => {
+      const dateA = a.release_date ? new Date(a.release_date).getTime() : 0;
+      const dateB = b.release_date ? new Date(b.release_date).getTime() : 0;
+      return dateA - dateB;
+    });
+
+    return sortedParts.map((part, index) => ({
+      number: index + 1,
+      name: part.title,
+      episodeCount: 0,
+      overview: part.overview ?? '',
+      posterUrl: part.poster_path ? getImageUrl(part.poster_path, IMAGE_SIZES.poster.medium) : undefined,
+      airDate: part.release_date ?? undefined,
+      mediaId: `tmdb-movie-${part.id}`,
+      mediaType: 'movie'
+    }));
+  } catch (error) {
+    console.error(`TMDb getCollectionDetails(${cleanId}) error:`, error);
+    return null;
   }
 }

@@ -98,6 +98,7 @@ export default function WatchlistPage() {
 
     // 3. Add remaining un-grouped or single items
     filteredWatchlist.forEach(item => {
+      // If it has no franchiseId, we put it in the single pile
       if (!groupedIds.has(item.id)) {
         list.push({ type: 'single', item });
       }

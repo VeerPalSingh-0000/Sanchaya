@@ -6,6 +6,7 @@ import type { WatchlistItem } from '@/types/media';
 import { useWatchlist } from '@/lib/contexts/WatchlistContext';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 interface FranchiseCardProps {
   rootTitle: string;
@@ -17,6 +18,7 @@ interface FranchiseCardProps {
 export default function FranchiseCard({ rootTitle, rootPosterUrl, items, index = 0 }: FranchiseCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { updateStatus, removeFromWatchlist } = useWatchlist();
+  const router = useRouter();
 
   const posterSrc = rootPosterUrl || items[0].posterUrl;
   const title = rootTitle !== 'Unknown' ? rootTitle : items[0].title;
@@ -28,7 +30,13 @@ export default function FranchiseCard({ rootTitle, rootPosterUrl, items, index =
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05, duration: 0.5, type: 'spring', stiffness: 100 }}
         className="relative overflow-hidden rounded-xl aspect-[2/3] group cursor-pointer glass-panel"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          if (items.length === 1) {
+            router.push(`/media/${items[0].mediaType}/${items[0].externalId}`);
+          } else {
+            setIsOpen(true);
+          }
+        }}
       >
         <div className="block w-full h-full">
           {posterSrc ? (
@@ -47,7 +55,9 @@ export default function FranchiseCard({ rootTitle, rootPosterUrl, items, index =
           {/* Floating Badges - Ultra Clean, matches MediaCard */}
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
             <span className="bg-primary-container text-on-primary-container font-label-sm text-[10px] px-2 py-0.5 rounded shadow-lg uppercase font-bold tracking-wider">
-              Series
+              {items.length > 1 
+                ? (items[0]?.mediaType === 'movie' ? 'Collection' : 'Series')
+                : (items[0]?.mediaType === 'movie' ? 'Movie' : 'Anime')}
             </span>
             {items[0]?.rating != null && items[0].rating > 0 && (
               <span className="bg-surface/80 backdrop-blur-md text-primary font-label-sm text-[10px] px-2 py-0.5 rounded shadow-lg flex items-center font-bold">
@@ -80,14 +90,14 @@ export default function FranchiseCard({ rootTitle, rootPosterUrl, items, index =
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm fade-in">
           <div className="bg-surface-container border border-white/10 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-            <div className="relative h-48 w-full overflow-hidden shrink-0">
+            <div className="relative h-48 w-full overflow-hidden shrink-0 bg-surface">
                <Image
-                  src={posterSrc || '/placeholder-poster.png'}
+                  src={items.find(i => i.backdropUrl)?.backdropUrl || posterSrc || '/placeholder-poster.png'}
                   alt={title}
                   fill
-                  className="object-cover blur-sm opacity-50"
+                  className={`object-cover ${items.some(i => i.backdropUrl) ? 'opacity-80' : 'blur-xl scale-110 opacity-60'}`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/60 to-transparent"></div>
                 <div className="absolute bottom-4 left-6 right-6 flex justify-between items-end">
                    <div>
                      <span className="text-primary font-label-sm font-bold uppercase tracking-wider mb-1 block">Franchise Collection</span>
