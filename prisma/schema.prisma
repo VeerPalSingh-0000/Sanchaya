@@ -87,6 +87,10 @@ model WatchlistItem {
   rating     Int?
   notes      String?
   
+  franchiseId        String?
+  franchiseTitle     String?
+  franchisePosterUrl String?
+  
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

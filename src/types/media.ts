@@ -37,6 +37,9 @@ export interface Media {
   totalEpisodes?: number;
   studios?: string[];
   trailer?: string;
+  franchiseId?: string;
+  franchiseTitle?: string;
+  franchisePosterUrl?: string;
 }
 
 export interface Season {
@@ -79,6 +82,9 @@ export interface WatchlistItem {
   totalEpisodes?: number;
   addedAt: string;
   updatedAt: string;
+  franchiseId?: string;
+  franchiseTitle?: string;
+  franchisePosterUrl?: string;
 }
 
 // ─── Search & Recommendations ───────────────────────────────────────────────

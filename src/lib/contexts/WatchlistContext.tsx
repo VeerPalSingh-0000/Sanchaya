@@ -38,6 +38,9 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
               status: item.status.toLowerCase() as WatchStatus,
               addedAt: item.createdAt,
               updatedAt: item.updatedAt,
+              franchiseId: item.franchiseId,
+              franchiseTitle: item.franchiseTitle,
+              franchisePosterUrl: item.franchisePosterUrl,
             }));
             setWatchlist(mapped);
           }
@@ -80,6 +83,9 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
         totalEpisodes: media.totalEpisodes,
         addedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        franchiseId: media.franchiseId,
+        franchiseTitle: media.franchiseTitle,
+        franchisePosterUrl: media.franchisePosterUrl,
       };
       return [newItem, ...prev];
     });
@@ -94,6 +100,9 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
           title: media.title,
           posterPath: media.posterUrl || '',
           status: status.toUpperCase(),
+          franchiseId: media.franchiseId,
+          franchiseTitle: media.franchiseTitle,
+          franchisePosterUrl: media.franchisePosterUrl,
         })
       });
     }

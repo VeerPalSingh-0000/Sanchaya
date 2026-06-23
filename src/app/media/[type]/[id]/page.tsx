@@ -18,10 +18,12 @@ export default async function MediaDetailPage({
 
   let media = null;
   let seasons = null;
+  let isAnime = false;
 
   if (type === 'movie') {
     media = await getMovieDetails(id);
     if (media?.originCountry === 'JP' && media.genres.some(g => g.name === 'Animation')) {
+      isAnime = true;
       const animeMatch = await searchAnime(media.originalTitle || media.title, 1, 1);
       if (animeMatch.results.length > 0) {
         seasons = await getAnimeSeasons(animeMatch.results[0].externalId);
@@ -31,7 +33,6 @@ export default async function MediaDetailPage({
     media = await getTVDetails(id);
     
     // Check if it's actually an anime (Japanese Animation)
-    let isAnime = false;
     if (media?.originCountry === 'JP' && media.genres.some(g => g.name === 'Animation')) {
       isAnime = true;
       const animeMatch = await searchAnime(media.originalTitle || media.title, 1, 1);
@@ -70,6 +71,13 @@ export default async function MediaDetailPage({
 
   if (!media) {
     notFound();
+  }
+
+  // Inject franchise metadata for Watchlist adding
+  if (seasons && seasons.length > 0 && (type === 'anime' || isAnime || media.type === 'anime')) {
+    media.franchiseId = seasons[0].mediaId || String(media.id);
+    media.franchiseTitle = seasons[0].name;
+    media.franchisePosterUrl = seasons[0].posterUrl || media.posterUrl;
   }
 
   return (

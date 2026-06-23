@@ -14,8 +14,9 @@ export async function GET() {
       orderBy: { updatedAt: 'desc' },
     })
     return NextResponse.json(items)
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch watchlist' }, { status: 500 })
+  } catch (error: any) {
+    console.error("Watchlist API GET Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch watchlist', details: error?.message || String(error) }, { status: 500 })
   }
 }
 
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const { mediaId, mediaType, title, posterPath, status, rating, notes } = body
+    const { mediaId, mediaType, title, posterPath, status, rating, notes, franchiseId, franchiseTitle, franchisePosterUrl } = body
 
     if (!mediaId || !mediaType || !title || !status) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -46,6 +47,9 @@ export async function POST(req: Request) {
         rating,
         notes,
         posterPath,
+        franchiseId,
+        franchiseTitle,
+        franchisePosterUrl,
       },
       create: {
         userId: session.user.id,
@@ -56,6 +60,9 @@ export async function POST(req: Request) {
         status,
         rating,
         notes,
+        franchiseId,
+        franchiseTitle,
+        franchisePosterUrl,
       }
     })
 

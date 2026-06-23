@@ -52,6 +52,12 @@ interface TMDbMovie {
   videos?: {
     results: { type: string; site: string; key: string }[];
   };
+  belongs_to_collection?: {
+    id: number;
+    name: string;
+    poster_path: string | null;
+    backdrop_path: string | null;
+  } | null;
 }
 
 interface TMDbTV {
@@ -264,6 +270,9 @@ function mapMovieToMedia(movie: TMDbMovie): Media {
     status: movie.status ?? 'Released',
     studios: movie.production_companies?.map((c) => c.name),
     trailer: findTrailerKey(movie.videos),
+    franchiseId: movie.belongs_to_collection ? `tmdb-collection-${movie.belongs_to_collection.id}` : undefined,
+    franchiseTitle: movie.belongs_to_collection ? movie.belongs_to_collection.name : undefined,
+    franchisePosterUrl: movie.belongs_to_collection ? getImageUrl(movie.belongs_to_collection.poster_path) : undefined,
   };
 }
 
@@ -527,10 +536,12 @@ export async function getTVSeasonDetails(
 export async function getTrending(
   mediaType: 'movie' | 'tv' | 'all' = 'all',
   timeWindow: 'day' | 'week' = 'week',
+  page: number = 1
 ): Promise<Media[]> {
   try {
     const data = await tmdbFetch<TMDbPagedResponse<TMDbMultiResult>>(
       `/trending/${mediaType}/${timeWindow}`,
+      { page: String(page) }
     );
 
     // For 'movie' or 'tv' specific calls, TMDb doesn't include media_type in each result
