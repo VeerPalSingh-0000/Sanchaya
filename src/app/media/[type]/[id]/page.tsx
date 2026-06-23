@@ -92,7 +92,7 @@ export default async function MediaDetailPage({
       </div>
 
       {/* Content */}
-      <div className={`container ${styles.contentContainer}`}>
+      <div className={`max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop ${styles.contentContainer}`}>
         <div className={styles.detailsWrapper}>
           {/* Poster */}
           <div className={styles.posterWrapper}>

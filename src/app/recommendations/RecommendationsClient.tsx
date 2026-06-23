@@ -23,6 +23,9 @@ export default function RecommendationsClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const hideFillers = false;
+  const filterItems = (items: Media[]) => items.filter((item) => !!item);
+
   useEffect(() => {
     setMounted(true);
   }, []);

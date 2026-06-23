@@ -153,7 +153,6 @@
   display: flex;
   align-items: baseline;
   gap: 16px;
-  padding: 0 16px;
 }
 
 .minimalTitle {
@@ -172,12 +171,46 @@
   color: var(--text-muted);
 }
 
+.timelineWrapper {
+  position: relative;
+  width: 100%;
+}
+
 .minimalScrollContainer {
-  width: 100vw;
-  margin-left: 50%;
-  transform: translateX(-50%);
-  overflow-x: auto; /* Only show scrollbar when needed */
-  padding: 80px 0 24px; /* Remove horizontal padding so scrollbar spans 100vw, but we restrict it below */
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 80px 0 24px;
+
+  /* Layout variables - Defaults for large screens */
+  --items-per-screen: 4;
+  --gap: 32px;
+  --padding-x: max(64px, calc((100vw - 1440px) / 2 + 64px));
+}
+
+@media (max-width: 1024px) {
+  .minimalScrollContainer {
+    --items-per-screen: 3;
+    --gap: 24px;
+    --padding-x: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  .minimalScrollContainer {
+    --items-per-screen: 2;
+    --gap: 16px;
+    --padding-x: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .minimalScrollContainer {
+    --items-per-screen: 1.25;
+    --gap: 12px;
+    --padding-x: 16px;
+  }
 }
 
 .minimalScrollContainer::-webkit-scrollbar {
@@ -186,8 +219,6 @@
 
 .minimalScrollContainer::-webkit-scrollbar-track {
   background: transparent;
-  margin-left: max(5vw, calc((100vw - 1200px) / 2));
-  margin-right: max(5vw, calc((100vw - 1200px) / 2));
 }
 
 .minimalScrollContainer::-webkit-scrollbar-thumb {
@@ -206,23 +237,27 @@
 
 .minimalTrack {
   display: flex;
-  gap: 40px;
+  gap: var(--gap);
   width: max-content;
-  padding-left: max(
-    5vw,
-    calc((100vw - 1200px) / 2)
-  ); /* Ensure proper alignment on wide screens */
-  padding-right: max(5vw, calc((100vw - 1200px) / 2)); /* Symmetric padding */
 }
 
 .minimalCardWrapper {
   position: relative;
-  width: 220px;
+  flex-shrink: 0;
+  width: calc(
+    (
+        100vw - 2 * var(--padding-x) - (var(--items-per-screen) - 1) *
+          var(--gap)
+      ) /
+      var(--items-per-screen)
+  );
   display: flex;
   flex-direction: column;
   gap: 16px;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  scroll-snap-align: start;
+  scroll-margin-left: 0px;
 }
 
 .minimalCardWrapper:hover {
