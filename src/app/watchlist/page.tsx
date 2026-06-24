@@ -136,15 +136,15 @@ export default function WatchlistPage() {
         {watchlist.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center gap-4">
             {/* Filters */}
-            <div className="flex space-x-2 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1 sm:pb-0">
-              {["all", "plan_to_watch", "watching", "completed", "dropped"].map(
+            <div className="flex items-center p-1.5 bg-surface-container/40 backdrop-blur-xl border border-white/5 rounded-full overflow-x-auto no-scrollbar w-full sm:w-auto shadow-inner">
+              {["all", "plan_to_watch", "watching", "on_hold", "completed", "dropped"].map(
                 (f) => (
                   <button
                     key={f}
-                    className={`px-4 py-2 rounded-full font-label-sm text-[12px] whitespace-nowrap transition-all active:scale-95 border ${
+                    className={`px-5 py-2 rounded-full font-label-sm text-[13px] whitespace-nowrap transition-all duration-300 ease-out flex-shrink-0 ${
                       filter === f
-                        ? "bg-primary text-background border-primary font-bold shadow-[0_5px_15px_rgba(245,158,11,0.2)]"
-                        : "bg-surface-container/40 backdrop-blur-lg border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-white/10"
+                        ? "bg-primary text-background font-bold shadow-[0_4px_12px_rgba(245,158,11,0.25)] scale-100"
+                        : "text-on-surface-variant hover:text-on-surface hover:bg-white/5 active:scale-95"
                     }`}
                     onClick={() => setFilter(f as WatchStatus | "all")}
                   >
