@@ -9,6 +9,7 @@ interface WatchlistContextType {
   addToWatchlist: (media: Media, status?: WatchStatus) => void;
   removeFromWatchlist: (id: string) => void;
   updateStatus: (id: string, status: WatchStatus) => void;
+  updateProgress: (id: string, progress: number) => void;
   isInWatchlist: (id: string) => boolean;
 }
 
@@ -41,6 +42,8 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
               franchiseId: item.franchiseId,
               franchiseTitle: item.franchiseTitle,
               franchisePosterUrl: item.franchisePosterUrl,
+              progress: item.progress || 0,
+              totalEpisodes: item.totalEpisodes || undefined,
             }));
             setWatchlist(mapped);
           }
@@ -103,6 +106,8 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
           franchiseId: media.franchiseId,
           franchiseTitle: media.franchiseTitle,
           franchisePosterUrl: media.franchisePosterUrl,
+          progress: 0,
+          totalEpisodes: media.totalEpisodes,
         })
       });
     }
@@ -130,13 +135,28 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session]);
 
+  const updateProgress = useCallback((id: string, progress: number) => {
+    setWatchlist((prev) =>
+      prev.map((item) =>
+        item.id === String(id) ? { ...item, progress, updatedAt: new Date().toISOString() } : item
+      )
+    );
+    if (session) {
+      fetch(`/api/watchlist/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progress })
+      });
+    }
+  }, [session]);
+
   const isInWatchlist = useCallback(
     (id: string) => watchlist.some((item) => item.id === String(id)),
     [watchlist]
   );
 
   return (
-    <WatchlistContext.Provider value={{ watchlist, addToWatchlist, removeFromWatchlist, updateStatus, isInWatchlist }}>
+    <WatchlistContext.Provider value={{ watchlist, addToWatchlist, removeFromWatchlist, updateStatus, updateProgress, isInWatchlist }}>
       {children}
     </WatchlistContext.Provider>
   );

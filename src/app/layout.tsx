@@ -22,10 +22,38 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Sanchaya | Your Unified Media Tracker',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  title: {
+    default: 'Sanchaya | Your Unified Media Tracker',
+    template: '%s | Sanchaya'
+  },
   description:
     'Track your favorite movies, TV series, and anime all in one place. Discover, rate, and organize your watchlist with Sanchaya.',
-  keywords: ['media tracker', 'movies', 'anime', 'tv series', 'watchlist'],
+  keywords: ['media tracker', 'movies', 'anime', 'tv series', 'watchlist', 'Sanchaya'],
+  openGraph: {
+    title: 'Sanchaya | Your Unified Media Tracker',
+    description: 'Track your favorite movies, TV series, and anime all in one place. Discover, rate, and organize your watchlist with Sanchaya.',
+    url: '/',
+    siteName: 'Sanchaya',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sanchaya | Your Unified Media Tracker',
+    description: 'Track your favorite movies, TV series, and anime all in one place.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({

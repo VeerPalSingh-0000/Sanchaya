@@ -7,7 +7,50 @@ import Badge from '@/components/ui/Badge';
 import WatchlistButton from '@/components/media/WatchlistButton';
 import AnimeTimeline from './AnimeTimeline';
 import type { MediaType } from '@/types/media';
+import type { Metadata } from 'next';
 import styles from './mediaDetail.module.css';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ type: string; id: string }>;
+}): Promise<Metadata> {
+  const { type, id } = await params;
+  let media = null;
+
+  if (type === 'movie') {
+    media = await getMovieDetails(id);
+  } else if (type === 'series') {
+    media = await getTVDetails(id);
+  } else if (type === 'anime') {
+    media = await getAnimeDetails(id);
+  }
+
+  if (!media) {
+    return {
+      title: 'Not Found',
+    };
+  }
+
+  const ogImage = media.backdropUrl || media.posterUrl || '';
+
+  return {
+    title: media.title,
+    description: media.overview || `Details for ${media.title}`,
+    openGraph: {
+      title: media.title,
+      description: media.overview || `Details for ${media.title}`,
+      images: ogImage ? [{ url: ogImage, width: 1280, height: 720, alt: media.title }] : [],
+      type: type === 'movie' ? 'video.movie' : type === 'series' || type === 'anime' ? 'video.tv_show' : 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: media.title,
+      description: media.overview || `Details for ${media.title}`,
+      images: ogImage ? [ogImage] : [],
+    },
+  };
+}
 
 export default async function MediaDetailPage({
   params,
@@ -82,8 +125,30 @@ export default async function MediaDetailPage({
     media.franchisePosterUrl = seasons[0].posterUrl || media.posterUrl;
   }
 
+  // Generate JSON-LD Schema
+  const schemaType = type === 'movie' ? 'Movie' : 'TVSeries';
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': schemaType,
+    name: media.title,
+    image: media.posterUrl,
+    description: media.overview,
+    dateCreated: media.releaseDate,
+    aggregateRating: media.rating ? {
+      '@type': 'AggregateRating',
+      ratingValue: media.rating,
+      bestRating: '10',
+      worstRating: '1',
+    } : undefined,
+    genre: media.genres.map(g => g.name),
+  };
+
   return (
     <div className={styles.pageWrapper}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Backdrop Header */}
       <div className={styles.backdropHeader}>
         {media.backdropUrl ? (
@@ -149,7 +214,7 @@ export default async function MediaDetailPage({
             </div>
 
             <div style={{ marginTop: '24px', marginBottom: '24px' }}>
-              <WatchlistButton media={media} />
+              <WatchlistButton media={media} hideEpisodeTracker={!!(seasons && seasons.length > 0)} />
             </div>
 
             <div className={styles.overviewSection}>

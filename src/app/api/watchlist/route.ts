@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const { mediaId, mediaType, title, posterPath, status, rating, notes, franchiseId, franchiseTitle, franchisePosterUrl } = body
+    const { mediaId, mediaType, title, posterPath, status, rating, notes, franchiseId, franchiseTitle, franchisePosterUrl, progress, totalEpisodes } = body
 
     if (!mediaId || !mediaType || !title || !status) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -50,6 +50,8 @@ export async function POST(req: Request) {
         franchiseId,
         franchiseTitle,
         franchisePosterUrl,
+        progress,
+        totalEpisodes,
       },
       create: {
         userId: session.user.id,
@@ -63,6 +65,8 @@ export async function POST(req: Request) {
         franchiseId,
         franchiseTitle,
         franchisePosterUrl,
+        progress,
+        totalEpisodes,
       }
     })
 

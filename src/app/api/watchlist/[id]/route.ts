@@ -11,7 +11,7 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
 
   try {
     const body = await req.json()
-    const { status, rating, notes } = body
+    const { status, rating, notes, progress, totalEpisodes } = body
 
     await prisma.watchlistItem.updateMany({
       where: {
@@ -22,6 +22,8 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
         ...(status && { status }),
         ...(rating !== undefined && { rating }),
         ...(notes !== undefined && { notes }),
+        ...(progress !== undefined && { progress }),
+        ...(totalEpisodes !== undefined && { totalEpisodes }),
       }
     })
 

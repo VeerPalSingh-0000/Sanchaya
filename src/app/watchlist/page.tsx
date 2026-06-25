@@ -59,19 +59,14 @@ export default function WatchlistPage() {
     }).catch(() => setIsMigrating(false));
   }, [watchlist, mounted]);
 
-  const filteredWatchlist = useMemo(() => {
-    if (filter === "all") return watchlist;
-    return watchlist.filter((item) => item.status === filter);
-  }, [watchlist, filter]);
-
-  const displayItems = useMemo(() => {
-    const list: DisplayItem[] = [];
+  // 1. Group natively using database fields without filtering
+  const allGroups = useMemo(() => {
+    const list: (DisplayItem & { aggregateStatus: WatchStatus })[] = [];
     const groupedIds = new Set<string>();
 
-    // 1. Group natively using database fields
     const franchiseMap = new Map<string, { title: string, posterUrl: string, items: WatchlistItem[] }>();
 
-    filteredWatchlist.forEach(item => {
+    watchlist.forEach(item => {
       if (item.franchiseId) {
         if (!franchiseMap.has(item.franchiseId)) {
           franchiseMap.set(item.franchiseId, {
@@ -85,33 +80,48 @@ export default function WatchlistPage() {
       }
     });
 
-    // 2. Map groups into display cards
     franchiseMap.forEach((data, franchiseId) => {
       if (data.items.length > 0) {
+        // Compute aggregate status
+        let aggregateStatus: WatchStatus = 'plan_to_watch';
+        if (data.items.some(i => i.status === 'watching')) {
+          aggregateStatus = 'watching';
+        } else if (data.items.every(i => i.status === 'completed')) {
+          aggregateStatus = 'completed';
+        } else if (data.items.some(i => i.status === 'plan_to_watch')) {
+          aggregateStatus = 'plan_to_watch';
+        } else if (data.items.some(i => i.status === 'on_hold')) {
+          aggregateStatus = 'on_hold';
+        } else {
+          aggregateStatus = 'dropped';
+        }
+
         list.push({
           type: 'franchise',
           group: { rootId: franchiseId, rootTitle: data.title, rootPosterUrl: data.posterUrl, memberIds: data.items.map(i => String(i.externalId)) },
-          items: data.items
+          items: data.items,
+          aggregateStatus
         });
       }
     });
 
-    // 3. Add remaining un-grouped or single items
-    filteredWatchlist.forEach(item => {
-      // If it has no franchiseId, we put it in the single pile
+    watchlist.forEach(item => {
       if (!groupedIds.has(item.id)) {
-        list.push({ type: 'single', item });
+        list.push({ type: 'single', item, aggregateStatus: item.status });
       }
     });
 
-    // Sort by most recently added
     return list.sort((a, b) => {
       const timeA = a.type === 'single' ? new Date(a.item.addedAt).getTime() : Math.max(...a.items.map(i => new Date(i.addedAt).getTime()));
       const timeB = b.type === 'single' ? new Date(b.item.addedAt).getTime() : Math.max(...b.items.map(i => new Date(i.addedAt).getTime()));
       return timeB - timeA;
     });
+  }, [watchlist]);
 
-  }, [filteredWatchlist]);
+  const displayItems = useMemo(() => {
+    if (filter === "all") return allGroups;
+    return allGroups.filter((group) => group.aggregateStatus === filter);
+  }, [allGroups, filter]);
 
   if (!mounted) {
     return (
@@ -169,6 +179,7 @@ export default function WatchlistPage() {
                 return (
                   <div key={`franchise-${display.group.rootId}`}>
                     <FranchiseCard
+                      rootId={display.group.rootId}
                       rootTitle={display.group.rootTitle}
                       rootPosterUrl={display.group.rootPosterUrl}
                       items={display.items}

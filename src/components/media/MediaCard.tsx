@@ -56,14 +56,15 @@ export default function MediaCard({ media, onAddToWatchlist, index = 0 }: MediaC
         {/* Floating Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           <span className="bg-primary-container text-on-primary-container font-label-sm text-[10px] px-2 py-0.5 rounded shadow-lg uppercase font-bold tracking-wider">
-            {itemType === 'movie' ? 'Movie' : itemType === 'series' ? 'Series' : 'Anime'}
+            {(() => {
+              const isActuallyAnime = 
+                itemType === 'anime' || 
+                ((itemType === 'series' || itemType === 'movie') && 
+                 (media.originCountry === 'JP' || (media.title && media.title.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/))) && 
+                 (media.genres ?? []).some((g) => g.name === 'Animation' || g.id === 16));
+              return isActuallyAnime ? 'Anime' : (itemType === 'movie' ? 'Movie' : 'Series');
+            })()}
           </span>
-          {media.rating != null && media.rating > 0 && (
-            <span className="bg-surface/80 backdrop-blur-md text-primary font-label-sm text-[10px] px-2 py-0.5 rounded shadow-lg flex items-center font-bold">
-              <span className="material-symbols-outlined text-[12px] mr-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-              {media.rating.toFixed(1)}
-            </span>
-          )}
         </div>
 
         {/* Hover Overlay */}

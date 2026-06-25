@@ -91,6 +91,9 @@ model WatchlistItem {
   franchiseTitle     String?
   franchisePosterUrl String?
   
+  progress           Int?
+  totalEpisodes      Int?
+  
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

@@ -7,6 +7,7 @@ import styles from './WatchlistButton.module.css';
 
 interface WatchlistButtonProps {
   media: Media;
+  hideEpisodeTracker?: boolean;
 }
 
 const STATUS_OPTIONS: { value: WatchStatus; label: string; color: string }[] = [
@@ -17,14 +18,38 @@ const STATUS_OPTIONS: { value: WatchStatus; label: string; color: string }[] = [
   { value: 'dropped', label: 'Dropped', color: '#ef4444' },
 ];
 
-export default function WatchlistButton({ media }: WatchlistButtonProps) {
-  const { watchlist, addToWatchlist, removeFromWatchlist, updateStatus } = useWatchlist();
+export default function WatchlistButton({ media, hideEpisodeTracker = false }: WatchlistButtonProps) {
+  const { watchlist, addToWatchlist, removeFromWatchlist, updateStatus, updateProgress } = useWatchlist();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const existingItem = watchlist.find((item) => item.id === String(media.id));
-  const isAdded = !!existingItem;
-  const currentStatus = existingItem?.status || 'plan_to_watch';
+  // Find exact item
+  const existingItem = watchlist.find((item) => item.id === String(media.id) || item.externalId === String(media.id));
+  
+  // Find all franchise items
+  const franchiseItems = watchlist.filter(item => 
+    (media.franchiseId && item.franchiseId === String(media.franchiseId)) || 
+    item.id === String(media.id) || 
+    item.externalId === String(media.id)
+  );
+  
+  const isAdded = franchiseItems.length > 0;
+  
+  // Calculate aggregate status
+  let currentStatus: WatchStatus = 'plan_to_watch';
+  if (franchiseItems.length > 0) {
+    if (franchiseItems.some(i => i.status === 'watching')) {
+      currentStatus = 'watching';
+    } else if (franchiseItems.every(i => i.status === 'completed')) {
+      currentStatus = 'completed';
+    } else if (franchiseItems.some(i => i.status === 'plan_to_watch')) {
+      currentStatus = 'plan_to_watch';
+    } else if (franchiseItems.some(i => i.status === 'on_hold')) {
+      currentStatus = 'on_hold';
+    } else {
+      currentStatus = 'dropped';
+    }
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -37,25 +62,60 @@ export default function WatchlistButton({ media }: WatchlistButtonProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const handleStatusSelect = (status: WatchStatus) => {
-    if (isAdded) {
-      updateStatus(String(media.id), status);
+  const handleStatusSelect = async (status: WatchStatus) => {
+    if (franchiseItems.length > 0) {
+      // Bulk update all franchise items currently in the watchlist
+      franchiseItems.forEach(item => {
+        updateStatus(item.id, status);
+      });
+      // If the specific item we are viewing isn't in the list yet, add it
+      if (!existingItem) {
+        addToWatchlist(media, status);
+      }
     } else {
-      addToWatchlist(media, status);
+      let finalMedia = { ...media };
+      if (!finalMedia.franchiseId) {
+        try {
+          const { getFranchiseMetadata } = await import('@/app/actions');
+          const meta = await getFranchiseMetadata(finalMedia);
+          finalMedia = { ...finalMedia, ...meta };
+        } catch (e) {
+          console.error('Failed to get franchise metadata', e);
+        }
+      }
+      addToWatchlist(finalMedia, status);
     }
     setIsOpen(false);
   };
 
   const handleRemove = () => {
-    removeFromWatchlist(String(media.id));
+    if (franchiseItems.length > 0) {
+      // Bulk remove all franchise items
+      franchiseItems.forEach(item => {
+        removeFromWatchlist(item.id);
+      });
+    }
     setIsOpen(false);
   };
 
   const currentOption = STATUS_OPTIONS.find((opt) => opt.value === currentStatus);
 
+  const progress = existingItem?.progress || 0;
+  const totalEpisodes = existingItem?.totalEpisodes || media.totalEpisodes;
+
+  const handleProgressChange = (newProgress: number) => {
+    if (!existingItem) return;
+    const clampedProgress = Math.max(0, Math.min(newProgress, totalEpisodes || 9999));
+    updateProgress(existingItem.id, clampedProgress);
+    if (totalEpisodes && clampedProgress === totalEpisodes && currentStatus === 'watching') {
+      updateStatus(existingItem.id, 'completed');
+    }
+  };
+
   return (
-    <div className={styles.container} ref={dropdownRef}>
-      <button
+    <div className="flex flex-col gap-3 items-start">
+      <div className={styles.container} ref={dropdownRef}>
+        <button
         className={`${styles.button} ${isAdded ? styles.added : styles.add}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
@@ -109,7 +169,41 @@ export default function WatchlistButton({ media }: WatchlistButtonProps) {
                 Remove from List
               </button>
             </>
-          )}
+            )}
+          </div>
+        )}
+      </div>
+
+      {(!hideEpisodeTracker && isAdded && currentStatus === 'watching') && (
+        <div className="flex items-center gap-3 bg-surface-container/50 backdrop-blur-md border border-white/10 rounded-full p-1 shadow-lg animate-in fade-in slide-in-from-top-2">
+          <button 
+            onClick={() => handleProgressChange(progress - 1)}
+            disabled={progress <= 0}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-surface hover:bg-white/10 text-on-surface-variant transition-colors disabled:opacity-30 disabled:hover:bg-surface"
+          >
+            <span className="material-symbols-outlined text-[18px]">remove</span>
+          </button>
+          
+          <div className="flex items-center gap-1 min-w-[80px] justify-center px-2">
+            <span className="font-headline-sm text-[16px] font-bold text-on-surface leading-none">{progress}</span>
+            {totalEpisodes && (
+              <>
+                <span className="text-on-surface-variant opacity-50 text-[12px] leading-none">/</span>
+                <span className="text-on-surface-variant text-[14px] leading-none">{totalEpisodes}</span>
+              </>
+            )}
+            {!totalEpisodes && (
+              <span className="text-on-surface-variant text-[12px] ml-1 uppercase tracking-wider font-bold">EP</span>
+            )}
+          </div>
+          
+          <button 
+            onClick={() => handleProgressChange(progress + 1)}
+            disabled={totalEpisodes ? progress >= totalEpisodes : false}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors disabled:opacity-30"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+          </button>
         </div>
       )}
     </div>
