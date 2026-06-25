@@ -190,10 +190,10 @@ function getApiKey(): string {
 }
 
 export function getImageUrl(
-  path: string | null,
+  path: string | null | undefined,
   size: string = IMAGE_SIZES.poster.medium,
-): string {
-  if (!path) return '/placeholder-poster.png';
+): string | undefined {
+  if (!path) return undefined;
   return `${IMAGE_BASE}${size}${path}`;
 }
 
@@ -252,6 +252,9 @@ async function tmdbFetch<T>(
     } catch (error) {
       if (i === retries - 1) throw error;
       const err = error as Error;
+      if (err.message.includes('404')) {
+        throw err; // Do not retry 404 errors
+      }
       console.warn(`TMDb fetch attempt ${i + 1} failed for ${endpoint}. Retrying... [${err.name}: ${err.message}]`);
       // Exponential backoff with jitter to prevent thundering herd
       const jitter = Math.random() * 300;
@@ -505,6 +508,9 @@ export async function getMovieDetails(id: string): Promise<Media | null> {
     });
     return mapMovieToMedia(movie);
   } catch (error) {
+    if (error instanceof Error && error.message.includes('404')) {
+      return null;
+    }
     console.error(`TMDb getMovieDetails(${cleanId}) error:`, error);
     return null;
   }
@@ -521,6 +527,9 @@ export async function getTVDetails(id: string): Promise<Media | null> {
     });
     return mapTVToMedia(tv);
   } catch (error) {
+    if (error instanceof Error && error.message.includes('404')) {
+      return null;
+    }
     console.error(`TMDb getTVDetails(${cleanId}) error:`, error);
     return null;
   }
@@ -540,6 +549,9 @@ export async function getTVSeasonDetails(
     );
     return mapSeasonDetail(detail);
   } catch (error) {
+    if (error instanceof Error && error.message.includes('404')) {
+      return null;
+    }
     console.error(
       `TMDb getTVSeasonDetails(${cleanId}, ${seasonNumber}) error:`,
       error,

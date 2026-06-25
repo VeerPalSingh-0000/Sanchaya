@@ -28,7 +28,8 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!(event.target as Element).closest('#profile-menu-container')) {
+      const target = event.target as Element;
+      if (!target.closest('#profile-menu-container') && !target.closest('#profile-menu-container-mobile')) {
         setDropdownOpen(false);
       }
     };
@@ -67,8 +68,11 @@ export default function Navbar() {
             Sign In
           </button>
         ) : (
-          <Link href="/settings">
-            <div className="w-8 h-8 rounded-full bg-surface-container border border-white/10 overflow-hidden">
+          <div id="profile-menu-container-mobile" className="relative">
+            <div 
+              className="w-8 h-8 rounded-full bg-surface-container border border-white/10 overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
               {session.user?.image ? (
                 <img className="w-full h-full object-cover" src={session.user.image} alt="Profile" />
               ) : (
@@ -77,7 +81,40 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-          </Link>
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-4 w-64 rounded-3xl bg-[#0a0f18]/90 backdrop-blur-3xl border border-white/10 shadow-[0_0_40px_rgba(255,193,116,0.15)] p-3 flex flex-col gap-2 z-50 transform origin-top-right transition-all">
+                <div className="relative overflow-hidden rounded-2xl p-4 mb-2 bg-white/5 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full border-2 border-primary/30 overflow-hidden flex-shrink-0">
+                      {session.user?.image ? (
+                         <img className="w-full h-full object-cover" src={session.user.image} alt="User Profile" />
+                      ) : (
+                         <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
+                           <span className="material-symbols-outlined text-[20px]">person</span>
+                         </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{session.user?.name}</p>
+                      <p className="text-[10px] text-white/50 truncate">{session.user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+                <Link href="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all" onClick={() => setDropdownOpen(false)}>
+                  <span className="material-symbols-outlined text-[18px] text-white/50">settings</span>
+                  <span className="text-sm font-medium text-white/80">Preferences</span>
+                </Link>
+                <div className="h-px w-full bg-white/10 my-1"></div>
+                <button 
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-error/10 transition-all text-left w-full" 
+                  onClick={() => { setDropdownOpen(false); signOut(); }}
+                >
+                  <span className="material-symbols-outlined text-[18px] text-error/80">logout</span>
+                  <span className="text-sm font-medium text-error/80">Sign Out</span>
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
       {/* TopNavBar (Desktop) */}
@@ -222,42 +259,28 @@ export default function Navbar() {
       </nav>
 
       {/* BottomNavBar (Mobile) */}
-      {(!(!session && pathname === '/')) && (
-        <nav className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 pointer-events-none">
-          <div className="bg-surface-container/60 backdrop-blur-lg rounded-full w-full max-w-sm mx-auto border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex justify-around items-center p-2 font-label-sm text-label-sm pointer-events-auto">
+      {(!(!session && pathname === '/') && pathname !== '/auth/signin') && (
+        <nav className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+          <div className="bg-[#0a0f18]/90 backdrop-blur-2xl rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center p-1.5 gap-1 pointer-events-auto">
           {NAV_LINKS.map((link) => {
             const active = isActive(link.href);
             return (
               <Link 
                 key={link.href}
                 href={link.href}
-                className={`flex flex-col items-center justify-center p-3 rounded-full transition-all active:scale-90 ${
+                className={`flex items-center justify-center gap-2 py-2.5 px-5 rounded-full transition-all duration-300 ease-out active:scale-95 ${
                   active 
-                    ? 'bg-primary-container text-on-primary-container animate-bounce-short' 
-                    : 'text-on-surface-variant hover:bg-white/10'
+                    ? 'bg-primary/15 text-primary shadow-inner border border-primary/20' 
+                    : 'text-white/40 hover:text-white/80 hover:bg-white/5'
                 }`}
               >
-                <span className="material-symbols-outlined mb-1 text-[20px]" style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                <span className="material-symbols-outlined text-[20px]" style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>
                   {link.icon}
                 </span>
-                <span>{link.label}</span>
+                {active && <span className="text-sm font-bold tracking-wide">{link.label}</span>}
               </Link>
             )
           })}
-          
-          <Link 
-             href="/settings"
-             className={`flex flex-col items-center justify-center p-3 rounded-full transition-all active:scale-90 ${
-               isActive('/settings') 
-                 ? 'bg-primary-container text-on-primary-container animate-bounce-short' 
-                 : 'text-on-surface-variant hover:bg-white/10'
-             }`}
-          >
-            <span className="material-symbols-outlined mb-1 text-[20px]" style={isActive('/settings') ? { fontVariationSettings: "'FILL' 1" } : {}}>
-              person
-            </span>
-            <span>Profile</span>
-          </Link>
         </div>
       </nav>
       )}
