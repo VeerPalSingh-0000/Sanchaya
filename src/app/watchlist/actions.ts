@@ -24,10 +24,10 @@ export async function getWatchlistFranchiseGroupings(animeIds: string[]): Promis
         // Prioritize the earliest 'TV' format as the main story. Fallback to the earliest overall item.
         const tvItem = timeline.find(t => t.format === 'TV');
         const rootItem = tvItem || timeline[0];
-        const memberIds = timeline.map(t => t.mediaId).filter(Boolean) as string[];
+        const memberIds = timeline.map(t => String(t.mediaId).replace('anilist-', '')).filter(Boolean) as string[];
         
         groups.push({
-          rootId: rootItem.mediaId || id,
+          rootId: String(rootItem.mediaId).startsWith('anilist-') ? String(rootItem.mediaId) : `anilist-${String(rootItem.mediaId).replace('anilist-', '') || id}`,
           rootTitle: rootItem.name,
           rootPosterUrl: rootItem.posterUrl || '',
           memberIds: memberIds
@@ -37,7 +37,7 @@ export async function getWatchlistFranchiseGroupings(animeIds: string[]): Promis
       } else {
         // Fallback for items with no timeline/relations
         groups.push({
-          rootId: id,
+          rootId: `anilist-${id}`,
           rootTitle: "Unknown", // Will be replaced by client
           rootPosterUrl: "",
           memberIds: [id]

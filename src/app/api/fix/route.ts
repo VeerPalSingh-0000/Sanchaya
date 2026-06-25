@@ -3,15 +3,14 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const deleted = await prisma.watchlistItem.deleteMany({
-      where: {
-        mediaId: {
-          contains: 'undefined'
-        }
-      }
-    })
-    return NextResponse.json({ success: true, message: `Deleted ${deleted.count} corrupted items from the database.` })
+    // Reset all franchise IDs for anime to force a clean grouping on next reload
+    const updated = await prisma.watchlistItem.updateMany({
+      where: { mediaType: 'anime' },
+      data: { franchiseId: null, franchiseTitle: null, franchisePosterUrl: null }
+    });
+
+    return NextResponse.json({ success: true, message: `Successfully reset franchise groups for ${updated.count} anime.` });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

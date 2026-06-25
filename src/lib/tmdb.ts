@@ -309,8 +309,10 @@ function mapTVToMedia(tv: TMDbTV): Media {
     overview: s.overview ?? '',
     posterUrl: s.poster_path
       ? getImageUrl(s.poster_path, IMAGE_SIZES.poster.medium)
-      : undefined,
+      : "",
     airDate: s.air_date ?? undefined,
+    mediaId: `${tv.id}-season-${s.season_number}`,
+    mediaType: 'series',
   }));
 
   return {
@@ -520,12 +522,45 @@ export async function getMovieDetails(id: string): Promise<Media | null> {
  * Get full TV show details including seasons, videos, and networks.
  */
 export async function getTVDetails(id: string): Promise<Media | null> {
-  const cleanId = id.replace('tmdb-tv-', '');
+  let cleanId = id.replace('tmdb-tv-', '');
+  // Because AnimeTimeline uses the generic tmdb-movie- prefix for TMDb IDs historically, we strip it too
+  cleanId = cleanId.replace('tmdb-movie-', '');
+  
+  const match = cleanId.match(/^(\d+)-season-(\d+)$/);
+  let showId = cleanId;
+  let seasonNumber: number | null = null;
+  
+  if (match) {
+    showId = match[1];
+    seasonNumber = parseInt(match[2]);
+  }
+
   try {
-    const tv = await tmdbFetch<TMDbTV>(`/tv/${cleanId}`, {
+    const tv = await tmdbFetch<TMDbTV>(`/tv/${showId}`, {
       append_to_response: 'videos',
     });
-    return mapTVToMedia(tv);
+    
+    const media = mapTVToMedia(tv);
+    
+    if (seasonNumber !== null && media.seasons) {
+      const season = media.seasons.find(s => s.number === seasonNumber);
+      if (season) {
+        return {
+          ...media,
+          id: `tmdb-tv-${showId}-season-${seasonNumber}`,
+          externalId: `${showId}-season-${seasonNumber}`,
+          title: `${media.title}: ${season.name}`,
+          overview: season.overview || media.overview,
+          posterUrl: season.posterUrl || media.posterUrl,
+          totalEpisodes: season.episodeCount,
+          franchiseId: `tmdb-tv-${showId}`,
+          franchiseTitle: media.title,
+          franchisePosterUrl: media.posterUrl,
+        };
+      }
+    }
+    
+    return media;
   } catch (error) {
     if (error instanceof Error && error.message.includes('404')) {
       return null;

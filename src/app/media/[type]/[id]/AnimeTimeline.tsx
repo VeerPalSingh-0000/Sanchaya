@@ -319,7 +319,8 @@ export default function AnimeTimeline({
                 >
                   {(() => {
                     const season = displayedSeasons[dropdownState.idx];
-              const savedItem = season.mediaId ? watchlist.find(i => i.externalId === String(season.mediaId) || i.id === `anilist-${season.mediaId}` || i.id === `tmdb-movie-${season.mediaId}`) : null;
+              const cleanMediaId = season.mediaId ? String(season.mediaId).replace(/anilist-/g, '').replace(/tmdb-movie-/g, '') : '';
+              const savedItem = cleanMediaId ? watchlist.find(i => i.externalId === cleanMediaId || i.id === `anilist-${cleanMediaId}` || i.id === `tmdb-movie-${cleanMediaId}`) : null;
               const isCurrentlyWatching = savedItem?.status === 'watching';
 
               return (
@@ -396,14 +397,15 @@ export default function AnimeTimeline({
                             updateStatus(savedItem.id, opt.val as any);
                           } else {
                             const prefix = (season.mediaType || type) === 'anime' ? 'anilist-' : 'tmdb-movie-';
+                            const cleanMediaId = String(season.mediaId).replace(/anilist-/g, '').replace(/tmdb-movie-/g, '');
                             const pseudoMedia: any = {
-                              id: `${prefix}${season.mediaId}`,
-                              externalId: String(season.mediaId),
+                              id: `${prefix}${cleanMediaId}`,
+                              externalId: cleanMediaId,
                               type: season.mediaType || type,
                               title: season.name,
                               posterUrl: season.posterUrl || '',
                               genres: media?.genres || [],
-                              franchiseId: media?.franchiseId || String(media?.id),
+                              franchiseId: media?.franchiseId || undefined,
                               franchiseTitle: media?.franchiseTitle || media?.title,
                               franchisePosterUrl: media?.franchisePosterUrl || media?.posterUrl,
                             };

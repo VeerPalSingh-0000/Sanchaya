@@ -30,32 +30,42 @@ export default function WatchlistPage() {
     if (itemsToMigrate.length === 0) return;
 
     setIsMigrating(true);
-    const missingIds = itemsToMigrate.map(i => String(i.externalId));
+    const missingIds = itemsToMigrate.map(i => String(i.externalId).replace(/anilist-/g, ''));
     getWatchlistFranchiseGroupings(missingIds).then(newGroups => {
+      const updatePromises: Promise<any>[] = [];
+      
       itemsToMigrate.forEach(item => {
-        const group = newGroups.find(g => g.memberIds.includes(String(item.externalId)));
+        const cleanExtId = String(item.externalId).replace(/anilist-/g, '');
+        const group = newGroups.find(g => g.memberIds.includes(cleanExtId));
         if (group) {
-          // Trigger a silent background update to POST the new franchise data permanently
-          fetch('/api/watchlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              mediaId: String(item.externalId),
-              mediaType: item.mediaType,
-              title: item.title,
-              posterPath: item.posterUrl,
-              status: item.status.toUpperCase(),
-              franchiseId: group.rootId,
-              franchiseTitle: group.rootTitle,
-              franchisePosterUrl: group.rootPosterUrl,
+          // Queue a silent background update to POST the new franchise data permanently
+          updatePromises.push(
+            fetch('/api/watchlist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                mediaId: String(item.externalId),
+                mediaType: item.mediaType,
+                title: item.title,
+                posterPath: item.posterUrl,
+                status: item.status.toUpperCase(),
+                franchiseId: group.rootId,
+                franchiseTitle: group.rootTitle,
+                franchisePosterUrl: group.rootPosterUrl,
+              })
             })
-          }).then(() => {
-            // Force a hard reload to fetch the new DB state and rerender groups!
-            window.location.reload();
-          });
+          );
         }
       });
-      setIsMigrating(false);
+
+      if (updatePromises.length > 0) {
+        Promise.all(updatePromises).then(() => {
+          // Force a hard reload to fetch the new DB state and rerender groups!
+          window.location.reload();
+        });
+      } else {
+        setIsMigrating(false);
+      }
     }).catch(() => setIsMigrating(false));
   }, [watchlist, mounted]);
 
@@ -83,7 +93,9 @@ export default function WatchlistPage() {
     franchiseMap.forEach((data, franchiseId) => {
       if (data.items.length > 0) {
         // Compute aggregate status
+        // Compute aggregate status across the entire franchise
         let aggregateStatus: WatchStatus = 'plan_to_watch';
+        
         if (data.items.some(i => i.status === 'watching')) {
           aggregateStatus = 'watching';
         } else if (data.items.every(i => i.status === 'completed')) {
@@ -137,8 +149,8 @@ export default function WatchlistPage() {
             My Watchlist
           </h1>
           <p className="font-body-md text-on-surface-variant mt-2 text-[16px] flex items-center gap-2">
-            {watchlist.length} items saved •{" "}
-            {watchlist.filter((i) => i.status === "completed").length} completed
+            {allGroups.length} items saved •{" "}
+            {allGroups.filter((g) => g.aggregateStatus === "completed").length} completed
             {isMigrating && <span className="ml-2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>}
           </p>
         </div>
