@@ -134,9 +134,10 @@ export default async function MediaDetailPage({
     image: media.posterUrl,
     description: media.overview,
     dateCreated: media.releaseDate,
-    aggregateRating: media.rating ? {
+    aggregateRating: media.rating && media.voteCount ? {
       '@type': 'AggregateRating',
       ratingValue: media.rating,
+      ratingCount: media.voteCount,
       bestRating: '10',
       worstRating: '1',
     } : undefined,

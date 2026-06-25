@@ -65,6 +65,17 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable}`} data-scroll-behavior="smooth">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'Sanchaya',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+            }),
+          }}
+        />
       </head>
       <body className="bg-background text-on-background antialiased selection:bg-primary/30 selection:text-primary-container min-h-screen flex flex-col">
         <NextAuthProvider>
