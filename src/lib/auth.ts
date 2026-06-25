@@ -11,6 +11,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  pages: {
+    signIn: '/auth/signin',
+  },
   callbacks: {
     session({ session, token }) {
       if (session.user && token.sub) {

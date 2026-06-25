@@ -43,6 +43,43 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Mobile Top Header (Only visible on mobile) */}
+      <div className="md:hidden sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-[#06090e]/80 backdrop-blur-xl border-b border-white/5">
+        <Link href="/" className="flex items-center gap-2">
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGradMob" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ffc174" />
+                <stop offset="100%" stopColor="#ffb0cd" />
+              </linearGradient>
+            </defs>
+            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="url(#logoGradMob)" />
+            <path d="M2 17l10 5 10-5" stroke="url(#logoGradMob)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 12l10 5 10-5" stroke="url(#logoGradMob)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="font-display font-bold text-lg text-white">Sanchaya</span>
+        </Link>
+        {!session ? (
+          <button 
+            onClick={() => signIn()}
+            className="text-sm font-semibold bg-primary text-black px-4 py-1.5 rounded-full hover:bg-primary/90 transition-colors"
+          >
+            Sign In
+          </button>
+        ) : (
+          <Link href="/settings">
+            <div className="w-8 h-8 rounded-full bg-surface-container border border-white/10 overflow-hidden">
+              {session.user?.image ? (
+                <img className="w-full h-full object-cover" src={session.user.image} alt="Profile" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
+                  <span className="material-symbols-outlined text-[16px]">person</span>
+                </div>
+              )}
+            </div>
+          </Link>
+        )}
+      </div>
       {/* TopNavBar (Desktop) */}
       <nav className="hidden md:flex sticky top-0 z-50 justify-between items-center px-margin-desktop py-4 w-full bg-surface/40 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-primary/5">
         <div className="flex items-center gap-12">
@@ -185,8 +222,9 @@ export default function Navbar() {
       </nav>
 
       {/* BottomNavBar (Mobile) */}
-      <nav className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 pointer-events-none">
-        <div className="bg-surface-container/60 backdrop-blur-lg rounded-full w-full max-w-sm mx-auto border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex justify-around items-center p-2 font-label-sm text-label-sm pointer-events-auto">
+      {(!(!session && pathname === '/')) && (
+        <nav className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 pointer-events-none">
+          <div className="bg-surface-container/60 backdrop-blur-lg rounded-full w-full max-w-sm mx-auto border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex justify-around items-center p-2 font-label-sm text-label-sm pointer-events-auto">
           {NAV_LINKS.map((link) => {
             const active = isActive(link.href);
             return (
@@ -222,6 +260,7 @@ export default function Navbar() {
           </Link>
         </div>
       </nav>
+      )}
     </>
   );
 }

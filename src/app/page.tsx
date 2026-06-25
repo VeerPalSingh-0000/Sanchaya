@@ -3,13 +3,18 @@ import { getTrendingAnime } from '@/lib/anilist';
 import MediaGrid from '@/components/media/MediaGrid';
 import SearchBar from '@/components/media/SearchBar';
 import HeroCarousel from '@/components/media/HeroCarousel';
-import LandingHero from '@/components/media/LandingHero';
+import LandingPage from '@/components/landing/LandingPage';
 import { auth } from '@/lib/auth';
 
 export default async function Home() {
   const session = await auth();
 
-  // Fetch trending data in parallel
+  // If user is NOT logged in, show the independent marketing landing page
+  if (!session) {
+    return <LandingPage />;
+  }
+
+  // Fetch trending data for the authenticated dashboard
   const [trendingMovies, trendingTV, trendingAnime] = await Promise.all([
     getTrending('movie', 'week'),
     getTrending('tv', 'week'),
@@ -26,8 +31,6 @@ export default async function Home() {
       <div className="fixed inset-0 z-[-1] pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background"></div>
       </div>
-
-      {!session && <LandingHero heroItems={topTrending} />}
 
       <div id="explore-section" className="w-full mx-auto pb-[120px] md:pb-24 pt-12 md:pt-8">
         {/* Search & Filters Section */}
