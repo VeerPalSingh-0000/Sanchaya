@@ -236,7 +236,7 @@ function mapAniListToMedia(anime: AniListMedia): Media {
     posterUrl:
       anime.coverImage.extraLarge ??
       anime.coverImage.large ??
-      undefined,
+      "",
     backdropUrl: anime.bannerImage ?? undefined,
     genres,
     rating: anime.averageScore ? Math.round(anime.averageScore) / 10 : 0,

@@ -192,8 +192,8 @@ function getApiKey(): string {
 export function getImageUrl(
   path: string | null | undefined,
   size: string = IMAGE_SIZES.poster.medium,
-): string | undefined {
-  if (!path) return undefined;
+): string {
+  if (!path) return "";
   return `${IMAGE_BASE}${size}${path}`;
 }
 
