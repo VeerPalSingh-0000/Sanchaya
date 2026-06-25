@@ -5,6 +5,7 @@ import MediaCard from "@/components/media/MediaCard";
 import FranchiseCard from "@/components/media/FranchiseCard";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
+import { ListFilter, PlaySquare } from "lucide-react";
 import type { WatchStatus, WatchlistItem } from "@/types/media";
 import { getWatchlistFranchiseGroupings, FranchiseGroup } from "./actions";
 
@@ -60,8 +61,14 @@ export default function WatchlistPage() {
 
       if (updatePromises.length > 0) {
         Promise.all(updatePromises).then(() => {
-          // Force a hard reload to fetch the new DB state and rerender groups!
-          window.location.reload();
+          const attempts = parseInt(sessionStorage.getItem('sanchaya_migration_attempts') || '0');
+          if (attempts < 3) {
+            sessionStorage.setItem('sanchaya_migration_attempts', String(attempts + 1));
+            window.location.reload();
+          } else {
+            setIsMigrating(false);
+            console.error("Migration failed after 3 attempts. Stopping loop.");
+          }
         });
       } else {
         setIsMigrating(false);
@@ -209,9 +216,7 @@ export default function WatchlistPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center glass-panel rounded-2xl border border-white/5">
-            <span className="material-symbols-outlined text-6xl text-on-surface-variant opacity-50 mb-4">
-              filter_list_off
-            </span>
+            <ListFilter className="w-16 h-16 text-on-surface-variant opacity-50 mb-4" />
             <h2 className="font-headline-lg-mobile text-[24px] font-bold text-on-surface mb-2">
               No items match filter
             </h2>
@@ -223,12 +228,7 @@ export default function WatchlistPage() {
       ) : (
         <div className="flex flex-col items-center justify-center py-24 text-center glass-panel rounded-2xl border border-white/5">
           <div className="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-6 border border-white/10 shadow-xl">
-            <span
-              className="material-symbols-outlined text-[40px] text-primary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              subscriptions
-            </span>
+            <PlaySquare className="w-10 h-10 text-primary" />
           </div>
           <h2 className="font-headline-lg-mobile md:font-headline-lg text-[24px] md:text-[32px] font-bold text-on-surface mb-4">
             Your watchlist is empty

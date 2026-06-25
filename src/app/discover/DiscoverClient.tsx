@@ -6,6 +6,7 @@ import type { Media } from "@/types/media";
 import MediaCard from "@/components/media/MediaCard";
 import { useWatchlist } from "@/lib/contexts/WatchlistContext";
 import { fetchDiscoverData, MediaTypeFilter, FilterCategory } from "./actions";
+import { Image as ImageIcon, Play, Check, Plus } from "lucide-react";
 
 interface DiscoverClientProps {
   items: Media[];
@@ -105,13 +106,14 @@ export default function DiscoverClient({ items: initialItems }: DiscoverClientPr
       { threshold: 0.1 }
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    const target = observerTarget.current;
+    if (target) {
+      observer.observe(target);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (target) {
+        observer.unobserve(target);
       }
     };
   }, [isLoading, hasMore]);
@@ -196,9 +198,7 @@ export default function DiscoverClient({ items: initialItems }: DiscoverClientPr
                     />
                   ) : (
                     <div className="absolute inset-0 bg-surface-container flex flex-col items-center justify-center p-4">
-                      <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-30 mb-2">
-                        image
-                      </span>
+                      <ImageIcon className="w-10 h-10 text-on-surface-variant opacity-30 mb-2" />
                     </div>
                   )}
 
@@ -229,12 +229,7 @@ export default function DiscoverClient({ items: initialItems }: DiscoverClientPr
                     </h2>
                     <div className="flex items-center gap-4 mt-2">
                       <button className="bg-white text-surface font-label-sm text-[12px] font-bold px-4 py-2 rounded-full flex items-center gap-2 hover:bg-tertiary transition-colors">
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                        >
-                          play_arrow
-                        </span>{" "}
+                        <Play className="w-4 h-4 fill-current" />
                         View Details
                       </button>
                       <button
@@ -245,16 +240,11 @@ export default function DiscoverClient({ items: initialItems }: DiscoverClientPr
                             : "bg-surface/50 backdrop-blur-md text-on-surface hover:bg-white/20 border-white/20"
                         }`}
                       >
-                        <span
-                          className="material-symbols-outlined"
-                          style={
-                            isFeaturedAdded
-                              ? { fontVariationSettings: "'FILL' 1" }
-                              : {}
-                          }
-                        >
-                          {isFeaturedAdded ? "check" : "add"}
-                        </span>
+                        {isFeaturedAdded ? (
+                          <Check className="w-5 h-5" />
+                        ) : (
+                          <Plus className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>

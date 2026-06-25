@@ -119,20 +119,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
 
       {/* Toast container */}
-      <div className="toast-container" role="status" aria-live="polite">
+      <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[100] flex flex-col gap-3 pointer-events-none" role="status" aria-live="polite">
         {toasts.map((toast) => {
           const Icon = iconMap[toast.type];
           return (
             <div
               key={toast.id}
-              className={`toast toast-${toast.type}${
-                toast.exiting ? ' toast-exiting' : ''
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border pointer-events-auto transition-all duration-300 backdrop-blur-md min-w-[280px] max-w-[90vw] md:max-w-md ${
+                toast.exiting ? 'opacity-0 scale-95 translate-y-4' : 'opacity-100 scale-100 translate-y-0'
+              } ${
+                toast.type === 'success' ? 'bg-green-950/80 border-green-500/40 text-green-100 shadow-green-900/20' :
+                toast.type === 'error' ? 'bg-red-950/80 border-red-500/40 text-red-100 shadow-red-900/20' :
+                'bg-surface-container-high/90 border-white/10 text-on-surface shadow-black/40'
               }`}
             >
-              <Icon />
-              <span>{toast.message}</span>
+              <div className={`w-5 h-5 shrink-0 ${toast.type === 'success' ? 'text-green-400' : toast.type === 'error' ? 'text-red-400' : 'text-primary'}`}>
+                <Icon />
+              </div>
+              <span className="font-body-sm font-medium flex-1">{toast.message}</span>
               <button
-                className="toast-close"
+                className="ml-2 opacity-50 hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-white/10"
                 onClick={() => removeToast(toast.id)}
                 aria-label="Dismiss notification"
               >

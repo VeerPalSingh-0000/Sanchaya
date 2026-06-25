@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { Home, PlaySquare, Compass, User, Settings, LogOut, Star, Coffee, LogIn, ArrowRight } from 'lucide-react';
 
 const NAV_LINKS = [
-  { href: '/', label: 'Home', icon: 'home' },
-  { href: '/watchlist', label: 'My List', icon: 'subscriptions' },
-  { href: '/discover', label: 'Discover', icon: 'explore' },
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/watchlist', label: 'My List', icon: PlaySquare },
+  { href: '/discover', label: 'Discover', icon: Compass },
 ] as const;
 
 export default function Navbar() {
@@ -77,7 +78,7 @@ export default function Navbar() {
                 <img className="w-full h-full object-cover" src={session.user.image} alt="Profile" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
-                  <span className="material-symbols-outlined text-[16px]">person</span>
+                  <User className="w-4 h-4" />
                 </div>
               )}
             </div>
@@ -90,7 +91,7 @@ export default function Navbar() {
                          <img className="w-full h-full object-cover" src={session.user.image} alt="User Profile" />
                       ) : (
                          <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
-                           <span className="material-symbols-outlined text-[20px]">person</span>
+                           <User className="w-5 h-5" />
                          </div>
                       )}
                     </div>
@@ -101,7 +102,7 @@ export default function Navbar() {
                   </div>
                 </div>
                 <Link href="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all" onClick={() => setDropdownOpen(false)}>
-                  <span className="material-symbols-outlined text-[18px] text-white/50">settings</span>
+                  <Settings className="w-[18px] h-[18px] text-white/50" />
                   <span className="text-sm font-medium text-white/80">Preferences</span>
                 </Link>
                 <div className="h-px w-full bg-white/10 my-1"></div>
@@ -109,7 +110,7 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-error/10 transition-all text-left w-full" 
                   onClick={() => { setDropdownOpen(false); signOut(); }}
                 >
-                  <span className="material-symbols-outlined text-[18px] text-error/80">logout</span>
+                  <LogOut className="w-[18px] h-[18px] text-error/80" />
                   <span className="text-sm font-medium text-error/80">Sign Out</span>
                 </button>
               </div>
@@ -169,7 +170,7 @@ export default function Navbar() {
                 <img className="w-full h-full object-cover" src={session.user.image} alt="User Profile" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-on-surface-variant bg-surface-variant">
-                  <span className="material-symbols-outlined text-[20px]">person</span>
+                  <User className="w-5 h-5" />
                 </div>
               )}
             </div>
@@ -186,7 +187,7 @@ export default function Navbar() {
                          <img className="w-full h-full object-cover" src={session.user.image} alt="User Profile" />
                       ) : (
                          <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
-                           <span className="material-symbols-outlined text-[24px]">person</span>
+                           <User className="w-6 h-6" />
                          </div>
                       )}
                     </div>
@@ -204,7 +205,7 @@ export default function Navbar() {
                 {/* Menu Items */}
                 <Link href="/settings" className="flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-white/5 group transition-all" onClick={() => setDropdownOpen(false)}>
                   <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-inner border border-white/5">
-                    <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors group-hover:rotate-45 duration-300">settings</span>
+                    <Settings className="w-[18px] h-[18px] text-on-surface-variant group-hover:text-primary transition-colors group-hover:rotate-45 duration-300" />
                   </div>
                   <span className="text-sm font-medium text-on-surface group-hover:translate-x-1 transition-transform">Preferences</span>
                 </Link>
@@ -212,21 +213,21 @@ export default function Navbar() {
                 <a href="https://github.com/VeerPalSingh-0000/Sanchaya" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-3 py-3 rounded-xl hover:bg-[#2ea043]/10 group transition-all">
                   <div className="flex items-center gap-4">
                     <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-[#2ea043]/20 transition-colors shadow-inner border border-white/5">
-                      <span className="material-symbols-outlined text-[18px] text-[#2ea043] group-hover:scale-110 transition-transform">star</span>
+                      <Star className="w-[18px] h-[18px] text-[#2ea043] group-hover:scale-110 transition-transform" />
                     </div>
                     <span className="text-sm font-medium text-on-surface group-hover:text-[#2ea043] group-hover:translate-x-1 transition-transform">Star on GitHub</span>
                   </div>
-                  <span className="material-symbols-outlined text-[16px] text-on-surface-variant opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all">arrow_forward</span>
+                  <ArrowRight className="w-4 h-4 text-on-surface-variant opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
                 </a>
 
                 <a href="https://buymeacoffee.com/veerpalsingh" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-3 py-3 rounded-xl hover:bg-[#FFDD00]/10 group transition-all">
                   <div className="flex items-center gap-4">
                     <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-[#FFDD00]/20 transition-colors shadow-inner border border-white/5">
-                      <span className="material-symbols-outlined text-[18px] text-[#FFDD00] group-hover:-rotate-12 transition-transform">local_cafe</span>
+                      <Coffee className="w-[18px] h-[18px] text-[#FFDD00] group-hover:-rotate-12 transition-transform" />
                     </div>
                     <span className="text-sm font-medium text-on-surface group-hover:text-[#FFDD00] group-hover:translate-x-1 transition-transform">Buy me a coffee</span>
                   </div>
-                  <span className="material-symbols-outlined text-[16px] text-on-surface-variant opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all">arrow_forward</span>
+                  <ArrowRight className="w-4 h-4 text-on-surface-variant opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
                 </a>
                 
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent my-1"></div>
@@ -237,7 +238,7 @@ export default function Navbar() {
                     onClick={() => { setDropdownOpen(false); signOut(); }}
                   >
                     <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-error/20 transition-colors shadow-inner border border-white/5">
-                      <span className="material-symbols-outlined text-[18px] text-error group-hover:-translate-x-1 transition-transform">logout</span>
+                      <LogOut className="w-[18px] h-[18px] text-error group-hover:-translate-x-1 transition-transform" />
                     </div>
                     <span className="text-sm font-medium text-error group-hover:translate-x-1 transition-transform">Sign Out</span>
                   </button>
@@ -247,7 +248,7 @@ export default function Navbar() {
                     onClick={() => { setDropdownOpen(false); signIn(); }}
                   >
                     <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors shadow-inner">
-                      <span className="material-symbols-outlined text-[18px] text-primary group-hover:translate-x-1 transition-transform">login</span>
+                      <LogIn className="w-[18px] h-[18px] text-primary group-hover:translate-x-1 transition-transform" />
                     </div>
                     <span className="text-sm font-bold text-primary group-hover:translate-x-1 transition-transform">Sign In</span>
                   </button>
@@ -260,8 +261,8 @@ export default function Navbar() {
 
       {/* BottomNavBar (Mobile) */}
       {(!(!session && pathname === '/') && pathname !== '/auth/signin') && (
-        <nav className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-          <div className="bg-[#0a0f18]/90 backdrop-blur-2xl rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center p-1.5 gap-1 pointer-events-auto">
+        <nav className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none pb-[env(safe-area-inset-bottom)]">
+          <div className="bg-[#0a0f18]/95 backdrop-blur-3xl rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center p-1.5 gap-1 pointer-events-auto">
           {NAV_LINKS.map((link) => {
             const active = isActive(link.href);
             return (
@@ -274,9 +275,7 @@ export default function Navbar() {
                     : 'text-white/40 hover:text-white/80 hover:bg-white/5'
                 }`}
               >
-                <span className="material-symbols-outlined text-[20px]" style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                  {link.icon}
-                </span>
+                <link.icon className={`w-5 h-5 ${active ? 'fill-current' : ''}`} />
                 {active && <span className="text-sm font-bold tracking-wide">{link.label}</span>}
               </Link>
             )

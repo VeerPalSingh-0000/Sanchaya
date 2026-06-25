@@ -2,25 +2,26 @@
 
 import { motion } from 'framer-motion';
 import { signIn } from 'next-auth/react';
+import { Clapperboard, ListTodo, Compass, Sparkles, ArrowRight, CodeXml } from 'lucide-react';
 import Image from 'next/image';
 
 const FEATURES = [
   {
     title: 'Track Everything',
     description: 'Keep a comprehensive list of movies, TV shows, and anime you have watched or plan to watch.',
-    icon: 'list_alt',
+    icon: ListTodo,
     color: 'from-blue-500 to-cyan-400'
   },
   {
     title: 'Discover New Favorites',
     description: 'Get personalized recommendations and explore trending media across the globe.',
-    icon: 'explore',
+    icon: Compass,
     color: 'from-purple-500 to-pink-500'
   },
   {
     title: 'Beautiful Interface',
     description: 'Enjoy a premium, ad-free experience designed for media lovers, by media lovers.',
-    icon: 'auto_awesome',
+    icon: Sparkles,
     color: 'from-orange-400 to-rose-400'
   }
 ];
@@ -45,7 +46,7 @@ export default function LandingPage() {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
         >
-          <span className="material-symbols-outlined text-primary text-[18px]">movie</span>
+          <Clapperboard className="text-primary w-5 h-5" />
           <span className="text-sm font-medium tracking-wide">The Ultimate Media Tracker</span>
         </motion.div>
 
@@ -83,7 +84,7 @@ export default function LandingPage() {
             onClick={() => signIn()}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-primary text-black font-bold text-lg hover:scale-105 hover:shadow-[0_0_30px_rgba(255,193,116,0.4)] transition-all duration-300 flex items-center justify-center gap-2"
           >
-            Get Started <span className="material-symbols-outlined">arrow_forward</span>
+            Get Started <ArrowRight className="w-5 h-5" />
           </button>
           
           <a 
@@ -92,7 +93,7 @@ export default function LandingPage() {
             rel="noopener noreferrer"
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/5 text-white font-semibold text-lg border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
           >
-            <span className="material-symbols-outlined">code</span> View GitHub
+            <CodeXml className="w-5 h-5" /> View GitHub
           </a>
         </motion.div>
       </div>
@@ -110,7 +111,7 @@ export default function LandingPage() {
               className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm hover:bg-white/10 transition-colors group"
             >
               <div className={`w-14 h-14 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br ${feature.color} bg-opacity-20 shadow-lg group-hover:scale-110 transition-transform`}>
-                <span className="material-symbols-outlined text-white text-[28px] drop-shadow-md">{feature.icon}</span>
+                <feature.icon className="text-white w-8 h-8 drop-shadow-md" />
               </div>
               <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
               <p className="text-white/60 leading-relaxed">{feature.description}</p>

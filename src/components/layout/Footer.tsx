@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ExternalLink, Coffee } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -7,7 +8,7 @@ export default function Footer() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[150px] bg-primary/5 blur-[100px] pointer-events-none"></div>
 
-      <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-10">
+      <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-8 pb-32 md:py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 items-center md:items-start">
           
           {/* Brand Section */}
@@ -39,11 +40,11 @@ export default function Footer() {
             <div className="flex flex-col gap-2 text-center">
               <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer" className="text-on-surface-variant hover:text-primary transition-colors text-[14px] flex items-center justify-center md:justify-start gap-2 group font-medium">
                 The Movie Database (TMDb)
-                <span className="material-symbols-outlined text-[14px] opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all">open_in_new</span>
+                <ExternalLink className="w-4 h-4 opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
               </a>
               <a href="https://anilist.co/" target="_blank" rel="noopener noreferrer" className="text-on-surface-variant hover:text-primary transition-colors text-[14px] flex items-center justify-center md:justify-start gap-2 group font-medium">
                 AniList
-                <span className="material-symbols-outlined text-[14px] opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all">open_in_new</span>
+                <ExternalLink className="w-4 h-4 opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
               </a>
             </div>
           </div>
@@ -63,7 +64,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a href="https://buymeacoffee.com/veerpalsingh" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container/50 border border-white/5 flex items-center justify-center text-on-surface-variant hover:text-[#FFDD00] hover:bg-[#FFDD00]/10 hover:border-[#FFDD00]/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(255,221,0,0.1)] group">
-                <span className="material-symbols-outlined text-[20px] group-hover:-rotate-12 transition-transform">local_cafe</span>
+                <Coffee className="w-5 h-5 group-hover:-rotate-12 transition-transform" />
               </a>
             </div>
           </div>

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useWatchlist } from '@/lib/contexts/WatchlistContext';
 import type { Media, WatchStatus } from '@/types/media';
+import { Minus, Plus } from 'lucide-react';
 import styles from './WatchlistButton.module.css';
 
 interface WatchlistButtonProps {
@@ -181,7 +183,7 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
             disabled={progress <= 0}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-surface hover:bg-white/10 text-on-surface-variant transition-colors disabled:opacity-30 disabled:hover:bg-surface"
           >
-            <span className="material-symbols-outlined text-[18px]">remove</span>
+            <Minus className="w-[18px] h-[18px]" />
           </button>
           
           <div className="flex items-center gap-1 min-w-[80px] justify-center px-2">
@@ -202,7 +204,7 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
             disabled={totalEpisodes ? progress >= totalEpisodes : false}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors disabled:opacity-30"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <Plus className="w-[18px] h-[18px]" />
           </button>
         </div>
       )}

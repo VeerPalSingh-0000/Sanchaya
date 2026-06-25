@@ -25,7 +25,10 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
 
     if (session) {
       fetch('/api/watchlist')
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`API returned ${res.status}`);
+          return res.json();
+        })
         .then(data => {
           if (Array.isArray(data)) {
             const mapped: WatchlistItem[] = data.map(item => ({
@@ -47,10 +50,13 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
             }));
             setWatchlist(mapped);
           }
+        })
+        .catch(err => {
+          console.error("WatchlistContext failed to fetch or parse watchlist:", err);
         });
     } else {
       try {
-        const stored = localStorage.getItem('sanchaya_watchlist') || localStorage.getItem('cineverse_watchlist');
+        const stored = localStorage.getItem('sanchaya_watchlist');
         if (stored) {
           setWatchlist(JSON.parse(stored));
         }

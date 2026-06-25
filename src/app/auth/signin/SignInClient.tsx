@@ -13,16 +13,22 @@ export default function SignInClient() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#06090e] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#06090e] px-4 overflow-hidden relative">
+      {/* Immersive Background matching Landing Page */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] mix-blend-screen opacity-50" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-secondary/20 rounded-full blur-[120px] mix-blend-screen opacity-50" />
+      </div>
+
       <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-sm"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-sm relative z-10 glass-panel p-8 md:p-10 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
       >
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Sign In</h1>
-          <p className="text-white/50 text-sm">Welcome back to Sanchaya.</p>
+          <h1 className="text-3xl font-display font-bold text-white mb-3 tracking-tight">Sign In</h1>
+          <p className="text-white/60 text-sm font-medium">Welcome back to your entertainment universe.</p>
         </div>
 
         <div className="flex flex-col gap-3">

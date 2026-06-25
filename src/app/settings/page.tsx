@@ -3,22 +3,22 @@
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 
+import { User, Bell, Palette, AlertTriangle, Loader2 } from "lucide-react";
+
 const UserIcon = () => (
-  <span className="material-symbols-outlined text-[24px]">person</span>
+  <User className="w-6 h-6 text-on-surface" />
 );
 
 const BellIcon = () => (
-  <span className="material-symbols-outlined text-[24px]">notifications</span>
+  <Bell className="w-6 h-6 text-on-surface" />
 );
 
 const PaletteIcon = () => (
-  <span className="material-symbols-outlined text-[24px]">palette</span>
+  <Palette className="w-6 h-6 text-on-surface" />
 );
 
 const AlertTriangleIcon = () => (
-  <span className="material-symbols-outlined text-[24px] text-error">
-    warning
-  </span>
+  <AlertTriangle className="w-6 h-6 text-error" />
 );
 
 type ThemeType = "theme-oled" | "theme-midnight" | "theme-slate";
@@ -203,9 +203,7 @@ export default function SettingsPage() {
             >
               {saving ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-[20px]">
-                    autorenew
-                  </span>{" "}
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Saving...
                 </>
               ) : (

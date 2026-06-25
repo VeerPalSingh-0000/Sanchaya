@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import MediaRow from "@/components/media/MediaRow";
 import type { Media, RecommendationResult } from "@/types/media";
+import { RefreshCw, AlertCircle, Sparkles } from "lucide-react";
 
 interface RecommendationsClientProps {
   trendingMovies: Media[];
@@ -98,9 +99,7 @@ export default function RecommendationsClient({
             className="flex items-center gap-2 bg-surface-container/40 backdrop-blur-md border border-white/10 text-on-surface px-6 py-3 rounded-full font-bold font-label-sm text-[12px] hover:bg-white/10 transition-colors shadow-lg active:scale-95"
             onClick={fetchRecommendations}
           >
-            <span className="material-symbols-outlined text-[18px]">
-              refresh
-            </span>
+            <RefreshCw className="w-[18px] h-[18px]" />
             REFRESH PICKS
           </button>
         )}
@@ -122,9 +121,7 @@ export default function RecommendationsClient({
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 glass-panel mx-margin-mobile md:mx-margin-desktop rounded-2xl border border-error/20 bg-error-container/10">
-            <span className="material-symbols-outlined text-4xl text-error">
-              error
-            </span>
+            <AlertCircle className="w-10 h-10 text-error" />
             <p className="font-body-md text-on-surface">{error}</p>
             <button
               onClick={fetchRecommendations}
@@ -138,12 +135,7 @@ export default function RecommendationsClient({
             title="Top Picks for You"
             items={filterItems(displayItems)}
             icon={
-              <span
-                className="material-symbols-outlined text-primary text-[32px]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                auto_awesome
-              </span>
+              <Sparkles className="w-8 h-8 text-primary" />
             }
           />
         )}

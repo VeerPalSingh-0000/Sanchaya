@@ -5,9 +5,11 @@ import { useEffect } from 'react';
 
 export default function Template({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    const savedTheme = localStorage.getItem('sanchaya_theme') || 'theme-oled';
-    document.body.classList.remove('theme-oled', 'theme-midnight', 'theme-slate');
-    document.body.classList.add(savedTheme);
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('sanchaya_theme') || 'theme-oled';
+      document.body.classList.remove('theme-oled', 'theme-midnight', 'theme-slate');
+      document.body.classList.add(savedTheme);
+    }
   }, []);
 
   return (

@@ -177,7 +177,7 @@ function SearchBarInner() {
 
       {/* Dropdown Overlay */}
       {focused && query.trim() && (
-        <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-surface-container-high/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] max-h-[400px] overflow-y-auto z-50 flex flex-col py-2 no-scrollbar">
+        <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-surface-container-high/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] max-h-[60vh] overflow-y-auto z-50 flex flex-col py-2 no-scrollbar">
           {searching && !results.length ? (
             <div className="p-6 text-center text-on-surface-variant">Searching...</div>
           ) : results.length > 0 ? (
@@ -206,7 +206,7 @@ function SearchBarInner() {
                   <div className="flex items-center gap-2 text-sm text-on-surface-variant">
                     <span className="bg-white/10 border border-white/10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-on-surface">{media.type}</span>
                     {media.releaseDate && <span>{new Date(media.releaseDate).getFullYear()}</span>}
-                    {media.rating > 0 && <span className="text-primary-fixed-dim">★ {media.rating.toFixed(1)}</span>}
+                    {media.rating && media.rating > 0 ? <span className="text-primary-fixed-dim">★ {media.rating.toFixed(1)}</span> : null}
                   </div>
                 </div>
               </Link>

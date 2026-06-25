@@ -72,12 +72,12 @@ const config: Config = {
         "margin-desktop": "64px"
       },
       fontFamily: {
-        "body-md": ["Inter", "sans-serif"],
-        "headline-lg": ["Outfit", "sans-serif"],
-        "display-xl": ["Outfit", "sans-serif"],
-        "display-xl-mobile": ["Outfit", "sans-serif"],
-        "headline-lg-mobile": ["Outfit", "sans-serif"],
-        "label-sm": ["Inter", "sans-serif"]
+        "body-md": ["var(--font-inter)", "sans-serif"],
+        "headline-lg": ["var(--font-outfit)", "sans-serif"],
+        "display-xl": ["var(--font-outfit)", "sans-serif"],
+        "display-xl-mobile": ["var(--font-outfit)", "sans-serif"],
+        "headline-lg-mobile": ["var(--font-outfit)", "sans-serif"],
+        "label-sm": ["var(--font-inter)", "sans-serif"]
       },
       fontSize: {
         "body-md": ["16px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }],
