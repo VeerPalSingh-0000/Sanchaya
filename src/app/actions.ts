@@ -75,10 +75,12 @@ export async function getFranchiseMetadata(media: Media): Promise<{
       const { getAnimeSeasons } = await import('@/lib/anilist');
       const seasons = await getAnimeSeasons(media.externalId);
       if (seasons && seasons.length > 0) {
+        const tvItem = seasons.find(t => t.format === 'TV');
+        const rootItem = tvItem || seasons[0];
         return {
-          franchiseId: seasons[0].mediaId || String(media.id),
-          franchiseTitle: seasons[0].name,
-          franchisePosterUrl: seasons[0].posterUrl || media.posterUrl,
+          franchiseId: rootItem.mediaId || String(media.id),
+          franchiseTitle: rootItem.name,
+          franchisePosterUrl: rootItem.posterUrl || media.posterUrl,
         };
       }
     } else if (media.type === 'movie' || media.id.startsWith('tmdb-movie-')) {

@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { Season, Media } from "@/types/media";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Layers, Sparkles } from "lucide-react";
 import { useWatchlist } from "@/lib/contexts/WatchlistContext";
 import styles from "./mediaDetail.module.css";
 
@@ -111,83 +111,88 @@ export default function AnimeTimeline({
   return (
     <div className={styles.minimalTimelineSection}>
       <div className={styles.minimalHeader}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-            width: "100%",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "baseline", gap: "16px" }}>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 w-full mb-4">
+          <div className="flex items-baseline gap-4">
             <h3 className={styles.minimalTitle}>
               {isAnime ? "Franchise" : "Seasons"}
             </h3>
-            <p className={styles.minimalSubtitle}>Watch order</p>
+            <p className="font-label-sm text-primary tracking-[0.2em] uppercase font-black text-[12px] opacity-90">Watch Order</p>
           </div>
 
           {isAnime && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <button
-                onClick={() => setMainStoryOnly(false)}
-                style={{
-                  background: !mainStoryOnly
-                    ? "linear-gradient(135deg, #ffc174, #f59e0b)"
-                    : "rgba(255, 255, 255, 0.05)",
-                  color: !mainStoryOnly ? "#000" : "rgba(255, 255, 255, 0.7)",
-                  border: !mainStoryOnly
-                    ? "1px solid #f59e0b"
-                    : "1px solid rgba(255, 255, 255, 0.1)",
-                  padding: "8px 18px",
-                  borderRadius: "20px",
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  boxShadow: !mainStoryOnly
-                    ? "0 4px 12px rgba(245, 158, 11, 0.3)"
-                    : "none",
-                }}
-              >
-                <span style={{ marginRight: "6px" }}>📺</span>
-                All Content
-              </button>
-              <button
-                onClick={() => setMainStoryOnly(true)}
-                style={{
-                  background: mainStoryOnly
-                    ? "linear-gradient(135deg, #ffc174, #f59e0b)"
-                    : "rgba(255, 255, 255, 0.05)",
-                  color: mainStoryOnly ? "#000" : "rgba(255, 255, 255, 0.7)",
-                  border: mainStoryOnly
-                    ? "1px solid #f59e0b"
-                    : "1px solid rgba(255, 255, 255, 0.1)",
-                  padding: "8px 18px",
-                  borderRadius: "20px",
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  boxShadow: mainStoryOnly
-                    ? "0 4px 12px rgba(245, 158, 11, 0.3)"
-                    : "none",
-                }}
-              >
-                <span style={{ marginRight: "6px" }}>✨</span>
-                Main Story Only
-              </button>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex items-center p-1 bg-[#0a0a0a]/80 backdrop-blur-3xl border border-white/[0.08] rounded-full w-full sm:w-auto shadow-inner relative overflow-hidden">
+                <button
+                  onClick={() => setMainStoryOnly(false)}
+                  className={`relative px-5 md:px-6 py-2 rounded-full font-label-sm text-[11px] md:text-[12px] font-bold whitespace-nowrap transition-all duration-500 ease-out flex items-center justify-center gap-2 flex-shrink-0 z-10 w-1/2 sm:w-auto ${
+                    !mainStoryOnly
+                      ? "text-white drop-shadow-md"
+                      : "text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  {!mainStoryOnly && (
+                    <div className="absolute inset-0 bg-white/10 rounded-full -z-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] border border-white/[0.05]" />
+                  )}
+                  <Layers className={`w-[14px] h-[14px] transition-colors duration-500 ${!mainStoryOnly ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]' : ''}`} />
+                  <span className="tracking-widest uppercase mt-[1px]">All Content</span>
+                </button>
+                
+                <button
+                  onClick={() => setMainStoryOnly(true)}
+                  className={`relative px-5 md:px-6 py-2 rounded-full font-label-sm text-[11px] md:text-[12px] font-bold whitespace-nowrap transition-all duration-500 ease-out flex items-center justify-center gap-2 flex-shrink-0 z-10 w-1/2 sm:w-auto ${
+                    mainStoryOnly
+                      ? "text-white drop-shadow-md"
+                      : "text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  {mainStoryOnly && (
+                    <div className="absolute inset-0 bg-white/10 rounded-full -z-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] border border-white/[0.05]" />
+                  )}
+                  <Sparkles className={`w-[14px] h-[14px] transition-colors duration-500 ${mainStoryOnly ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]' : ''}`} />
+                  <span className="tracking-widest uppercase mt-[1px]">Main Story</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className={styles.timelineWrapper}>
+      <div className="relative w-full group/timeline mt-6">
+        {/* Decorative horizontal timeline line */}
+        <div className="absolute top-[35%] left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0 pointer-events-none" />
+        
+        <button
+          onClick={() => scroll("left")}
+          disabled={!showLeftArrow}
+          className={`absolute left-4 top-[32%] -translate-y-1/2 z-50 w-14 h-14 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] transition-all duration-500 ${
+            showLeftArrow
+              ? "text-white hover:bg-white hover:text-black cursor-pointer hover:scale-110 opacity-0 group-hover/timeline:opacity-100 translate-x-4 group-hover/timeline:translate-x-0"
+              : "opacity-0 pointer-events-none"
+          }`}
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="w-8 h-8 ml-[-2px]" />
+        </button>
+
+        <button
+          onClick={() => scroll("right")}
+          disabled={!showRightArrow}
+          className={`absolute right-4 top-[32%] -translate-y-1/2 z-50 w-14 h-14 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] transition-all duration-500 ${
+            showRightArrow
+              ? "text-white hover:bg-white hover:text-black cursor-pointer hover:scale-110 opacity-0 group-hover/timeline:opacity-100 -translate-x-4 group-hover/timeline:translate-x-0"
+              : "opacity-0 pointer-events-none"
+          }`}
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="w-8 h-8 mr-[-2px]" />
+        </button>
+
         {/* Scrollable Container */}
         <div
           ref={scrollContainerRef}
-          className={`${styles.minimalScrollContainer} hide-scrollbar`}
+          className="w-full overflow-x-auto overflow-y-hidden scroll-smooth snap-x snap-mandatory hide-scrollbar relative z-10 pb-16 pt-12 -mt-12"
         >
-          <div className={styles.minimalTrack}>
+          <div className="flex gap-6 md:gap-8 px-6 md:px-12 w-max">
             {displayedSeasons.map((season, idx) => {
               const cleanMediaId = season.mediaId ? String(season.mediaId).replace(/anilist-/g, '').replace(/tmdb-movie-/g, '') : '';
               const savedItem = cleanMediaId ? watchlist.find(i => i.externalId === cleanMediaId || i.id === `anilist-${cleanMediaId}` || i.id === `tmdb-movie-${cleanMediaId}`) : null;
@@ -196,97 +201,124 @@ export default function AnimeTimeline({
               const progress = savedItem?.progress || 0;
 
               const CardContent = (
-                <>
-                  <div className={styles.minimalNumberBackground}>
+                <div className="relative flex flex-col h-full group/card z-10 pt-8">
+                  {/* Huge background number */}
+                  <div className="absolute top-0 left-[-10px] text-[7rem] leading-none font-black tracking-tighter text-white/[0.03] select-none pointer-events-none transition-all duration-700 ease-out group-hover/card:text-white/[0.08] group-hover/card:-translate-y-2 group-hover/card:scale-110 origin-bottom-left z-0">
                     {String(idx + 1).padStart(2, "0")}
                   </div>
 
-                  <div className={styles.minimalCard}>
-                    <div className={`${styles.minimalPosterContainer} transition-all duration-300 ${
-                      savedItem?.status === 'watching' ? 'ring-2 ring-blue-500/80 ring-offset-4 ring-offset-[#121212] shadow-[0_0_30px_rgba(59,130,246,0.25)]' :
-                      savedItem?.status === 'completed' ? 'ring-2 ring-green-500/80 ring-offset-4 ring-offset-[#121212] shadow-[0_0_30px_rgba(34,197,94,0.25)]' :
-                      savedItem?.status === 'plan_to_watch' ? 'ring-2 ring-orange-500/80 ring-offset-4 ring-offset-[#121212] shadow-[0_0_30px_rgba(249,115,22,0.25)]' :
+                  <div className={`relative w-full aspect-[2/3] rounded-2xl overflow-hidden bg-surface-container border border-white/5 shadow-2xl transition-all duration-500 ease-out group-hover/card:shadow-[0_20px_40px_rgba(0,0,0,0.8)] group-hover/card:-translate-y-2 z-10 ${
+                      savedItem?.status === 'watching' ? 'ring-2 ring-blue-500/80 shadow-[0_0_30px_rgba(59,130,246,0.3)]' :
+                      savedItem?.status === 'completed' ? 'ring-2 ring-green-500/80 shadow-[0_0_30px_rgba(34,197,94,0.3)]' :
+                      savedItem?.status === 'plan_to_watch' ? 'ring-2 ring-orange-500/80 shadow-[0_0_30px_rgba(249,115,22,0.3)]' :
                       ''
                     }`}>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.05] to-white/0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 z-20 pointer-events-none" />
+
                       {season.posterUrl ? (
                         <Image
                           src={season.posterUrl}
                           alt={season.name}
                           fill
-                          sizes="16rem"
-                          className={styles.minimalPosterImage}
+                          sizes="(max-width: 768px) 12rem, 16rem"
+                          className="object-cover transition-transform duration-700 ease-out group-hover/card:scale-110"
                           priority={idx < 4}
                         />
                       ) : (
-                        <div className={styles.backdropFallback} />
+                        <div className="absolute inset-0 bg-gradient-to-br from-surface-container to-surface flex items-center justify-center opacity-50" />
                       )}
-                    </div>
-
-                    <div className={styles.minimalInfo}>
-                      <span className={styles.minimalStepBadge}>
-                        Part {String(idx + 1).padStart(2, "0")}
-                        {season.format ? ` • ${season.format}` : ""}
-                      </span>
-                      <h4 className={styles.minimalSeasonTitle}>
-                        {season.name}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        {season.episodeCount > 0 && (
-                          <span className={styles.minimalEpisodeCount}>
-                            {season.episodeCount} Episodes
-                          </span>
-                        )}
-                        {isCompleted && (
-                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-green-400 bg-green-500/20 px-2 py-0.5 rounded-full border border-green-500/30">
-                            <Check className="w-3 h-3" />
-                          </span>
-                        )}
-                        {isWatching && progress > 0 && (
-                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/20 px-2 py-0.5 rounded-full border border-primary/30">
-                            EP {progress}
-                          </span>
-                        )}
+                      
+                      {/* Floating badging on top of poster */}
+                      <div className="absolute top-2 left-2 z-30 flex flex-col gap-1">
+                        <span className="bg-black/60 backdrop-blur-md text-white/90 border border-white/10 font-label-sm text-[10px] px-2.5 py-1 rounded-md shadow-lg uppercase font-bold tracking-wider">
+                          Part {String(idx + 1).padStart(2, "0")}
+                        </span>
                       </div>
                       
-                      {/* Interactive Status Editor */}
-                      <div className="mt-3 relative z-20" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                        <button
-                          onClick={(e) => {
-                            if (dropdownState?.idx === idx) {
-                              setDropdownState(null);
-                            } else {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              setDropdownState({ idx, rect });
-                            }
-                          }}
-                          className={`w-full flex items-center justify-center gap-1 bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-wider px-2 py-1.5 rounded outline-none transition-all cursor-pointer text-center shadow-sm hover:shadow-md ${
-                            savedItem?.status === 'watching' ? 'text-blue-400 border-blue-500/30 bg-blue-500/10' :
-                            savedItem?.status === 'completed' ? 'text-green-400 border-green-500/30 bg-green-500/10' :
-                            savedItem?.status === 'plan_to_watch' ? 'text-orange-400 border-orange-500/30 bg-orange-500/10' :
-                            savedItem?.status === 'on_hold' || savedItem?.status === 'dropped' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
-                            'text-on-surface-variant hover:text-white hover:bg-white/10'
-                          }`}
-                        >
-                          {savedItem ? savedItem.status.replace(/_/g, ' ') : '+ ADD TO LIST'}
-                        </button>
-                      </div>
+                      {/* Status overlay (if watching) */}
+                      {isWatching && progress > 0 && (
+                        <div className="absolute top-2 right-2 z-30">
+                          <span className="flex items-center justify-center text-[10px] font-bold uppercase tracking-wider text-blue-100 bg-blue-500/80 backdrop-blur-md px-2 py-1 rounded-md shadow-lg border border-blue-400/50">
+                            EP {progress}
+                          </span>
+                        </div>
+                      )}
+                  </div>
 
+                  <div className="flex flex-col mt-4 gap-1.5 px-1 relative z-20">
+                    <h4 className="font-headline-sm text-[15px] md:text-[17px] font-bold text-white leading-tight line-clamp-2 group-hover/card:text-primary transition-colors duration-300">
+                      {season.name}
+                    </h4>
+                    
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {season.episodeCount > 0 && (
+                        <span className="font-label-sm text-[11px] text-white/50 tracking-wide font-medium">
+                          {season.episodeCount} EP
+                        </span>
+                      )}
+                      {season.format && (
+                        <>
+                          <span className="text-white/20 text-[10px]">•</span>
+                          <span className="font-label-sm text-[11px] text-white/50 uppercase tracking-wider font-medium">
+                            {season.format}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                      
+                    {/* Interactive Status Editor */}
+                    <div className="mt-3 relative z-30 w-full" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                      <button
+                        onClick={(e) => {
+                          if (dropdownState?.idx === idx) {
+                            setDropdownState(null);
+                          } else {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setDropdownState({ idx, rect });
+                          }
+                        }}
+                        className={`w-full flex items-center justify-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 text-[10px] md:text-[11px] font-bold uppercase tracking-widest px-3 py-2 rounded-lg outline-none transition-all duration-300 cursor-pointer text-center hover:shadow-lg ${
+                          savedItem?.status === 'watching' ? 'text-blue-400 border-blue-500/40 bg-blue-500/10 hover:bg-blue-500/20' :
+                          savedItem?.status === 'completed' ? 'text-green-400 border-green-500/40 bg-green-500/10 hover:bg-green-500/20' :
+                          savedItem?.status === 'plan_to_watch' ? 'text-orange-400 border-orange-500/40 bg-orange-500/10 hover:bg-orange-500/20' :
+                          savedItem?.status === 'on_hold' || savedItem?.status === 'dropped' ? 'text-red-400 border-red-500/40 bg-red-500/10 hover:bg-red-500/20' :
+                          'text-white/70 hover:text-white hover:bg-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        {savedItem ? (
+                           <>
+                             <span className="relative flex h-2 w-2">
+                               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-40 ${
+                                 savedItem.status === 'watching' ? 'bg-blue-400' :
+                                 savedItem.status === 'completed' ? 'bg-green-400' :
+                                 savedItem.status === 'plan_to_watch' ? 'bg-orange-400' : 'bg-red-400'
+                               }`}></span>
+                               <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                                 savedItem.status === 'watching' ? 'bg-blue-500' :
+                                 savedItem.status === 'completed' ? 'bg-green-500' :
+                                 savedItem.status === 'plan_to_watch' ? 'bg-orange-500' : 'bg-red-500'
+                               }`}></span>
+                             </span>
+                             {savedItem.status.replace(/_/g, ' ')}
+                           </>
+                        ) : '+ Add to List'}
+                      </button>
                     </div>
                   </div>
-                </>
+                </div>
               );
 
               return season.mediaId && season.mediaType ? (
                 <Link
                   key={season.number}
                   href={`/media/${season.mediaType}/${season.mediaId}`}
-                  className={styles.minimalCardWrapper}
+                  className="relative flex-shrink-0 w-[160px] md:w-[200px] lg:w-[240px] snap-start"
                   style={{ textDecoration: "none" }}
                 >
                   {CardContent}
                 </Link>
               ) : (
-                <div key={season.number} className={styles.minimalCardWrapper}>
+                <div key={season.number} className="relative flex-shrink-0 w-[160px] md:w-[200px] lg:w-[240px] snap-start">
                   {CardContent}
                 </div>
               );
@@ -433,34 +465,7 @@ export default function AnimeTimeline({
         document.body
       )}
 
-      {/* Navigation Arrows Grouped Below */}
-      <div className="w-full flex items-center justify-center gap-4 mt-2">
-        <button
-          onClick={() => scroll("left")}
-          disabled={!showLeftArrow}
-          className={`w-12 h-12 flex items-center justify-center rounded-full bg-[#121212]/90 border border-white/10 backdrop-blur-sm shadow-lg transition-all duration-200 ${
-            showLeftArrow
-              ? "text-white hover:bg-white hover:text-black cursor-pointer"
-              : "text-white/20 cursor-not-allowed"
-          }`}
-          aria-label="Scroll left"
-        >
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-
-        <button
-          onClick={() => scroll("right")}
-          disabled={!showRightArrow}
-          className={`w-12 h-12 flex items-center justify-center rounded-full bg-[#121212]/90 border border-white/10 backdrop-blur-sm shadow-lg transition-all duration-200 ${
-            showRightArrow
-              ? "text-white hover:bg-white hover:text-black cursor-pointer"
-              : "text-white/20 cursor-not-allowed"
-          }`}
-          aria-label="Scroll right"
-        >
-          <ChevronRight className="w-8 h-8" />
-        </button>
-      </div>
+      {/* End of component */}
     </div>
   );
 }

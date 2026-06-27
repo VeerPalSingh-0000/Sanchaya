@@ -678,11 +678,13 @@ export async function getCollectionDetails(id: string): Promise<Season[] | null>
   try {
     const collection = await tmdbFetch<TMDbCollection>(`/collection/${cleanId}`);
     
-    // Sort parts chronologically by release date
+    // Sort parts chronologically by release date. Unreleased/invalid dates go to the end.
     const sortedParts = [...collection.parts].sort((a, b) => {
-      const dateA = a.release_date ? new Date(a.release_date).getTime() : 0;
-      const dateB = b.release_date ? new Date(b.release_date).getTime() : 0;
-      return dateA - dateB;
+      const timeA = a.release_date ? new Date(a.release_date).getTime() : NaN;
+      const timeB = b.release_date ? new Date(b.release_date).getTime() : NaN;
+      const finalA = isNaN(timeA) ? Number.MAX_SAFE_INTEGER : timeA;
+      const finalB = isNaN(timeB) ? Number.MAX_SAFE_INTEGER : timeB;
+      return finalA - finalB;
     });
 
     return sortedParts.map((part, index) => ({

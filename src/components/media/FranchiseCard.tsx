@@ -20,11 +20,11 @@ export default function FranchiseCard({ rootId, rootTitle, rootPosterUrl, items,
     a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' })
   );
 
-  const posterSrc = rootPosterUrl || sortedItems[0]?.posterUrl;
-  const title = rootTitle !== 'Unknown' ? rootTitle : sortedItems[0]?.title;
-  
   const watchingItem = items.find(i => i.status === 'watching');
   const targetItem = watchingItem || sortedItems.find(i => i.status === 'plan_to_watch') || sortedItems[0];
+
+  const posterSrc = targetItem?.posterUrl || rootPosterUrl || sortedItems[0]?.posterUrl;
+  const title = rootTitle !== 'Unknown' ? rootTitle : sortedItems[0]?.title;
 
   return (
     <motion.article

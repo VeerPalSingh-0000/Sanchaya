@@ -173,14 +173,20 @@ export default async function MediaDetailPage({
           {/* Poster */}
           <div className={styles.posterWrapper}>
             <div className={styles.poster}>
-              <Image
-                src={media.posterUrl}
-                alt={media.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 16rem"
-                className={styles.posterImage}
-                priority
-              />
+              {media.posterUrl ? (
+                <Image
+                  src={media.posterUrl}
+                  alt={media.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 16rem"
+                  className={styles.posterImage}
+                  priority
+                />
+              ) : (
+                <div className="absolute inset-0 bg-surface-container flex flex-col items-center justify-center p-4 border border-white/5 shadow-inner">
+                  <span className="text-on-surface-variant/30 text-[3rem]">📺</span>
+                </div>
+              )}
             </div>
           </div>
 
