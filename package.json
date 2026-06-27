@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "android": "cd android-app && gradlew installDebug",
+    "android:build": "cd android-app && gradlew assembleDebug",
+    "android:clean": "cd android-app && gradlew clean",
+    "android:refresh": "cd android-app && gradlew clean && gradlew installDebug"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

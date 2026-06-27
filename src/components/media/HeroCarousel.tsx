@@ -134,7 +134,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
             
             <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out flex flex-col justify-end h-full z-30">
               <div>
-                <h3 className="font-display-xl-mobile md:font-display-xl text-[40px] md:text-[64px] font-bold text-on-background mb-2 leading-tight">
+                <h3 className="font-display-xl-mobile md:font-display-xl text-[28px] md:text-[42px] font-bold text-on-background mb-2 leading-tight line-clamp-3 md:line-clamp-4">
                   {currentItem.title}
                 </h3>
                 <div className="flex items-center space-x-3 text-primary font-body-md text-[16px] mb-6">

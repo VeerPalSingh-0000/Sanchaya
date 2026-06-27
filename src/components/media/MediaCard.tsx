@@ -96,30 +96,21 @@ export default function MediaCard({ media, onAddToWatchlist, index = 0 }: MediaC
       </Link>
 
       {/* Quick-add watchlist button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (isAdded) {
-            removeFromWatchlist(media.id);
-          } else {
+      {!isAdded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             addToWatchlist(media);
             if (onAddToWatchlist) onAddToWatchlist(media);
-          }
-        }}
-        className={`absolute top-2 right-2 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-lg ${
-          isAdded 
-            ? 'bg-primary text-surface' 
-            : 'bg-surface/50 backdrop-blur-md text-white border border-white/20 hover:bg-white/20'
-        }`}
-        aria-label={isAdded ? `Remove ${media.title} from watchlist` : `Add ${media.title} to watchlist`}
-      >
-        {isAdded ? (
-          <Check className="w-5 h-5 text-surface" />
-        ) : (
+          }}
+          className="absolute top-2 right-2 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-lg bg-surface/50 backdrop-blur-md text-white border border-white/20 hover:bg-white/20"
+          aria-label={`Add ${media.title} to watchlist`}
+        >
           <Plus className="w-5 h-5 text-white" />
-        )}
-      </button>
+        </button>
+      )}
     </motion.article>
   );
 }

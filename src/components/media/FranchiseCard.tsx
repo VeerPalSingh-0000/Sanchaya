@@ -16,10 +16,15 @@ interface FranchiseCardProps {
 export default function FranchiseCard({ rootId, rootTitle, rootPosterUrl, items, index = 0 }: FranchiseCardProps) {
   const router = useRouter();
 
-  const posterSrc = rootPosterUrl || items[0].posterUrl;
-  const title = rootTitle !== 'Unknown' ? rootTitle : items[0].title;
+  const sortedItems = [...items].sort((a, b) => 
+    a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' })
+  );
+
+  const posterSrc = rootPosterUrl || sortedItems[0]?.posterUrl;
+  const title = rootTitle !== 'Unknown' ? rootTitle : sortedItems[0]?.title;
   
   const watchingItem = items.find(i => i.status === 'watching');
+  const targetItem = watchingItem || sortedItems.find(i => i.status === 'plan_to_watch') || sortedItems[0];
 
   return (
     <motion.article
@@ -30,10 +35,12 @@ export default function FranchiseCard({ rootId, rootTitle, rootPosterUrl, items,
       onClick={() => {
         if (watchingItem) {
           router.push(`/media/${watchingItem.mediaType}/${watchingItem.externalId}`);
+        } else if (targetItem && targetItem.status === 'plan_to_watch') {
+          router.push(`/media/${targetItem.mediaType}/${targetItem.externalId}`);
         } else if (rootId && rootId.startsWith('anilist-')) {
           router.push(`/media/anime/${rootId.replace('anilist-', '')}`);
-        } else {
-          router.push(`/media/${items[0].mediaType}/${items[0].externalId}`);
+        } else if (targetItem) {
+          router.push(`/media/${targetItem.mediaType}/${targetItem.externalId}`);
         }
       }}
     >
@@ -55,7 +62,7 @@ export default function FranchiseCard({ rootId, rootTitle, rootPosterUrl, items,
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           <span className="bg-primary-container text-on-primary-container font-label-sm text-[10px] px-2 py-0.5 rounded shadow-lg uppercase font-bold tracking-wider">
             {(() => {
-              const item = items[0];
+              const item = targetItem || items[0];
               if (!item) return 'Series';
               const isActuallyAnime = 
                 item.mediaType === 'anime' || 
@@ -86,7 +93,7 @@ export default function FranchiseCard({ rootId, rootTitle, rootPosterUrl, items,
           <h3 className="font-headline-lg-mobile text-[18px] font-bold text-on-surface mb-1 line-clamp-2">{title}</h3>
           
           <p className="font-label-sm text-[12px] text-on-surface-variant mt-1">
-            {(items[0]?.genres ?? []).slice(0, 2).map(g => g.name).join(', ')}
+            {(targetItem?.genres ?? items[0]?.genres ?? []).slice(0, 2).map(g => g.name).join(', ')}
           </p>
         </div>
       </div>

@@ -65,6 +65,7 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
   }, [isOpen]);
 
   const handleStatusSelect = async (status: WatchStatus) => {
+    setIsOpen(false);
     if (franchiseItems.length > 0) {
       // Bulk update all franchise items currently in the watchlist
       franchiseItems.forEach(item => {
@@ -87,7 +88,6 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
       }
       addToWatchlist(finalMedia, status);
     }
-    setIsOpen(false);
   };
 
   const handleRemove = () => {
@@ -118,8 +118,13 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
     <div className="flex flex-col gap-3 items-start">
       <div className={styles.container} ref={dropdownRef}>
         <button
+        type="button"
         className={`${styles.button} ${isAdded ? styles.added : styles.add}`}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         aria-expanded={isOpen}
         style={isAdded ? { borderColor: currentOption?.color, boxShadow: `0 0 10px ${currentOption?.color}33` } : {}}
       >
@@ -152,8 +157,13 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
             {STATUS_OPTIONS.map((option) => (
               <button
                 key={option.value}
+                type="button"
                 className={`${styles.menuItem} ${currentStatus === option.value && isAdded ? styles.activeItem : ''}`}
-                onClick={() => handleStatusSelect(option.value)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStatusSelect(option.value);
+                }}
               >
                 <span className={styles.statusDot} style={{ backgroundColor: option.color }} />
                 {option.label}
@@ -164,7 +174,11 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
           {isAdded && (
             <>
               <div className={styles.divider} />
-              <button className={styles.removeBtn} onClick={handleRemove}>
+              <button type="button" className={styles.removeBtn} onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRemove();
+              }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
                 </svg>
@@ -179,7 +193,12 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
       {(!hideEpisodeTracker && isAdded && currentStatus === 'watching') && (
         <div className="flex items-center gap-3 bg-surface-container/50 backdrop-blur-md border border-white/10 rounded-full p-1 shadow-lg animate-in fade-in slide-in-from-top-2">
           <button 
-            onClick={() => handleProgressChange(progress - 1)}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleProgressChange(progress - 1);
+            }}
             disabled={progress <= 0}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-surface hover:bg-white/10 text-on-surface-variant transition-colors disabled:opacity-30 disabled:hover:bg-surface"
           >
@@ -200,7 +219,12 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
           </div>
           
           <button 
-            onClick={() => handleProgressChange(progress + 1)}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleProgressChange(progress + 1);
+            }}
             disabled={totalEpisodes ? progress >= totalEpisodes : false}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors disabled:opacity-30"
           >

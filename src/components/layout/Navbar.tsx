@@ -105,6 +105,14 @@ export default function Navbar() {
                   <Settings className="w-[18px] h-[18px] text-white/50" />
                   <span className="text-sm font-medium text-white/80">Preferences</span>
                 </Link>
+                <a href="https://github.com/VeerPalSingh-0000/Sanchaya" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#2ea043]/10 group transition-all" onClick={() => setDropdownOpen(false)}>
+                  <Star className="w-[18px] h-[18px] text-[#2ea043] group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium text-white/80 group-hover:text-[#2ea043] transition-colors">Star on GitHub</span>
+                </a>
+                <a href="https://buymeacoffee.com/veerpalsingh" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#FFDD00]/10 group transition-all" onClick={() => setDropdownOpen(false)}>
+                  <Coffee className="w-[18px] h-[18px] text-[#FFDD00] group-hover:-rotate-12 transition-transform" />
+                  <span className="text-sm font-medium text-white/80 group-hover:text-[#FFDD00] transition-colors">Buy me a coffee</span>
+                </a>
                 <div className="h-px w-full bg-white/10 my-1"></div>
                 <button 
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-error/10 transition-all text-left w-full" 

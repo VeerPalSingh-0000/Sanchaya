@@ -189,7 +189,8 @@ export default function AnimeTimeline({
         >
           <div className={styles.minimalTrack}>
             {displayedSeasons.map((season, idx) => {
-              const savedItem = season.mediaId ? watchlist.find(i => i.externalId === String(season.mediaId) || i.id === `anilist-${season.mediaId}` || i.id === `tmdb-movie-${season.mediaId}`) : null;
+              const cleanMediaId = season.mediaId ? String(season.mediaId).replace(/anilist-/g, '').replace(/tmdb-movie-/g, '') : '';
+              const savedItem = cleanMediaId ? watchlist.find(i => i.externalId === cleanMediaId || i.id === `anilist-${cleanMediaId}` || i.id === `tmdb-movie-${cleanMediaId}`) : null;
               const isCompleted = savedItem?.status === 'completed';
               const isWatching = savedItem?.status === 'watching';
               const progress = savedItem?.progress || 0;
