@@ -39,7 +39,7 @@ export default function MediaCard({ media, onAddToWatchlist, index = 0 }: MediaC
       <Link
         href={`/media/${itemType}/${media.externalId}`}
         aria-label={`View ${media.title}`}
-        className="block w-full h-full"
+        className="relative block w-full h-full"
       >
         {posterSrc ? (
           <Image

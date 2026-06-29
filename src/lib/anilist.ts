@@ -1,4 +1,5 @@
 import type { Media, Genre, Season, SearchResult } from "@/types/media";
+import arcData from '@/data/arc_data.json';
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -43,6 +44,7 @@ interface AniListStreamingEpisode {
 }
 interface AniListMedia {
   id: number;
+  idMal: number | null;
   title: AniListTitle;
   description: string | null;
   coverImage: AniListCoverImage;
@@ -86,6 +88,7 @@ interface AniListPagedResponse {
 const MEDIA_FRAGMENT = `
   fragment MediaFields on Media {
     id
+    idMal
     title { romaji english native }
     description(asHtml: false)
     coverImage { extraLarge large medium color }
@@ -229,6 +232,7 @@ function mapAniListToMedia(anime: AniListMedia): Media {
   return {
     id: `anilist-${anime.id}`,
     externalId: String(anime.id),
+    malId: anime.idMal ?? undefined,
     type: "anime",
     title,
     originalTitle: anime.title.native ?? undefined,
@@ -299,7 +303,7 @@ export async function getAnimeDetails(id: string): Promise<Media | null> {
 }
 
 export async function getAnimeSeasons(id: string): Promise<Season[]> {
-  const timelineNodeFragment = `fragment TimelineNode on Media { id title { romaji english native } type format coverImage { extraLarge large medium color } bannerImage episodes averageScore startDate { year month day } }`;
+  const timelineNodeFragment = `fragment TimelineNode on Media { id idMal title { romaji english native } type format coverImage { extraLarge large medium color } bannerImage episodes averageScore startDate { year month day } }`;
 
   const gql = `${timelineNodeFragment} query GetTimelineNode($id: Int!) { Media(id: $id, type: ANIME) { ...TimelineNode relations { edges { relationType node { id type } } } } }`;
 
@@ -408,6 +412,7 @@ export async function getAnimeSeasons(id: string): Promise<Season[]> {
         node.coverImage.extraLarge ?? node.coverImage.large ?? undefined,
       airDate: undefined,
       mediaId: `anilist-${node.id}`,
+      malId: node.idMal ?? undefined,
       mediaType: "anime",
       format: node.format,
       relationType: node.relationType,
@@ -461,5 +466,56 @@ export async function discoverAnimeByGenres(
   } catch (error) {
     console.error("AniList discoverAnimeByGenres error:", error);
     return { results: [], totalResults: 0, totalPages: 0, page: 1 };
+  }
+}
+
+export async function getAnimeEpisodes(idMal: number | undefined): Promise<import('@/types/media').Episode[]> {
+  if (!idMal) return [];
+  try {
+    let allEpisodes: any[] = [];
+    let page = 1;
+    let hasNextPage = true;
+    
+    // Fetch up to 30 pages (3000 episodes) to ensure long anime like One Piece are fully loaded
+    while (hasNextPage && page <= 30) {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${idMal}/episodes?page=${page}`, { next: { revalidate: 3600 } });
+      if (!res.ok) {
+        if (res.status === 429) {
+          await new Promise(r => setTimeout(r, 1000));
+          continue; // Retry on rate limit
+        }
+        break; // Stop on other errors
+      }
+      const json = await res.json();
+      if (!json.data) break;
+      
+      allEpisodes = allEpisodes.concat(json.data);
+      hasNextPage = json.pagination?.has_next_page || false;
+      
+      if (hasNextPage) {
+        page++;
+        // Delay to respect Jikan API rate limits (3 requests per second)
+        await new Promise(r => setTimeout(r, 400));
+      }
+    }
+    
+    const animeArcs = arcData.find((a: any) => a.anime_id === idMal)?.arcs || [];
+    
+    return allEpisodes.map((ep: any) => {
+      const arc: any = animeArcs.find((a: any) => ep.mal_id >= a.start && ep.mal_id <= a.end);
+      return {
+        number: ep.mal_id,
+        name: ep.title,
+        overview: ep.title_japanese || '',
+        airDate: ep.aired,
+        isFiller: ep.filler,
+        isRecap: ep.recap,
+        arcName: arc ? arc.name : undefined,
+        sagaName: arc && arc.saga ? arc.saga : undefined,
+      };
+    });
+  } catch (error) {
+    console.error('getAnimeEpisodes failed for idMal:', idMal, error);
+    return [];
   }
 }

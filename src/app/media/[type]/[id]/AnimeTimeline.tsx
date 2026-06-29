@@ -358,7 +358,7 @@ export default function AnimeTimeline({
 
               return (
                 <div className="flex flex-col">
-                  {isCurrentlyWatching && (
+                  {isCurrentlyWatching && (season.mediaType || type) !== 'movie' && (
                     <div className="p-3 border-b border-white/10 bg-[#1a1a1a]/95 backdrop-blur-md" onClick={(e) => { e.stopPropagation(); }}>
                       <div className="flex flex-col items-center gap-2.5">
                         <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.15em] w-full text-center">Track Episode</span>
@@ -445,8 +445,8 @@ export default function AnimeTimeline({
                             addToWatchlist(pseudoMedia, opt.val as any);
                           }
                         }
-                        // Don't close immediately if selecting watching, so they can edit episodes!
-                        if (opt.val !== 'watching') {
+                        // Don't close immediately if selecting watching for series, so they can edit episodes!
+                        if (opt.val !== 'watching' || (season.mediaType || type) === 'movie') {
                            setDropdownState(null);
                         }
                       }}

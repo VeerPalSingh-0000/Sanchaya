@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getMovieDetails, getTVDetails, getTVSeasonDetails, getCollectionDetails } from '@/lib/tmdb';
@@ -6,6 +7,8 @@ import { getAnimeDetails, getAnimeSeasons, searchAnime } from '@/lib/anilist';
 import Badge from '@/components/ui/Badge';
 import WatchlistButton from '@/components/media/WatchlistButton';
 import AnimeTimeline from './AnimeTimeline';
+import EpisodesLoader from './EpisodesLoader';
+import BeautifulOverview from '@/components/media/BeautifulOverview';
 import type { MediaType } from '@/types/media';
 import type { Metadata } from 'next';
 import styles from './mediaDetail.module.css';
@@ -60,7 +63,7 @@ export default async function MediaDetailPage({
   const { type, id } = await params;
 
   let media = null;
-  let seasons = null;
+  let seasons: any = null;
   let isAnime = false;
 
   if (type === 'movie') {
@@ -70,6 +73,7 @@ export default async function MediaDetailPage({
       const animeMatch = await searchAnime(media.originalTitle || media.title, 1, 1);
       if (animeMatch.results.length > 0) {
         seasons = await getAnimeSeasons(animeMatch.results[0].externalId);
+        media.malId = animeMatch.results[0].malId;
       }
     } else if (media?.franchiseId && media.franchiseId.startsWith('tmdb-collection-')) {
       seasons = await getCollectionDetails(media.franchiseId);
@@ -83,6 +87,7 @@ export default async function MediaDetailPage({
       const animeMatch = await searchAnime(media.originalTitle || media.title, 1, 1);
       if (animeMatch.results.length > 0) {
         seasons = await getAnimeSeasons(animeMatch.results[0].externalId);
+        media.malId = animeMatch.results[0].malId;
       }
     }
 
@@ -110,6 +115,7 @@ export default async function MediaDetailPage({
       }
     }
   } else if (type === 'anime') {
+    isAnime = true;
     media = await getAnimeDetails(id);
     seasons = await getAnimeSeasons(id);
   }
@@ -222,14 +228,20 @@ export default async function MediaDetailPage({
 
             <div style={{ marginTop: '24px', marginBottom: '24px' }}>
               <WatchlistButton media={media} hideEpisodeTracker={!!(seasons && seasons.length > 0)} />
+              
+              {/* Anime Episodes List */}
+              {(isAnime || type === 'anime') && media?.malId && (
+                <div style={{ marginTop: '16px' }}>
+                  <Suspense fallback={
+                    <div className="w-full mt-4 h-12 bg-surface-container animate-pulse rounded-2xl border border-white/5"></div>
+                  }>
+                    <EpisodesLoader malId={media.malId} isAnime={isAnime} />
+                  </Suspense>
+                </div>
+              )}
             </div>
 
-            <div className={styles.overviewSection}>
-              <h3 className={styles.sectionTitle}>Overview</h3>
-              <p className={styles.overviewText}>
-                {media.overview || 'No overview available.'}
-              </p>
-            </div>
+            <BeautifulOverview text={media.overview || ''} />
           </div>
         </div>
 

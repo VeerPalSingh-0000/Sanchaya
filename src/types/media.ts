@@ -21,6 +21,7 @@ export interface Genre {
 export interface Media {
   id: string;
   externalId: string;
+  malId?: number;
   type: MediaType;
   title: string;
   originalTitle?: string;
@@ -51,6 +52,7 @@ export interface Season {
   airDate?: string;
   episodes?: Episode[];
   mediaId?: string;
+  malId?: number;
   mediaType?: MediaType;
   format?: string;
   relationType?: string;
@@ -64,6 +66,10 @@ export interface Episode {
   stillUrl?: string;
   runtime?: number;
   rating?: number;
+  isFiller?: boolean;
+  isRecap?: boolean;
+  arcName?: string;
+  sagaName?: string;
 }
 
 // ─── Watchlist ───────────────────────────────────────────────────────────────
