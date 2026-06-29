@@ -4,28 +4,29 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { Home, PlaySquare, Compass, User, Settings, LogOut, Star, Coffee, LogIn, ArrowRight } from 'lucide-react';
+import { Home, PlaySquare, Compass, User, Settings, LogOut, Star, Coffee, LogIn, ArrowRight, Sparkles } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/watchlist', label: 'My List', icon: PlaySquare },
+  { href: '/recommendations', label: 'For You', icon: Sparkles },
   { href: '/discover', label: 'Discover', icon: Compass },
 ] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [guestName, setGuestName] = useState('Guest User');
 
   useEffect(() => {
-    if (!session) {
+    if (status !== 'loading' && !session) {
       const savedName = localStorage.getItem('sanchaya_guest_name');
       if (savedName) {
         setGuestName(savedName);
       }
     }
-  }, [session]);
+  }, [session, status]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,7 +62,9 @@ export default function Navbar() {
           </svg>
           <span className="font-display font-bold text-lg text-white">Sanchaya</span>
         </Link>
-        {!session ? (
+        {status === 'loading' ? (
+          <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
+        ) : !session ? (
           <button 
             onClick={() => signIn()}
             className="text-sm font-semibold bg-primary text-black px-4 py-1.5 rounded-full hover:bg-primary/90 transition-colors"
@@ -170,18 +173,22 @@ export default function Navbar() {
         {/* Trailing Actions */}
         <div className="flex items-center gap-6">
           <div id="profile-menu-container" className="relative">
-            <div 
-              className="w-10 h-10 rounded-full bg-surface-container-high border border-white/10 overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              {session?.user?.image ? (
-                <img className="w-full h-full object-cover" src={session.user.image} alt="User Profile" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-on-surface-variant bg-surface-variant">
-                  <User className="w-5 h-5" />
-                </div>
-              )}
-            </div>
+            {status === 'loading' ? (
+              <div className="w-10 h-10 rounded-full bg-white/5 animate-pulse" />
+            ) : (
+              <div 
+                className="w-10 h-10 rounded-full bg-surface-container-high border border-white/10 overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                {session?.user?.image ? (
+                  <img className="w-full h-full object-cover" src={session.user.image} alt="User Profile" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-on-surface-variant bg-surface-variant">
+                    <User className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
+            )}
 
             {dropdownOpen && (
               <div className="absolute right-0 mt-4 w-72 rounded-3xl bg-[#0a0f18]/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(255,193,116,0.15)] p-3 flex flex-col gap-2 z-50 transform origin-top-right transition-all">

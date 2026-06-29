@@ -502,8 +502,19 @@ export async function searchTV(
 /**
  * Get full movie details including videos and production companies.
  */
-export async function getMovieDetails(id: string): Promise<Media | null> {
-  const cleanId = id.replace('tmdb-movie-', '');
+export async function getCollection(id: string | number): Promise<TMDbCollection | null> {
+  try {
+    const res = await fetch(`${BASE_URL}/collection/${id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error('getCollection error:', error);
+    return null;
+  }
+}
+
+export async function getMovieDetails(id: string | number): Promise<Media | null> {
+  const cleanId = String(id).replace('tmdb-movie-', '');
   try {
     const movie = await tmdbFetch<TMDbMovie>(`/movie/${cleanId}`, {
       append_to_response: 'videos',
@@ -656,7 +667,7 @@ export async function discoverByGenres(
         }
         return mapTVToMedia(item as TMDbTV);
       })
-      .filter((m) => !excludeSet.has(m.externalId));
+      .filter((m) => !excludeSet.has(m.id));
 
     return {
       results,

@@ -23,6 +23,7 @@ const STATUS_OPTIONS: { value: WatchStatus; label: string; color: string }[] = [
 export default function WatchlistButton({ media, hideEpisodeTracker = false }: WatchlistButtonProps) {
   const { watchlist, addToWatchlist, removeFromWatchlist, updateStatus, updateProgress } = useWatchlist();
   const [isOpen, setIsOpen] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Find exact item
@@ -63,6 +64,32 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
     if (isOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
+
+  const handleBulkFranchise = async (status: WatchStatus) => {
+    setIsBulkUpdating(true);
+    try {
+      const { getEntireFranchiseMedia } = await import('@/app/actions');
+      const allMedia = await getEntireFranchiseMedia(media);
+      if (allMedia.length > 0) {
+        allMedia.forEach(m => {
+          const itemExists = watchlist.find(item => item.id === String(m.id) || item.externalId === String(m.id));
+          if (itemExists) {
+            updateStatus(itemExists.id, status);
+          } else {
+            addToWatchlist(m, status);
+          }
+        });
+      } else {
+        // Fallback if no franchise items found
+        handleStatusSelect(status);
+      }
+    } catch (e) {
+      console.error('Failed to bulk add franchise', e);
+    } finally {
+      setIsBulkUpdating(false);
+      setIsOpen(false);
+    }
+  };
 
   const handleStatusSelect = async (status: WatchStatus) => {
     setIsOpen(false);
@@ -170,6 +197,41 @@ export default function WatchlistButton({ media, hideEpisodeTracker = false }: W
               </button>
             ))}
           </div>
+          
+          {(media.franchiseId || media.type === 'anime') && (
+            <>
+              <div className={styles.divider} />
+              <div className="px-3 py-1.5 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider opacity-60">
+                Entire Franchise
+              </div>
+              <button 
+                type="button" 
+                className={`${styles.menuItem} whitespace-nowrap`} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleBulkFranchise('plan_to_watch');
+                }}
+                disabled={isBulkUpdating}
+              >
+                <span className={styles.statusDot} style={{ backgroundColor: '#f59e0b', opacity: isBulkUpdating ? 0.5 : 1 }} />
+                {isBulkUpdating ? 'Updating...' : 'Mark all Plan to Watch'}
+              </button>
+              <button 
+                type="button" 
+                className={`${styles.menuItem} whitespace-nowrap`} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleBulkFranchise('completed');
+                }}
+                disabled={isBulkUpdating}
+              >
+                <span className={styles.statusDot} style={{ backgroundColor: '#3b82f6', opacity: isBulkUpdating ? 0.5 : 1 }} />
+                {isBulkUpdating ? 'Updating...' : 'Mark all Completed'}
+              </button>
+            </>
+          )}
           
           {isAdded && (
             <>

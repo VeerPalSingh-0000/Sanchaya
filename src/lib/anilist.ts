@@ -456,7 +456,7 @@ export async function discoverAnimeByGenres(
     const { pageInfo, media } = data.Page;
     const results = media
       .map(mapAniListToMedia)
-      .filter((m) => !excludeSet.has(m.externalId));
+      .filter((m) => !excludeSet.has(m.id));
     return {
       results,
       totalResults: pageInfo.total,

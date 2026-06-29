@@ -164,10 +164,10 @@ export async function GET() {
       }
     }
 
-    // Sort by match score and return top 20
+    // Sort by match score and return top 60
     const finalResults = uniqueResults
       .sort((a, b) => b.matchScore - a.matchScore)
-      .slice(0, 20)
+      .slice(0, 60)
 
     return NextResponse.json({
       results: finalResults,

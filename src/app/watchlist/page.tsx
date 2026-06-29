@@ -15,7 +15,7 @@ type DisplayItem =
   | { type: 'franchise'; group: FranchiseGroup; items: WatchlistItem[] };
 
 export default function WatchlistPage() {
-  const { watchlist } = useWatchlist();
+  const { watchlist, isLoading } = useWatchlist();
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState<WatchStatus | "all">("all");
   const [isMigrating, setIsMigrating] = useState(false);
@@ -190,7 +190,12 @@ export default function WatchlistPage() {
         )}
       </header>
 
-      {watchlist.length > 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-32 text-center fade-in">
+          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+          <p className="font-body-md text-on-surface-variant animate-pulse">Loading your watchlist...</p>
+        </div>
+      ) : watchlist.length > 0 ? (
         displayItems.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-gutter fade-in">
             {displayItems.map((display, i) => {

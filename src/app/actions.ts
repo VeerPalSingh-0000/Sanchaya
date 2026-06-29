@@ -100,3 +100,65 @@ export async function getFranchiseMetadata(media: Media): Promise<{
 
   return {};
 }
+
+export async function getEntireFranchiseMedia(media: Media): Promise<Media[]> {
+  const results: Media[] = [];
+  try {
+    if (media.type === 'anime' || media.id.startsWith('anilist-')) {
+      const { getAnimeSeasons } = await import('@/lib/anilist');
+      const seasons = await getAnimeSeasons(media.externalId);
+      if (seasons && seasons.length > 0) {
+        const rootItem = seasons.find((t: any) => t.format === 'TV') || seasons[0];
+        const franchiseId = rootItem.mediaId || String(media.id);
+        const franchiseTitle = rootItem.name;
+        const franchisePosterUrl = rootItem.posterUrl || media.posterUrl;
+        
+        return seasons.map((s: any) => ({
+          id: s.mediaId,
+          externalId: String(s.mediaId).replace('anilist-', ''),
+          type: 'anime',
+          title: s.name,
+          posterUrl: s.posterUrl || media.posterUrl,
+          backdropUrl: media.backdropUrl,
+          rating: media.rating, 
+          voteCount: 0,
+          overview: '',
+          status: 'released',
+          totalEpisodes: undefined, 
+          genres: media.genres,
+          franchiseId,
+          franchiseTitle,
+          franchisePosterUrl,
+        }));
+      }
+    } else if (media.type === 'movie' || media.id.startsWith('tmdb-movie-')) {
+      const { getMovieDetails, getCollection } = await import('@/lib/tmdb');
+      const details = await getMovieDetails(media.externalId);
+      if (details?.franchiseId) {
+        const cleanCollectionId = String(details.franchiseId).replace('tmdb-collection-', '');
+        const collection = await getCollection(cleanCollectionId);
+        if (collection && collection.parts) {
+          return collection.parts.map((p: any) => ({
+            id: `tmdb-movie-${p.id}`,
+            externalId: String(p.id),
+            type: 'movie',
+            title: p.title || p.name,
+            posterUrl: p.poster_path ? `https://image.tmdb.org/t/p/w500${p.poster_path}` : '',
+            backdropUrl: p.backdrop_path ? `https://image.tmdb.org/t/p/w1280${p.backdrop_path}` : '',
+            rating: p.vote_average ? p.vote_average * 10 : 0,
+            voteCount: 0,
+            overview: p.overview || '',
+            status: 'released',
+            genres: [],
+            franchiseId: details.franchiseId,
+            franchiseTitle: details.franchiseTitle,
+            franchisePosterUrl: details.franchisePosterUrl,
+          }));
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to get entire franchise media:', error);
+  }
+  return results;
+}

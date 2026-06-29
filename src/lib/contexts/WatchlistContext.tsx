@@ -11,6 +11,7 @@ interface WatchlistContextType {
   updateStatus: (id: string, status: WatchStatus) => void;
   updateProgress: (id: string, progress: number) => void;
   isInWatchlist: (id: string) => boolean;
+  isLoading: boolean;
 }
 
 const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
@@ -18,12 +19,14 @@ const WatchlistContext = createContext<WatchlistContextType | undefined>(undefin
 export function WatchlistProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status: sessionStatus } = useSession();
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     if (sessionStatus === 'loading') return;
 
     if (session) {
+      setIsLoading(true);
       fetch('/api/watchlist')
         .then(res => {
           if (!res.ok) throw new Error(`API returned ${res.status}`);
@@ -53,6 +56,10 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
         })
         .catch(err => {
           console.error("WatchlistContext failed to fetch or parse watchlist:", err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setMounted(true);
         });
     } else {
       try {
@@ -63,8 +70,9 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error('Failed to parse watchlist from local storage', e);
       }
+      setIsLoading(false);
+      setMounted(true);
     }
-    setMounted(true);
   }, [session, sessionStatus]);
 
   useEffect(() => {
@@ -162,7 +170,17 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <WatchlistContext.Provider value={{ watchlist, addToWatchlist, removeFromWatchlist, updateStatus, updateProgress, isInWatchlist }}>
+    <WatchlistContext.Provider
+      value={{
+        watchlist,
+        isLoading,
+        addToWatchlist,
+        removeFromWatchlist,
+        updateStatus,
+        updateProgress,
+        isInWatchlist,
+      }}
+    >
       {children}
     </WatchlistContext.Provider>
   );
