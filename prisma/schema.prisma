@@ -94,6 +94,9 @@ model WatchlistItem {
   progress           Int?
   totalEpisodes      Int?
   
+  releaseDate        String?
+  reaction           String?
+  
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

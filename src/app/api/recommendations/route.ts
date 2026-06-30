@@ -15,7 +15,7 @@ export async function GET() {
     // 1. Get all items to build exclude list and analyze types
     const allItems = await prisma.watchlistItem.findMany({
       where: { userId: session.user.id },
-      select: { mediaId: true, mediaType: true, status: true, rating: true, updatedAt: true },
+      select: { mediaId: true, mediaType: true, status: true, rating: true, updatedAt: true, reaction: true },
       orderBy: [
         { rating: 'desc' },
         { updatedAt: 'desc' }
@@ -30,13 +30,17 @@ export async function GET() {
       counts[item.mediaType as keyof typeof counts]++
     })
 
-    // 2. Select top seed items (completed or highly rated)
+    // 2. Select top seed items (completed or highly rated, or explicitly loved/good)
     const seedItems = allItems
-      .filter(item => item.status === 'completed' || (item.rating && item.rating >= 7))
+      .filter(item => item.reaction === 'LOVE' || item.reaction === 'GOOD' || item.status === 'completed' || (item.rating && item.rating >= 7))
+      .filter(item => item.reaction !== 'BAD') // Don't use BAD items as positive seeds
       .slice(0, 10)
     
+    // Also select some 'BAD' items to penalize their genres
+    const badItems = allItems.filter(item => item.reaction === 'BAD').slice(0, 5)
+    
     // Fallback if no highly rated/completed items: just take the most recently added ones
-    const itemsToFetch = seedItems.length > 0 ? seedItems : allItems.slice(0, 10)
+    const itemsToFetch = seedItems.length > 0 ? seedItems : allItems.filter(item => item.reaction !== 'BAD').slice(0, 10)
 
     // If still no items, return trending as fallback
     if (itemsToFetch.length === 0) {
@@ -71,19 +75,40 @@ export async function GET() {
     })
 
     const detailedMedia = (await Promise.all(detailPromises)).filter(Boolean) as Media[]
+    
+    // Fetch details for BAD items to penalize
+    const badDetailPromises = badItems.map(item => {
+      if (item.mediaType === 'movie') return getMovieDetails(item.mediaId)
+      if (item.mediaType === 'series') return getTVDetails(item.mediaId)
+      if (item.mediaType === 'anime') return getAnimeDetails(`anilist-${item.mediaId}`)
+      return null
+    })
+    const badDetailedMedia = (await Promise.all(badDetailPromises)).filter(Boolean) as Media[]
 
     // 4. Calculate genre weights
     const genreWeights: Record<string, number> = {}
     detailedMedia.forEach(media => {
       const dbItem = itemsToFetch.find(i => i.mediaId === media.externalId)
-      const weight = dbItem?.rating || 7 // Default weight
+      let weight = dbItem?.rating || 7 // Default weight
+      if (dbItem?.reaction === 'LOVE') weight = 15;
+      if (dbItem?.reaction === 'GOOD') weight = 10;
+      
       media.genres.forEach(genre => {
         genreWeights[genre.name] = (genreWeights[genre.name] || 0) + weight
       })
     })
 
-    // 5. Select top genres
+    // Subtract weights for BAD items
+    badDetailedMedia.forEach(media => {
+      media.genres.forEach(genre => {
+        // Penalize genres that appear in bad items
+        genreWeights[genre.name] = (genreWeights[genre.name] || 0) - 10
+      })
+    })
+
+    // 5. Select top genres (must have positive weight)
     const sortedGenres = Object.entries(genreWeights)
+      .filter(entry => entry[1] > 0)
       .sort((a, b) => b[1] - a[1])
       .map(entry => entry[0])
     

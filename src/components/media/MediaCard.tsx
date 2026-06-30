@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { Media } from '@/types/media';
 import { useWatchlist } from '@/lib/contexts/WatchlistContext';
 import { motion } from 'framer-motion';
-import { Image as ImageIcon, PlayCircle, Check, Plus } from 'lucide-react';
+import { Image as ImageIcon, PlayCircle, Check, Plus, Calendar } from 'lucide-react';
 
 interface MediaCardProps {
   media: Media;
@@ -17,6 +17,9 @@ export default function MediaCard({ media, onAddToWatchlist, index = 0 }: MediaC
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   
   const year = media.releaseDate ? new Date(media.releaseDate).getFullYear() : null;
+  const releaseDateFormatted = media.releaseDate 
+    ? new Date(media.releaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null;
   const genres = (media.genres ?? []).slice(0, 2);
   const posterSrc = media.posterUrl || null;
   const itemType = media.type || ('mediaType' in media ? (media as any).mediaType : 'movie');
@@ -86,11 +89,17 @@ export default function MediaCard({ media, onAddToWatchlist, index = 0 }: MediaC
               </div>
             </div>
           ) : (
-            <p className="font-label-sm text-[12px] text-on-surface-variant mt-1">
-              {year && <span>{year}</span>}
-              {year && genres.length > 0 && <span className="mx-1">•</span>}
-              {genres.map(g => g.name).join(', ')}
-            </p>
+            <div className="flex flex-col items-center gap-2 mt-2">
+              <p className="font-label-sm text-[12px] text-on-surface-variant">
+                {genres.map(g => g.name).join(', ')}
+              </p>
+              {releaseDateFormatted && (
+                <div className="flex items-center gap-1.5 text-[11px] text-on-surface-variant bg-white/5 px-2.5 py-1 rounded-full border border-white/10 shadow-inner">
+                  <Calendar className="w-3.5 h-3.5 text-primary/80" />
+                  <span className="font-medium tracking-wide">{releaseDateFormatted}</span>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </Link>

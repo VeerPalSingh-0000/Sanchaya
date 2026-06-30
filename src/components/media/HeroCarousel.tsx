@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Media } from '@/types/media';
-import { ChevronLeft, ChevronRight, Star, Play, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Play, Image as ImageIcon, Calendar } from 'lucide-react';
 
 interface HeroCarouselProps {
   items: Media[];
@@ -143,7 +143,12 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                     {currentItem.rating?.toFixed(1) || 'N/A'}
                   </span>
                   <span className="text-on-surface-variant">•</span>
-                  <span className="text-on-surface-variant">{currentItem.releaseDate?.split('-')[0] || 'TBA'}</span>
+                  <span className="text-on-surface-variant flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-primary/80" />
+                    {currentItem.releaseDate 
+                      ? new Date(currentItem.releaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : 'TBA'}
+                  </span>
                   {currentItem.genres?.[0] && (
                     <>
                       <span className="text-on-surface-variant">•</span>

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Media, MediaFilter } from '@/types/media';
 import { performSearch } from '@/app/actions';
 
@@ -176,10 +177,27 @@ function SearchBarInner() {
       </div>
 
       {/* Dropdown Overlay */}
-      {focused && query.trim() && (
-        <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-surface-container-high/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] max-h-[60vh] overflow-y-auto z-50 flex flex-col py-2 no-scrollbar">
-          {searching && !results.length ? (
-            <div className="p-6 text-center text-on-surface-variant">Searching...</div>
+      <AnimatePresence>
+        {focused && query.trim() && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="absolute top-[calc(100%+8px)] left-0 right-0 bg-surface-container-high/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.7)] max-h-[60vh] overflow-y-auto z-50 flex flex-col py-3 no-scrollbar origin-top"
+          >
+            {searching && !results.length ? (
+              <div className="flex flex-col gap-2 px-3 py-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 px-3 py-2 animate-pulse">
+                    <div className="w-12 h-16 bg-white/10 rounded-lg shrink-0" />
+                    <div className="flex flex-col gap-2 w-full">
+                      <div className="h-4 bg-white/10 rounded w-3/4" />
+                      <div className="h-3 bg-white/10 rounded w-1/4" />
+                    </div>
+                  </div>
+                ))}
+              </div>
           ) : results.length > 0 ? (
             results.map((media) => (
               <Link
@@ -212,12 +230,14 @@ function SearchBarInner() {
               </Link>
             ))
           ) : hasSearched ? (
-            <div className="p-6 text-center text-on-surface-variant">
-              No results found for "{query}"
+            <div className="p-10 text-center flex flex-col items-center gap-3">
+              <span className="text-4xl">🔍</span>
+              <div className="text-on-surface-variant font-label-md">No results found for <span className="text-white font-bold">"{query}"</span></div>
             </div>
           ) : null}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

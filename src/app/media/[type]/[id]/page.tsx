@@ -6,6 +6,7 @@ import { getMovieDetails, getTVDetails, getTVSeasonDetails, getCollectionDetails
 import { getAnimeDetails, getAnimeSeasons, searchAnime } from '@/lib/anilist';
 import Badge from '@/components/ui/Badge';
 import WatchlistButton from '@/components/media/WatchlistButton';
+import ReactionSelector from '@/components/media/ReactionSelector';
 import AnimeTimeline from './AnimeTimeline';
 import EpisodesLoader from './EpisodesLoader';
 import BeautifulOverview from '@/components/media/BeautifulOverview';
@@ -227,7 +228,10 @@ export default async function MediaDetailPage({
             </div>
 
             <div style={{ marginTop: '24px', marginBottom: '24px' }}>
-              <WatchlistButton media={media} hideEpisodeTracker={!!(seasons && seasons.length > 0)} />
+              <div className="flex items-center gap-4 flex-wrap">
+                <WatchlistButton media={media} hideEpisodeTracker={!!(seasons && seasons.length > 0)} />
+                <ReactionSelector mediaId={id} />
+              </div>
               
               {/* Anime Episodes List */}
               {(isAnime || type === 'anime') && media?.malId && (

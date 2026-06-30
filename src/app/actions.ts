@@ -47,14 +47,14 @@ export async function performSearch(query: string, type: MediaFilter): Promise<M
       results = res.results;
     }
     
-    // Optional: Sort by rating or popularity
-    results.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    // Sort by popularity (voteCount) to ensure highly searched/popular items appear first
+    results.sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
     
   } catch (error) {
     console.error('Search error:', error);
   }
 
-  return results.slice(0, 10); // Return top 10 results for the dropdown
+  return results.slice(0, 15); // Return top 15 results for the dropdown
 }
 
 export async function getFranchiseMetadata(media: Media): Promise<{

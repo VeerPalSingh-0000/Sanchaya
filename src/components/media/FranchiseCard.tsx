@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import type { WatchlistItem } from '@/types/media';
-import { Image as ImageIcon, PlayCircle } from 'lucide-react';
+import { Image as ImageIcon, PlayCircle, Calendar } from 'lucide-react';
 
 interface FranchiseCardProps {
   rootId?: string;
@@ -92,9 +92,19 @@ export default function FranchiseCard({ rootId, rootTitle, rootPosterUrl, items,
           <PlayCircle className="w-16 h-16 text-primary mb-4 transition-transform duration-300 group-hover:scale-110" />
           <h3 className="font-headline-lg-mobile text-[18px] font-bold text-on-surface mb-1 line-clamp-2">{title}</h3>
           
-          <p className="font-label-sm text-[12px] text-on-surface-variant mt-1">
-            {(targetItem?.genres ?? items[0]?.genres ?? []).slice(0, 2).map(g => g.name).join(', ')}
-          </p>
+          <div className="flex flex-col items-center gap-2 mt-2">
+            <p className="font-label-sm text-[12px] text-on-surface-variant">
+              {(targetItem?.genres ?? items[0]?.genres ?? []).slice(0, 2).map(g => g.name).join(', ')}
+            </p>
+            {targetItem?.releaseDate && (
+              <div className="flex items-center gap-1.5 text-[11px] text-on-surface-variant bg-white/5 px-2.5 py-1 rounded-full border border-white/10 shadow-inner">
+                <Calendar className="w-3.5 h-3.5 text-primary/80" />
+                <span className="font-medium tracking-wide">
+                  {new Date(targetItem.releaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </motion.article>

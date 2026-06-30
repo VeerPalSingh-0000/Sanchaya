@@ -10,6 +10,7 @@ interface WatchlistContextType {
   removeFromWatchlist: (id: string) => void;
   updateStatus: (id: string, status: WatchStatus) => void;
   updateProgress: (id: string, progress: number) => void;
+  updateReaction: (id: string, reaction: 'LOVE' | 'GOOD' | 'BAD' | null) => void;
   isInWatchlist: (id: string) => boolean;
   isLoading: boolean;
 }
@@ -50,6 +51,8 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
               franchisePosterUrl: item.franchisePosterUrl,
               progress: item.progress || 0,
               totalEpisodes: item.totalEpisodes || undefined,
+              releaseDate: item.releaseDate || undefined,
+              reaction: item.reaction as 'LOVE' | 'GOOD' | 'BAD' | undefined,
             }));
             setWatchlist(mapped);
           }
@@ -103,6 +106,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
         franchiseId: media.franchiseId,
         franchiseTitle: media.franchiseTitle,
         franchisePosterUrl: media.franchisePosterUrl,
+        releaseDate: media.releaseDate,
       };
       return [newItem, ...prev];
     });
@@ -122,6 +126,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
           franchisePosterUrl: media.franchisePosterUrl,
           progress: 0,
           totalEpisodes: media.totalEpisodes,
+          releaseDate: media.releaseDate,
         })
       });
     }
@@ -164,6 +169,21 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session]);
 
+  const updateReaction = useCallback((id: string, reaction: 'LOVE' | 'GOOD' | 'BAD' | null) => {
+    setWatchlist((prev) =>
+      prev.map((item) =>
+        item.id === String(id) ? { ...item, reaction: reaction || undefined, updatedAt: new Date().toISOString() } : item
+      )
+    );
+    if (session) {
+      fetch(`/api/watchlist/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reaction })
+      });
+    }
+  }, [session]);
+
   const isInWatchlist = useCallback(
     (id: string) => watchlist.some((item) => item.id === String(id)),
     [watchlist]
@@ -178,6 +198,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
         removeFromWatchlist,
         updateStatus,
         updateProgress,
+        updateReaction,
         isInWatchlist,
       }}
     >

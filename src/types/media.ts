@@ -91,6 +91,8 @@ export interface WatchlistItem {
   franchiseId?: string;
   franchiseTitle?: string;
   franchisePosterUrl?: string;
+  releaseDate?: string;
+  reaction?: 'LOVE' | 'GOOD' | 'BAD';
 }
 
 // ─── Search & Recommendations ───────────────────────────────────────────────
