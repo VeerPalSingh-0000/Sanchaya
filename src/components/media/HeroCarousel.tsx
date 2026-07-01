@@ -114,51 +114,51 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
         {currentItem && (
           <Link 
             href={`/media/${currentItem.type}/${currentItem.externalId}`}
-            className="relative w-[260px] md:w-[400px] aspect-[2/3] rounded-2xl overflow-hidden group cursor-pointer border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.7)] z-10 hover:shadow-[0_0_60px_rgba(245,158,11,0.4)] transition-all duration-500 hover:scale-105"
+            className="relative w-[260px] md:w-[400px] aspect-[2/3] rounded-2xl overflow-hidden group cursor-pointer border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.7)] z-10 md:hover:shadow-[0_0_60px_rgba(245,158,11,0.4)] transition-all duration-500 md:hover:scale-105"
           >
             {currentItem.posterUrl ? (
               <img 
                 src={currentItem.posterUrl} 
                 alt={currentItem.title} 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-110" 
               />
             ) : renderPosterFallback(currentItem.title)}
             
-            <div className="absolute top-4 left-4 bg-primary text-surface font-label-sm text-[12px] px-4 py-1.5 rounded-full shadow-lg z-10 font-bold tracking-wider">
+            <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-primary text-surface font-label-sm text-[10px] md:text-[12px] px-3 md:px-4 py-1 md:py-1.5 rounded-full shadow-lg z-10 font-bold tracking-wider">
               TRENDING
             </div>
 
-            <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary/50 rounded-2xl transition-all duration-500 z-20 pointer-events-none mix-blend-overlay"></div>
+            <div className="absolute inset-0 border-2 border-transparent md:group-hover:border-primary/50 rounded-2xl transition-all duration-500 z-20 pointer-events-none mix-blend-overlay"></div>
             
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-90 md:group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out flex flex-col justify-end h-full z-30">
+            <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300 ease-out flex flex-col justify-end h-full z-30">
               <div>
-                <h3 className="font-display-xl-mobile md:font-display-xl text-[28px] md:text-[42px] font-bold text-on-background mb-2 leading-tight line-clamp-3 md:line-clamp-4">
+                <h3 className="font-display-xl-mobile md:font-display-xl text-[20px] md:text-[42px] font-bold text-on-background mb-1 md:mb-2 leading-tight line-clamp-2 md:line-clamp-4 break-words">
                   {currentItem.title}
                 </h3>
-                <div className="flex items-center space-x-3 text-primary font-body-md text-[16px] mb-6">
+                <div className="flex flex-wrap items-center gap-x-2 md:gap-x-3 gap-y-2 text-primary font-body-md text-[13px] md:text-[16px] mb-2 md:mb-6">
                   <span className="flex items-center">
-                    <Star className="w-5 h-5 mr-1 fill-current" /> 
+                    <Star className="w-4 h-4 md:w-5 md:h-5 mr-1 fill-current" /> 
                     {currentItem.rating?.toFixed(1) || 'N/A'}
                   </span>
-                  <span className="text-on-surface-variant">•</span>
-                  <span className="text-on-surface-variant flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-primary/80" />
+                  <span className="hidden md:inline text-on-surface-variant">•</span>
+                  <span className="text-on-surface-variant flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary/80" />
                     {currentItem.releaseDate 
                       ? new Date(currentItem.releaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                       : 'TBA'}
                   </span>
                   {currentItem.genres?.[0] && (
                     <>
-                      <span className="text-on-surface-variant">•</span>
-                      <span className="text-on-surface-variant border border-white/20 rounded px-2 py-0.5 text-sm">
+                      <span className="hidden md:inline text-on-surface-variant">•</span>
+                      <span className="text-on-surface-variant border border-white/20 rounded md:border-none px-1.5 md:px-0 py-0.5 md:py-0 text-[11px] md:text-sm whitespace-nowrap">
                         {currentItem.genres[0].name}
                       </span>
                     </>
                   )}
                 </div>
-                <div className="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                <div className="hidden md:flex space-x-3 opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 delay-100">
                   <button className="flex-1 bg-primary text-surface py-3 rounded-lg font-label-sm text-[12px] hover:bg-primary-container transition-colors flex items-center justify-center space-x-2 font-bold shadow-[0_10px_20px_rgba(245,158,11,0.3)]">
                     <Play className="w-4 h-4 fill-current" />
                     <span>View Details</span>

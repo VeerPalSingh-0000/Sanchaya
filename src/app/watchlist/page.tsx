@@ -5,7 +5,7 @@ import MediaCard from "@/components/media/MediaCard";
 import FranchiseCard from "@/components/media/FranchiseCard";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
-import { ListFilter, PlaySquare } from "lucide-react";
+import { ListFilter, PlaySquare, Search, X } from "lucide-react";
 import type { WatchStatus, WatchlistItem } from "@/types/media";
 import { getWatchlistFranchiseGroupings, FranchiseGroup } from "./actions";
 
@@ -18,6 +18,7 @@ export default function WatchlistPage() {
   const { watchlist, isLoading } = useWatchlist();
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState<WatchStatus | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isMigrating, setIsMigrating] = useState(false);
 
   useEffect(() => {
@@ -138,9 +139,28 @@ export default function WatchlistPage() {
   }, [watchlist]);
 
   const displayItems = useMemo(() => {
-    if (filter === "all") return allGroups;
-    return allGroups.filter((group) => group.aggregateStatus === filter);
-  }, [allGroups, filter]);
+    let filtered = allGroups;
+    
+    if (filter !== "all") {
+      filtered = filtered.filter((group) => group.aggregateStatus === filter);
+    }
+    
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((display) => {
+        if (display.type === "single") {
+          return display.item.title.toLowerCase().includes(q);
+        } else {
+          return (
+            display.group.rootTitle.toLowerCase().includes(q) ||
+            display.items.some((i) => i.title.toLowerCase().includes(q))
+          );
+        }
+      });
+    }
+    
+    return filtered;
+  }, [allGroups, filter, searchQuery]);
 
   if (!mounted) {
     return (
@@ -163,9 +183,31 @@ export default function WatchlistPage() {
         </div>
 
         {watchlist.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex flex-col xl:flex-row items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
+            {/* Search Bar */}
+            <div className="relative w-full xl:w-64 group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-on-surface-variant group-focus-within:text-primary transition-colors duration-300" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search watchlist..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-surface-container/40 backdrop-blur-xl border border-white/5 rounded-full py-2.5 pl-10 pr-10 text-[14px] text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/5 transition-all duration-300 shadow-inner"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-on-surface-variant hover:text-white transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
             {/* Filters */}
-            <div className="flex items-center p-1.5 bg-surface-container/40 backdrop-blur-xl border border-white/5 rounded-full overflow-x-auto no-scrollbar w-full sm:w-auto shadow-inner">
+            <div className="flex items-center p-1.5 bg-surface-container/40 backdrop-blur-xl border border-white/5 rounded-full overflow-x-auto no-scrollbar w-full xl:w-auto shadow-inner">
               {["all", "plan_to_watch", "watching", "on_hold", "completed", "dropped"].map(
                 (f) => (
                   <button

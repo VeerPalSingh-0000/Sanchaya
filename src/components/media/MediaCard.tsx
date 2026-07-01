@@ -50,7 +50,7 @@ export default function MediaCard({ media, onAddToWatchlist, index = 0 }: MediaC
             alt={media.title}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover transition-transform duration-500 md:group-hover:scale-110"
           />
         ) : (
           <div className="absolute inset-0 bg-surface-container flex flex-col items-center justify-center p-4">
@@ -74,8 +74,8 @@ export default function MediaCard({ media, onAddToWatchlist, index = 0 }: MediaC
         </div>
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center border-t border-white/10 mt-auto h-full z-20">
-          <PlayCircle className="w-16 h-16 text-primary mb-4 transition-transform duration-300 group-hover:scale-110" />
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center border-t border-white/10 mt-auto h-full z-20">
+          <PlayCircle className="w-16 h-16 text-primary mb-4 transition-transform duration-300 md:group-hover:scale-110" />
           <h3 className="font-headline-lg-mobile text-[18px] font-bold text-on-surface mb-1 line-clamp-2">{media.title}</h3>
           
           {showProgress ? (

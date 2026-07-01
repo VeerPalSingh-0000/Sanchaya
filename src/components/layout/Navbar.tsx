@@ -86,7 +86,7 @@ export default function Navbar() {
               )}
             </div>
             {dropdownOpen && (
-              <div className="absolute right-0 mt-4 w-64 rounded-3xl bg-[#0a0f18]/90 backdrop-blur-3xl border border-white/10 shadow-[0_0_40px_rgba(255,193,116,0.15)] p-3 flex flex-col gap-2 z-50 transform origin-top-right transition-all">
+              <div className="absolute right-0 mt-4 w-64 rounded-2xl bg-[#06090e] border border-white/10 shadow-2xl p-3 flex flex-col gap-2 z-50 transform origin-top-right transition-all">
                 <div className="relative overflow-hidden rounded-2xl p-4 mb-2 bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full border-2 border-primary/30 overflow-hidden flex-shrink-0">
@@ -191,7 +191,7 @@ export default function Navbar() {
             )}
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-4 w-72 rounded-3xl bg-[#0a0f18]/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(255,193,116,0.15)] p-3 flex flex-col gap-2 z-50 transform origin-top-right transition-all">
+              <div className="absolute right-0 mt-4 w-72 rounded-2xl bg-surface border border-white/10 shadow-2xl p-3 flex flex-col gap-2 z-50 transform origin-top-right transition-all">
                 
                 {/* Profile Header */}
                 <div className="relative overflow-hidden rounded-2xl p-4 mb-2 group border border-white/5 bg-white/5">
@@ -276,27 +276,29 @@ export default function Navbar() {
 
       {/* BottomNavBar (Mobile) */}
       {(!(!session && pathname === '/') && pathname !== '/auth/signin') && (
-        <nav className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none pb-[env(safe-area-inset-bottom)]">
-          <div className="bg-[#0a0f18]/95 backdrop-blur-3xl rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center p-1.5 gap-1 pointer-events-auto">
-          {NAV_LINKS.map((link) => {
-            const active = isActive(link.href);
-            return (
-              <Link 
-                key={link.href}
-                href={link.href}
-                className={`flex items-center justify-center gap-2 py-2.5 px-5 rounded-full transition-all duration-300 ease-out active:scale-95 ${
-                  active 
-                    ? 'bg-primary/15 text-primary shadow-inner border border-primary/20' 
-                    : 'text-white/40 hover:text-white/80 hover:bg-white/5'
-                }`}
-              >
-                <link.icon className={`w-5 h-5 ${active ? 'fill-current' : ''}`} />
-                {active && <span className="text-sm font-bold tracking-wide">{link.label}</span>}
-              </Link>
-            )
-          })}
-        </div>
-      </nav>
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0f18]/95 backdrop-blur-3xl border-t border-white/10 pb-[env(safe-area-inset-bottom)] pointer-events-auto shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-around w-full h-16 px-2">
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link 
+                  key={link.href}
+                  href={link.href}
+                  className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-300 ${
+                    active 
+                      ? 'text-primary' 
+                      : 'text-white/40 hover:text-white/80'
+                  }`}
+                >
+                  <link.icon className={`w-5 h-5 ${active ? 'fill-current' : ''}`} />
+                  <span className={`text-[10px] tracking-wide ${active ? 'font-bold' : 'font-medium'}`}>
+                    {link.label}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        </nav>
       )}
     </>
   );
