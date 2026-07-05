@@ -1,0 +1,1065 @@
+[
+  {
+    "anime_id": 21,
+    "title": "One Piece",
+    "arcs": [
+      {
+        "name": "Romance Dawn Arc",
+        "start": 1,
+        "end": 3,
+        "saga": "East Blue Saga"
+      },
+      {
+        "name": "Orange Town Arc",
+        "start": 4,
+        "end": 8,
+        "saga": "East Blue Saga"
+      },
+      {
+        "name": "Syrup Village Arc",
+        "start": 9,
+        "end": 18,
+        "saga": "East Blue Saga"
+      },
+      {
+        "name": "Baratie Arc",
+        "start": 19,
+        "end": 30,
+        "saga": "East Blue Saga"
+      },
+      {
+        "name": "Arlong Park Arc",
+        "start": 31,
+        "end": 44,
+        "saga": "East Blue Saga"
+      },
+      {
+        "name": "Loguetown Arc",
+        "start": 45,
+        "end": 53,
+        "saga": "East Blue Saga"
+      },
+      {
+        "name": "Warship Island Arc (Filler)",
+        "start": 54,
+        "end": 61,
+        "saga": "East Blue Saga"
+      },
+      {
+        "name": "Reverse Mountain Arc",
+        "start": 62,
+        "end": 63,
+        "saga": "Arabasta Saga"
+      },
+      {
+        "name": "Whisky Peak Arc",
+        "start": 64,
+        "end": 69,
+        "saga": "Arabasta Saga"
+      },
+      {
+        "name": "Little Garden Arc",
+        "start": 70,
+        "end": 77,
+        "saga": "Arabasta Saga"
+      },
+      {
+        "name": "Drum Island Arc",
+        "start": 78,
+        "end": 91,
+        "saga": "Arabasta Saga"
+      },
+      {
+        "name": "Alabasta Arc",
+        "start": 92,
+        "end": 130,
+        "saga": "Arabasta Saga"
+      },
+      {
+        "name": "Post-Alabasta Arc (Filler)",
+        "start": 131,
+        "end": 135,
+        "saga": "Arabasta Saga"
+      },
+      {
+        "name": "Goat Island Arc (Filler)",
+        "start": 136,
+        "end": 138,
+        "saga": "Sky Island Saga"
+      },
+      {
+        "name": "Ruluka Island Arc (Filler)",
+        "start": 139,
+        "end": 143,
+        "saga": "Sky Island Saga"
+      },
+      {
+        "name": "Jaya Arc",
+        "start": 144,
+        "end": 152,
+        "saga": "Sky Island Saga"
+      },
+      {
+        "name": "Skypiea Arc",
+        "start": 153,
+        "end": 195,
+        "saga": "Sky Island Saga"
+      },
+      {
+        "name": "G-8 Arc (Filler)",
+        "start": 196,
+        "end": 206,
+        "saga": "Sky Island Saga"
+      },
+      {
+        "name": "Long Ring Long Land Arc",
+        "start": 207,
+        "end": 219,
+        "saga": "Water 7 Saga"
+      },
+      {
+        "name": "Ocean's Dream Arc (Filler)",
+        "start": 220,
+        "end": 224,
+        "saga": "Water 7 Saga"
+      },
+      {
+        "name": "Foxy's Return Arc (Filler)",
+        "start": 225,
+        "end": 228,
+        "saga": "Water 7 Saga"
+      },
+      {
+        "name": "Water 7 Arc",
+        "start": 229,
+        "end": 263,
+        "saga": "Water 7 Saga"
+      },
+      {
+        "name": "Enies Lobby Arc",
+        "start": 264,
+        "end": 312,
+        "saga": "Water 7 Saga"
+      },
+      {
+        "name": "Post-Enies Lobby Arc",
+        "start": 313,
+        "end": 325,
+        "saga": "Water 7 Saga"
+      },
+      {
+        "name": "Ice Hunter / Lovely Land Arc (Filler)",
+        "start": 326,
+        "end": 336,
+        "saga": "Thriller Bark Saga"
+      },
+      {
+        "name": "Thriller Bark Arc",
+        "start": 337,
+        "end": 381,
+        "saga": "Thriller Bark Saga"
+      },
+      {
+        "name": "Spa Island Arc (Filler)",
+        "start": 382,
+        "end": 384,
+        "saga": "Thriller Bark Saga"
+      },
+      {
+        "name": "Sabaody Archipelago Arc",
+        "start": 385,
+        "end": 407,
+        "saga": "Summit War Saga"
+      },
+      {
+        "name": "Amazon Lily Arc",
+        "start": 408,
+        "end": 421,
+        "saga": "Summit War Saga"
+      },
+      {
+        "name": "Impel Down Arc (Part 1)",
+        "start": 422,
+        "end": 425,
+        "saga": "Summit War Saga"
+      },
+      {
+        "name": "Little East Blue Arc (Filler)",
+        "start": 426,
+        "end": 429,
+        "saga": "Summit War Saga"
+      },
+      {
+        "name": "Impel Down Arc (Part 2)",
+        "start": 430,
+        "end": 456,
+        "saga": "Summit War Saga"
+      },
+      {
+        "name": "Marineford Arc",
+        "start": 457,
+        "end": 516,
+        "saga": "Summit War Saga"
+      },
+      {
+        "name": "Post-War Arc",
+        "start": 517,
+        "end": 522,
+        "saga": "Fish-Man Island Saga"
+      },
+      {
+        "name": "Fish-Man Island Arc",
+        "start": 523,
+        "end": 574,
+        "saga": "Fish-Man Island Saga"
+      },
+      {
+        "name": "Z's Ambition Arc (Filler)",
+        "start": 575,
+        "end": 578,
+        "saga": "Dressrosa Saga"
+      },
+      {
+        "name": "Punk Hazard Arc",
+        "start": 579,
+        "end": 625,
+        "saga": "Dressrosa Saga"
+      },
+      {
+        "name": "Caesar Retrieval Arc (Filler)",
+        "start": 626,
+        "end": 628,
+        "saga": "Dressrosa Saga"
+      },
+      {
+        "name": "Dressrosa Arc",
+        "start": 629,
+        "end": 746,
+        "saga": "Dressrosa Saga"
+      },
+      {
+        "name": "Silver Mine Arc (Filler)",
+        "start": 747,
+        "end": 750,
+        "saga": "Four Emperors Saga"
+      },
+      {
+        "name": "Zou Arc",
+        "start": 751,
+        "end": 779,
+        "saga": "Four Emperors Saga"
+      },
+      {
+        "name": "Marine Rookie Arc (Filler)",
+        "start": 780,
+        "end": 782,
+        "saga": "Four Emperors Saga"
+      },
+      {
+        "name": "Whole Cake Island Arc",
+        "start": 783,
+        "end": 877,
+        "saga": "Four Emperors Saga"
+      },
+      {
+        "name": "Reverie Arc",
+        "start": 878,
+        "end": 894,
+        "saga": "Four Emperors Saga"
+      },
+      {
+        "name": "Cidre Guild Arc (Filler)",
+        "start": 895,
+        "end": 896,
+        "saga": "Four Emperors Saga"
+      },
+      {
+        "name": "Wano Country Arc",
+        "start": 892,
+        "end": 1088,
+        "saga": "Four Emperors Saga"
+      },
+      {
+        "name": "Egghead Arc",
+        "start": 1089,
+        "end": 1155,
+        "saga": "Final Saga"
+      }
+    ]
+  },
+  {
+    "anime_id": 20,
+    "title": "Naruto",
+    "arcs": [
+      {
+        "name": "Prologue — Land of Waves",
+        "start": 1,
+        "end": 19
+      },
+      {
+        "name": "Chunin Exams",
+        "start": 20,
+        "end": 67
+      },
+      {
+        "name": "Konoha Crush",
+        "start": 68,
+        "end": 80
+      },
+      {
+        "name": "Search for Tsunade",
+        "start": 81,
+        "end": 100
+      },
+      {
+        "name": "Land of Tea Escort Mission (Filler)",
+        "start": 101,
+        "end": 106,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Sasuke Recovery Mission",
+        "start": 107,
+        "end": 135
+      },
+      {
+        "name": "Land of Rice Fields Investigation (Filler)",
+        "start": 136,
+        "end": 141,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Mizuki Tracking Mission (Filler)",
+        "start": 142,
+        "end": 147,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Bikochu Beetle Search Mission (Filler)",
+        "start": 148,
+        "end": 151,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Kurosuki Family Removal Mission (Filler)",
+        "start": 152,
+        "end": 157,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Gosunkugi Capture Mission (Filler)",
+        "start": 158,
+        "end": 160,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Cursed Warrior Extermination Mission (Filler)",
+        "start": 161,
+        "end": 167,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Kaima Capture Mission (Filler)",
+        "start": 168,
+        "end": 173,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Buried Gold Search Mission (Filler)",
+        "start": 174,
+        "end": 177,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Star Guard Mission (Filler)",
+        "start": 178,
+        "end": 186,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Peddlers Escort Mission (Filler)",
+        "start": 187,
+        "end": 194,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Third Super-Beast Arc (Filler)",
+        "start": 195,
+        "end": 196,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Konoha Plans Recapture Mission (Filler)",
+        "start": 197,
+        "end": 202,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Yakumo Kurama Rescue Mission (Filler)",
+        "start": 203,
+        "end": 208,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Gantetsu Escort Mission (Filler)",
+        "start": 209,
+        "end": 212,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Menma Memory Recovery Mission (Filler)",
+        "start": 213,
+        "end": 215,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Sunagakure Support Mission (Filler)",
+        "start": 216,
+        "end": 220,
+        "saga": "Filler Episodes"
+      }
+    ]
+  },
+  {
+    "anime_id": 1735,
+    "title": "Naruto Shippuden",
+    "arcs": [
+      {
+        "name": "Kazekage Rescue Mission",
+        "start": 1,
+        "end": 32
+      },
+      {
+        "name": "Tenchi Bridge Reconnaissance Mission",
+        "start": 33,
+        "end": 53
+      },
+      {
+        "name": "Twelve Guardian Ninja Arc (Filler)",
+        "start": 54,
+        "end": 71,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Akatsuki Suppression Mission",
+        "start": 72,
+        "end": 88
+      },
+      {
+        "name": "Three-Tails' Appearance Arc (Filler)",
+        "start": 89,
+        "end": 112,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Itachi Pursuit Mission",
+        "start": 113,
+        "end": 126
+      },
+      {
+        "name": "Tale of Jiraiya the Gallant",
+        "start": 127,
+        "end": 133
+      },
+      {
+        "name": "Fated Battle Between Brothers",
+        "start": 134,
+        "end": 143
+      },
+      {
+        "name": "Six-Tails Unleashed Arc (Filler)",
+        "start": 144,
+        "end": 151,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Pain's Assault",
+        "start": 152,
+        "end": 175
+      },
+      {
+        "name": "Past Arc: Locus of Konoha (Filler)",
+        "start": 176,
+        "end": 196,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Five Kage Summit Arc",
+        "start": 197,
+        "end": 221
+      },
+      {
+        "name": "Paradise Life on a Boat Arc (Filler)",
+        "start": 222,
+        "end": 242,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Fourth Shinobi World War: Confrontation",
+        "start": 243,
+        "end": 275
+      },
+      {
+        "name": "Power Arc (Filler)",
+        "start": 276,
+        "end": 289,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Fourth Shinobi World War: Climax",
+        "start": 290,
+        "end": 348
+      },
+      {
+        "name": "Kakashi's Anbu Shadow Arc (Filler)",
+        "start": 349,
+        "end": 361,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Birth of the Ten-Tails' Jinchuriki",
+        "start": 362,
+        "end": 393
+      },
+      {
+        "name": "In Naruto's Footsteps: The Friends' Paths (Filler)",
+        "start": 394,
+        "end": 413,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Kaguya Otsutsuki Strikes",
+        "start": 414,
+        "end": 431
+      },
+      {
+        "name": "Jiraiya Shinobi Handbook Arc (Filler)",
+        "start": 432,
+        "end": 450,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Itachi Shinden: Book of Bright Light (Filler)",
+        "start": 451,
+        "end": 458,
+        "saga": "Filler Episodes"
+      },
+      {
+        "name": "Childhood / Final Battle Conclusion",
+        "start": 459,
+        "end": 500
+      }
+    ]
+  },
+  {
+    "anime_id": 269,
+    "title": "Bleach",
+    "arcs": [
+      {
+        "name": "Substitute Shinigami Arc",
+        "start": 1,
+        "end": 20,
+        "saga": "Agent of the Shinigami Arc"
+      },
+      {
+        "name": "Soul Society: The Sneak Entry",
+        "start": 21,
+        "end": 41,
+        "saga": "Soul Society Arc"
+      },
+      {
+        "name": "Soul Society: The Rescue",
+        "start": 42,
+        "end": 63,
+        "saga": "Soul Society Arc"
+      },
+      {
+        "name": "The Bount Arc (Filler)",
+        "start": 64,
+        "end": 91,
+        "saga": "The Bount Arc (Filler)"
+      },
+      {
+        "name": "Bount Assault on Soul Society Arc (Filler)",
+        "start": 92,
+        "end": 109,
+        "saga": "The Bount Arc (Filler)"
+      },
+      {
+        "name": "Arrancar: The Arrival",
+        "start": 110,
+        "end": 131,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "Arrancar: The Hueco Mundo Sneak Entry",
+        "start": 132,
+        "end": 151,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "Arrancar: The Fierce Fight",
+        "start": 152,
+        "end": 167,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "The New Captain Shusuke Amagai Arc (Filler)",
+        "start": 168,
+        "end": 189,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "Arrancar vs. Shinigami",
+        "start": 190,
+        "end": 205,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "The Past Arc",
+        "start": 206,
+        "end": 212,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "Arrancar: Decisive Battle of Karakura",
+        "start": 213,
+        "end": 229,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "Zanpakuto Unknown Tales Arc (Filler)",
+        "start": 230,
+        "end": 265,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "Arrancar: Downfall",
+        "start": 266,
+        "end": 316,
+        "saga": "Arrancar Arc"
+      },
+      {
+        "name": "Gotei 13 Invading Army Arc (Filler)",
+        "start": 317,
+        "end": 342,
+        "saga": "Lost Substitute Shinigami Arc"
+      },
+      {
+        "name": "The Lost Agent (Fullbring Arc)",
+        "start": 343,
+        "end": 366,
+        "saga": "Lost Substitute Shinigami Arc"
+      }
+    ]
+  },
+  {
+    "anime_id": 813,
+    "title": "Dragon Ball Z",
+    "arcs": [
+      {
+        "name": "Saiyan Arc",
+        "start": 1,
+        "end": 35,
+        "saga": "Saiyan Saga"
+      },
+      {
+        "name": "Namek Arc",
+        "start": 36,
+        "end": 67,
+        "saga": "Frieza Saga"
+      },
+      {
+        "name": "Captain Ginyu Arc",
+        "start": 68,
+        "end": 74,
+        "saga": "Frieza Saga"
+      },
+      {
+        "name": "Frieza Arc",
+        "start": 75,
+        "end": 107,
+        "saga": "Frieza Saga"
+      },
+      {
+        "name": "Garlic Jr. Arc (Filler)",
+        "start": 108,
+        "end": 117,
+        "saga": "Cell Saga"
+      },
+      {
+        "name": "Trunks Arc",
+        "start": 118,
+        "end": 125,
+        "saga": "Cell Saga"
+      },
+      {
+        "name": "Androids Arc",
+        "start": 126,
+        "end": 139,
+        "saga": "Cell Saga"
+      },
+      {
+        "name": "Imperfect Cell Arc",
+        "start": 140,
+        "end": 152,
+        "saga": "Cell Saga"
+      },
+      {
+        "name": "Perfect Cell Arc",
+        "start": 153,
+        "end": 165,
+        "saga": "Cell Saga"
+      },
+      {
+        "name": "Cell Games Arc",
+        "start": 166,
+        "end": 194,
+        "saga": "Cell Saga"
+      },
+      {
+        "name": "Other World Tournament Arc (Filler)",
+        "start": 195,
+        "end": 199,
+        "saga": "Majin Buu Saga"
+      },
+      {
+        "name": "Great Saiyaman Arc",
+        "start": 200,
+        "end": 209,
+        "saga": "Majin Buu Saga"
+      },
+      {
+        "name": "World Tournament Arc",
+        "start": 210,
+        "end": 219,
+        "saga": "Majin Buu Saga"
+      },
+      {
+        "name": "Babidi Arc",
+        "start": 220,
+        "end": 231,
+        "saga": "Majin Buu Saga"
+      },
+      {
+        "name": "Majin Buu Arc",
+        "start": 232,
+        "end": 253,
+        "saga": "Majin Buu Saga"
+      },
+      {
+        "name": "Fusion Arc",
+        "start": 254,
+        "end": 275,
+        "saga": "Majin Buu Saga"
+      },
+      {
+        "name": "Kid Buu Arc",
+        "start": 276,
+        "end": 291,
+        "saga": "Majin Buu Saga"
+      }
+    ]
+  },
+  {
+    "anime_id": 11061,
+    "title": "Hunter x Hunter (2011)",
+    "arcs": [
+      {
+        "name": "Hunter Exam Arc",
+        "start": 1,
+        "end": 21
+      },
+      {
+        "name": "Zoldyck Family Arc",
+        "start": 22,
+        "end": 26
+      },
+      {
+        "name": "Heavens Arena Arc",
+        "start": 27,
+        "end": 38
+      },
+      {
+        "name": "Yorknew City Arc",
+        "start": 39,
+        "end": 58
+      },
+      {
+        "name": "Greed Island Arc",
+        "start": 59,
+        "end": 75
+      },
+      {
+        "name": "Chimera Ant Arc",
+        "start": 76,
+        "end": 136
+      },
+      {
+        "name": "13th Hunter Chairman Election Arc",
+        "start": 137,
+        "end": 148
+      }
+    ]
+  },
+  {
+    "anime_id": 16498,
+    "title": "Attack on Titan",
+    "arcs": [
+      {
+        "name": "Battle for Trost Arc",
+        "start": 1,
+        "end": 13
+      },
+      {
+        "name": "The Female Titan Arc",
+        "start": 14,
+        "end": 25
+      },
+      {
+        "name": "Clash of the Titans Arc",
+        "start": 26,
+        "end": 37
+      },
+      {
+        "name": "The Uprising Arc",
+        "start": 38,
+        "end": 49
+      },
+      {
+        "name": "Return to Shiganshina Arc",
+        "start": 50,
+        "end": 59
+      },
+      {
+        "name": "Marley Arc",
+        "start": 60,
+        "end": 67
+      },
+      {
+        "name": "War for Paradis Arc",
+        "start": 68,
+        "end": 94
+      }
+    ]
+  },
+  {
+    "anime_id": 40748,
+    "title": "Jujutsu Kaisen",
+    "arcs": [
+      {
+        "name": "Fearsome Womb Arc",
+        "start": 1,
+        "end": 8
+      },
+      {
+        "name": "Vs. Mahito Arc",
+        "start": 9,
+        "end": 13
+      },
+      {
+        "name": "Kyoto Goodwill Event Arc",
+        "start": 14,
+        "end": 21
+      },
+      {
+        "name": "Death Painting Arc",
+        "start": 22,
+        "end": 24
+      },
+      {
+        "name": "Hidden Inventory / Premature Death Arc",
+        "start": 25,
+        "end": 29
+      },
+      {
+        "name": "Shibuya Incident Arc",
+        "start": 30,
+        "end": 47
+      }
+    ]
+  },
+  {
+    "anime_id": 31964,
+    "title": "My Hero Academia",
+    "arcs": [
+      {
+        "name": "Entrance Exam & Battle Trial Arc",
+        "start": 1,
+        "end": 8
+      },
+      {
+        "name": "U.S.J. Incident Arc",
+        "start": 9,
+        "end": 13
+      },
+      {
+        "name": "U.A. Sports Festival Arc",
+        "start": 14,
+        "end": 25
+      },
+      {
+        "name": "Vs. Hero Killer Stain Arc",
+        "start": 26,
+        "end": 33
+      },
+      {
+        "name": "Final Exams Arc",
+        "start": 34,
+        "end": 38
+      },
+      {
+        "name": "Forest Training Camp Arc",
+        "start": 39,
+        "end": 45
+      },
+      {
+        "name": "Hideout Raid Arc",
+        "start": 46,
+        "end": 50
+      },
+      {
+        "name": "Provisional Hero License Exam Arc",
+        "start": 51,
+        "end": 62
+      },
+      {
+        "name": "Shie Hassaikai (Overhaul) Arc",
+        "start": 63,
+        "end": 78
+      },
+      {
+        "name": "Remedial Course Arc",
+        "start": 79,
+        "end": 80
+      },
+      {
+        "name": "U.A. School Festival Arc",
+        "start": 81,
+        "end": 86
+      },
+      {
+        "name": "Pro Hero Arc",
+        "start": 87,
+        "end": 90
+      },
+      {
+        "name": "Joint Training Arc",
+        "start": 91,
+        "end": 100
+      },
+      {
+        "name": "Meta Liberation Army (My Villain Academia)",
+        "start": 101,
+        "end": 112
+      },
+      {
+        "name": "Endeavor Agency Arc",
+        "start": 113,
+        "end": 117
+      },
+      {
+        "name": "Paranormal Liberation War Arc",
+        "start": 118,
+        "end": 138
+      },
+      {
+        "name": "Dark Hero Arc",
+        "start": 139,
+        "end": 144
+      },
+      {
+        "name": "Final War Arc",
+        "start": 145,
+        "end": 155
+      }
+    ]
+  },
+  {
+    "anime_id": 38000,
+    "title": "Demon Slayer (Kimetsu no Yaiba)",
+    "arcs": [
+      {
+        "name": "Final Selection Arc",
+        "start": 1,
+        "end": 5
+      },
+      {
+        "name": "First Mission & Asakusa Arc",
+        "start": 6,
+        "end": 10
+      },
+      {
+        "name": "Tsuzumi Mansion Arc",
+        "start": 11,
+        "end": 14
+      },
+      {
+        "name": "Natagumo Mountain Arc",
+        "start": 15,
+        "end": 21
+      },
+      {
+        "name": "Rehabilitation Training Arc",
+        "start": 22,
+        "end": 26
+      },
+      {
+        "name": "Mugen Train Arc",
+        "start": 27,
+        "end": 34
+      },
+      {
+        "name": "Entertainment District Arc",
+        "start": 35,
+        "end": 45
+      },
+      {
+        "name": "Swordsmith Village Arc",
+        "start": 46,
+        "end": 56
+      },
+      {
+        "name": "Hashira Training Arc",
+        "start": 57,
+        "end": 64
+      }
+    ]
+  },
+  {
+    "anime_id": 14719,
+    "title": "JoJo's Bizarre Adventure",
+    "arcs": [
+      {
+        "name": "Part 1: Phantom Blood",
+        "start": 1,
+        "end": 9
+      },
+      {
+        "name": "Part 2: Battle Tendency",
+        "start": 10,
+        "end": 26
+      },
+      {
+        "name": "Part 3: Stardust Crusaders",
+        "start": 27,
+        "end": 74
+      },
+      {
+        "name": "Part 4: Diamond Is Unbreakable",
+        "start": 75,
+        "end": 113
+      },
+      {
+        "name": "Part 5: Golden Wind",
+        "start": 114,
+        "end": 152
+      },
+      {
+        "name": "Part 6: Stone Ocean",
+        "start": 153,
+        "end": 190
+      }
+    ]
+  }
+]

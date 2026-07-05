@@ -28,16 +28,24 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
   ];
 
   late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -64,6 +72,40 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
                 ),
               ),
             ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search watchlist...',
+                  hintStyle: const TextStyle(color: AppTheme.textSubtle, fontSize: 14),
+                  prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSubtle, size: 20),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded, color: AppTheme.textSubtle, size: 18),
+                          onPressed: () => _searchController.clear(),
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: AppTheme.surfaceLight,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: AppTheme.divider.withValues(alpha: 0.5)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: AppTheme.divider.withValues(alpha: 0.5)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.5)),
+                  ),
+                ),
+                style: const TextStyle(color: AppTheme.textMain, fontSize: 14),
+              ),
+            ).animate().fadeIn(duration: 400.ms),
 
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -127,8 +169,19 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
                   return TabBarView(
                     controller: _tabController,
                     children: _tabs.map((status) {
-                      final filtered =
-                          items.where((i) => i.aggregateStatus == status).toList();
+                      final filtered = items.where((i) {
+                        if (i.aggregateStatus != status) return false;
+                        if (_searchQuery.isEmpty) return true;
+                        
+                        if (i is SingleDisplayItem) {
+                          return i.item.title.toLowerCase().contains(_searchQuery);
+                        } else if (i is FranchiseDisplayItem) {
+                          return i.group.rootTitle.toLowerCase().contains(_searchQuery) ||
+                                 i.items.any((child) => child.title.toLowerCase().contains(_searchQuery));
+                        }
+                        return false;
+                      }).toList();
+
                       if (filtered.isEmpty) {
                         return _EmptyTab(status: status);
                       }
@@ -384,7 +437,10 @@ class _WatchlistTile extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   // Type + rating row
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -402,26 +458,28 @@ class _WatchlistTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      if (item.rating > 0) ...[
-                        const Icon(Icons.star_rounded,
-                            color: Color(0xFFFBBF24), size: 13),
-                        const SizedBox(width: 3),
-                        Text(
-                          item.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            color: AppTheme.textMuted,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      if (item.rating > 0)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.star_rounded,
+                                color: Color(0xFFFBBF24), size: 13),
+                            const SizedBox(width: 3),
+                            Text(
+                              item.rating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                      const Spacer(),
                       // Reaction emoji
                       if (item.reaction != null)
                         Text(
                           _reactionEmoji(item.reaction!),
-                          style: const TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 16),
                         ),
                     ],
                   ),
@@ -581,31 +639,6 @@ class _FranchiseTile extends StatelessWidget {
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         height: 1.3,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Entries badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.folder_copy_rounded, size: 12, color: AppTheme.primary),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${items.length} ${items.length == 1 ? "Entry" : "Entries"}',
-                            style: const TextStyle(
-                              color: AppTheme.primary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ],

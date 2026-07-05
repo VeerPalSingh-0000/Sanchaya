@@ -16,16 +16,22 @@ class SearchFilterNotifier extends Notifier<MediaFilter> {
   void updateFilter(MediaFilter f) => state = f;
 }
 
-final searchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
-final searchFilterProvider = NotifierProvider<SearchFilterNotifier, MediaFilter>(SearchFilterNotifier.new);
+final discoverSearchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
+final discoverSearchFilterProvider = NotifierProvider<SearchFilterNotifier, MediaFilter>(SearchFilterNotifier.new);
 
-class SearchResultsNotifier extends AsyncNotifier<SearchResult> {
+final homeSearchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
+final homeSearchFilterProvider = NotifierProvider<SearchFilterNotifier, MediaFilter>(SearchFilterNotifier.new);
+
+abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
+  NotifierProvider<SearchQueryNotifier, String> get queryProvider;
+  NotifierProvider<SearchFilterNotifier, MediaFilter> get filterProvider;
+  
   Timer? _debounceTimer;
 
   @override
   Future<SearchResult> build() async {
-    final query = ref.watch(searchQueryProvider);
-    final filter = ref.watch(searchFilterProvider);
+    final query = ref.watch(queryProvider);
+    final filter = ref.watch(filterProvider);
 
     if (query.isEmpty) {
       return SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
@@ -49,6 +55,17 @@ class SearchResultsNotifier extends AsyncNotifier<SearchResult> {
 
         SearchResult result = SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
 
+        if (query.startsWith('#genre:')) {
+          final genreIdStr = query.replaceFirst('#genre:', '');
+          final genreId = int.tryParse(genreIdStr);
+          if (genreId != null) {
+            result = await tmdbService.discoverByGenre(genreId);
+            await cacheService.setSearchCache(cacheKey, result.toJson());
+            completer.complete(result);
+            return;
+          }
+        }
+
         switch (filter) {
           case MediaFilter.movie:
             result = await tmdbService.searchMovies(query);
@@ -68,15 +85,12 @@ class SearchResultsNotifier extends AsyncNotifier<SearchResult> {
             // Filter out Japanese animation from TMDB if we have Anilist results
             for (final tmdbItem in tmdbMulti.results) {
               if (tmdbItem.originCountry == 'JP' && tmdbItem.genres.any((g) => g.name == 'Animation')) {
-                // Skip it, we'll use AniList for anime
                 continue;
               }
               combinedResults.add(tmdbItem);
             }
             
             combinedResults.addAll(anilistAnime.results);
-            
-            // Sort by vote count roughly
             combinedResults.sort((a, b) => b.voteCount.compareTo(a.voteCount));
 
             result = SearchResult(
@@ -99,4 +113,19 @@ class SearchResultsNotifier extends AsyncNotifier<SearchResult> {
   }
 }
 
-final searchResultsProvider = AsyncNotifierProvider<SearchResultsNotifier, SearchResult>(SearchResultsNotifier.new);
+class DiscoverSearchResultsNotifier extends BaseSearchResultsNotifier {
+  @override
+  NotifierProvider<SearchQueryNotifier, String> get queryProvider => discoverSearchQueryProvider;
+  @override
+  NotifierProvider<SearchFilterNotifier, MediaFilter> get filterProvider => discoverSearchFilterProvider;
+}
+
+class HomeSearchResultsNotifier extends BaseSearchResultsNotifier {
+  @override
+  NotifierProvider<SearchQueryNotifier, String> get queryProvider => homeSearchQueryProvider;
+  @override
+  NotifierProvider<SearchFilterNotifier, MediaFilter> get filterProvider => homeSearchFilterProvider;
+}
+
+final discoverSearchResultsProvider = AsyncNotifierProvider<DiscoverSearchResultsNotifier, SearchResult>(DiscoverSearchResultsNotifier.new);
+final homeSearchResultsProvider = AsyncNotifierProvider<HomeSearchResultsNotifier, SearchResult>(HomeSearchResultsNotifier.new);

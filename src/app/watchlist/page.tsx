@@ -77,14 +77,28 @@ export default function WatchlistPage() {
     }).catch(() => setIsMigrating(false));
   }, [watchlist, mounted]);
 
-  // 1. Group natively using database fields without filtering
   const allGroups = useMemo(() => {
     const list: (DisplayItem & { aggregateStatus: WatchStatus })[] = [];
     const groupedIds = new Set<string>();
 
     const franchiseMap = new Map<string, { title: string, posterUrl: string, items: WatchlistItem[] }>();
 
+    // Deduplicate watchlist to prevent duplicate posters from legacy vs new IDs
+    const uniqueWatchlist: WatchlistItem[] = [];
+    const seenKeys = new Set<string>();
+
     watchlist.forEach(item => {
+      const extId = item.externalId || item.id;
+      const cleanExtId = String(extId).replace(/tmdb-tv-|tmdb-movie-|anilist-/g, '');
+      const key = `${cleanExtId}-${item.mediaType}`;
+      
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        uniqueWatchlist.push(item);
+      }
+    });
+
+    uniqueWatchlist.forEach(item => {
       if (item.franchiseId) {
         if (!franchiseMap.has(item.franchiseId)) {
           franchiseMap.set(item.franchiseId, {
@@ -125,7 +139,7 @@ export default function WatchlistPage() {
       }
     });
 
-    watchlist.forEach(item => {
+    uniqueWatchlist.forEach(item => {
       if (!groupedIds.has(item.id)) {
         list.push({ type: 'single', item, aggregateStatus: item.status });
       }

@@ -5,6 +5,8 @@ import '../models/media.dart';
 import '../models/watchlist_item.dart';
 import '../providers/watchlist_provider.dart';
 import '../providers/service_providers.dart';
+import 'episode_tracker_widget.dart';
+import 'reaction_selector.dart';
 
 class WatchlistBottomSheet extends ConsumerStatefulWidget {
   final Media media;
@@ -211,6 +213,20 @@ class _WatchlistBottomSheetState extends ConsumerState<WatchlistBottomSheet> {
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child: Divider(color: Colors.white12),
               ),
+              if (watchlistNotifier.getItem(widget.media.externalId, widget.media.type) != null) ...[
+                if (watchlistNotifier.getItem(widget.media.externalId, widget.media.type)!.status == WatchStatus.watching) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Center(child: EpisodeTrackerWidget(item: watchlistNotifier.getItem(widget.media.externalId, widget.media.type)!)),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Center(child: ReactionSelectorWidget(item: watchlistNotifier.getItem(widget.media.externalId, widget.media.type)!)),
+                ),
+                const SizedBox(height: 16),
+              ],
               Material(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(12),

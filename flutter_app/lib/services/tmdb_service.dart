@@ -246,6 +246,27 @@ class TmdbService {
 
 
 
+  Future<SearchResult> discoverByGenre(int genreId, [int page = 1]) async {
+    try {
+      final data = await _fetch<Map<String, dynamic>>('/discover/movie', params: {
+        'with_genres': genreId,
+        'page': page,
+        'sort_by': 'popularity.desc',
+      });
+      final results = (data['results'] as List<dynamic>)
+          .map((e) => _mapMovieToMedia(e as Map<String, dynamic>))
+          .toList();
+      return SearchResult(
+        results: results,
+        totalResults: data['total_results'] as int? ?? 0,
+        totalPages: data['total_pages'] as int? ?? 0,
+        page: data['page'] as int? ?? 1,
+      );
+    } catch (e) {
+      return SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
+    }
+  }
+
   Future<SearchResult> searchMulti(String query, [int page = 1]) async {
     try {
       final data = await _fetch<Map<String, dynamic>>('/search/multi', params: {'query': query, 'page': page});

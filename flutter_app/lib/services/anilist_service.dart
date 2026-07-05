@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import '../config/constants.dart';
 import '../models/media.dart';
@@ -36,7 +38,8 @@ class AnilistService {
     }
   ''';
 
-  static const String mediaDetailFragment = '''
+  static const String mediaDetailFragment =
+      '''
     fragment MediaDetailFields on Media {
       ...MediaFields
       studios { edges { isMain node { name } } }
@@ -46,15 +49,24 @@ class AnilistService {
     $mediaFragment
   ''';
 
-  Future<T> _fetch<T>(String query, {Map<String, dynamic>? variables, int retries = 3}) async {
+  Future<T> _fetch<T>(
+    String query, {
+    Map<String, dynamic>? variables,
+    int retries = 3,
+  }) async {
     for (int i = 0; i < retries; i++) {
       try {
         final response = await _dio.post(
           '',
           data: {'query': query, 'variables': variables ?? {}},
-          options: Options(headers: {'Content-Type': 'application/json', 'Accept': 'application/json'}),
+          options: Options(
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          ),
         );
-        
+
         final data = response.data as Map<String, dynamic>;
         if (data.containsKey('errors') && (data['errors'] as List).isNotEmpty) {
           throw Exception((data['errors'] as List)[0]['message']);
@@ -64,7 +76,9 @@ class AnilistService {
         if (i == retries - 1) rethrow;
         if (e.response?.statusCode == 429) {
           final retryAfter = e.response?.headers.value('Retry-After');
-          final waitTime = retryAfter != null ? int.parse(retryAfter) * 1000 : 2000;
+          final waitTime = retryAfter != null
+              ? int.parse(retryAfter) * 1000
+              : 2000;
           await Future.delayed(Duration(milliseconds: waitTime));
           continue;
         }
@@ -84,7 +98,10 @@ class AnilistService {
 
   String _resolveTitle(Map<String, dynamic>? title) {
     if (title == null) return 'Unknown';
-    return (title['english'] as String?) ?? (title['romaji'] as String?) ?? (title['native'] as String?) ?? 'Unknown';
+    return (title['english'] as String?) ??
+        (title['romaji'] as String?) ??
+        (title['native'] as String?) ??
+        'Unknown';
   }
 
   String? _formatDate(Map<String, dynamic>? date) {
@@ -110,27 +127,37 @@ class AnilistService {
 
   String _mapAniListStatus(String? status) {
     switch (status) {
-      case 'FINISHED': return 'Ended';
-      case 'RELEASING': return 'Airing';
-      case 'NOT_YET_RELEASED': return 'Upcoming';
-      case 'CANCELLED': return 'Cancelled';
-      case 'HIATUS': return 'On Hiatus';
-      default: return 'Unknown';
+      case 'FINISHED':
+        return 'Ended';
+      case 'RELEASING':
+        return 'Airing';
+      case 'NOT_YET_RELEASED':
+        return 'Upcoming';
+      case 'CANCELLED':
+        return 'Cancelled';
+      case 'HIATUS':
+        return 'On Hiatus';
+      default:
+        return 'Unknown';
     }
   }
 
   String? _buildTrailerUrl(Map<String, dynamic>? trailer) {
     if (trailer == null) return null;
-    if (trailer['site'] == 'youtube') return 'https://www.youtube.com/watch?v=${trailer['id']}';
-    if (trailer['site'] == 'dailymotion') return 'https://www.dailymotion.com/video/${trailer['id']}';
+    if (trailer['site'] == 'youtube')
+      return 'https://www.youtube.com/watch?v=${trailer['id']}';
+    if (trailer['site'] == 'dailymotion')
+      return 'https://www.dailymotion.com/video/${trailer['id']}';
     return null;
   }
 
   Media _mapAniListToMedia(Map<String, dynamic> anime) {
     final title = _resolveTitle(anime['title'] as Map<String, dynamic>?);
     final rawGenres = anime['genres'] as List<dynamic>? ?? [];
-    final genres = rawGenres.map((e) => _genreStringToGenre(e as String)).toList();
-    
+    final genres = rawGenres
+        .map((e) => _genreStringToGenre(e as String))
+        .toList();
+
     List<String>? studiosList;
     final studiosEdges = anime['studios']?['edges'] as List<dynamic>?;
     if (studiosEdges != null) {
@@ -148,7 +175,10 @@ class AnilistService {
       title: title,
       originalTitle: anime['title']?['native'] as String?,
       overview: _stripHtml(anime['description'] as String?),
-      posterUrl: (anime['coverImage']?['extraLarge'] as String?) ?? (anime['coverImage']?['large'] as String?) ?? '',
+      posterUrl:
+          (anime['coverImage']?['extraLarge'] as String?) ??
+          (anime['coverImage']?['large'] as String?) ??
+          '',
       backdropUrl: anime['bannerImage'] as String?,
       genres: genres,
       rating: ((anime['averageScore'] as num?)?.toDouble() ?? 0) / 10,
@@ -161,8 +191,13 @@ class AnilistService {
     );
   }
 
-  Future<SearchResult> searchAnime(String query, [int page = 1, int perPage = 20]) async {
-    final String gqlQuery = '''
+  Future<SearchResult> searchAnime(
+    String query, [
+    int page = 1,
+    int perPage = 20,
+  ]) async {
+    final String gqlQuery =
+        '''
       query SearchAnime(\$query: String!, \$page: Int, \$perPage: Int) {
         Page(page: \$page, perPage: \$perPage) {
           pageInfo { total currentPage lastPage hasNextPage perPage }
@@ -173,13 +208,18 @@ class AnilistService {
     ''';
 
     try {
-      final data = await _fetch<Map<String, dynamic>>(gqlQuery, variables: {'query': query, 'page': page, 'perPage': perPage});
+      final data = await _fetch<Map<String, dynamic>>(
+        gqlQuery,
+        variables: {'query': query, 'page': page, 'perPage': perPage},
+      );
       final pageData = data['Page'] as Map<String, dynamic>;
       final pageInfo = pageData['pageInfo'] as Map<String, dynamic>;
       final mediaList = pageData['media'] as List<dynamic>;
 
       return SearchResult(
-        results: mediaList.map((e) => _mapAniListToMedia(e as Map<String, dynamic>)).toList(),
+        results: mediaList
+            .map((e) => _mapAniListToMedia(e as Map<String, dynamic>))
+            .toList(),
         totalResults: pageInfo['total'] as int? ?? 0,
         totalPages: pageInfo['lastPage'] as int? ?? 0,
         page: pageInfo['currentPage'] as int? ?? 1,
@@ -190,14 +230,18 @@ class AnilistService {
   }
 
   Future<Media?> getAnimeDetails(String id) async {
-    final String gqlQuery = '''
+    final String gqlQuery =
+        '''
       query GetAnimeDetails(\$id: Int!) { Media(id: \$id, type: ANIME) { ...MediaDetailFields } }
       $mediaDetailFragment
     ''';
 
     try {
       final numericId = int.parse(id.replaceAll(RegExp(r'\D'), ''));
-      final data = await _fetch<Map<String, dynamic>>(gqlQuery, variables: {'id': numericId});
+      final data = await _fetch<Map<String, dynamic>>(
+        gqlQuery,
+        variables: {'id': numericId},
+      );
       return _mapAniListToMedia(data['Media'] as Map<String, dynamic>);
     } catch (e) {
       return null;
@@ -205,7 +249,8 @@ class AnilistService {
   }
 
   Future<List<Media>> getTrendingAnime([int page = 1, int perPage = 20]) async {
-    final String gqlQuery = '''
+    final String gqlQuery =
+        '''
       query TrendingAnime(\$page: Int, \$perPage: Int) { 
         Page(page: \$page, perPage: \$perPage) { 
           pageInfo { total currentPage lastPage hasNextPage perPage } 
@@ -216,9 +261,14 @@ class AnilistService {
     ''';
 
     try {
-      final data = await _fetch<Map<String, dynamic>>(gqlQuery, variables: {'page': page, 'perPage': perPage});
+      final data = await _fetch<Map<String, dynamic>>(
+        gqlQuery,
+        variables: {'page': page, 'perPage': perPage},
+      );
       final mediaList = data['Page']['media'] as List<dynamic>;
-      return mediaList.map((e) => _mapAniListToMedia(e as Map<String, dynamic>)).toList();
+      return mediaList
+          .map((e) => _mapAniListToMedia(e as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       return [];
     }
@@ -229,36 +279,55 @@ class AnilistService {
       fragment TimelineNode on Media { id idMal title { romaji english native } type format coverImage { extraLarge large medium color } bannerImage episodes averageScore startDate { year month day } }
     ''';
 
-    const String gql = '''
+    const String gql =
+        '''
       $timelineNodeFragment query GetTimelineNode(\$id: Int!) { Media(id: \$id, type: ANIME) { ...TimelineNode relations { edges { relationType node { id type } } } } }
     ''';
 
-    const String relationsQuery = '''
-      $timelineNodeFragment query GetRelations(\$id_in: [Int]) { Page(page: 1, perPage: 50) { media(id_in: \$id_in, type: ANIME) { ...TimelineNode relations { edges { relationType node { id type } } } } } }
+    const String relationsQuery =
+        '''
+      $timelineNodeFragment query GetRelations(\$id_in: [Int]) { Page(page: 1, perPage: 50) { media(id_in: \$id_in, type: ANIME) { ...TimelineNode } } }
     ''';
 
     try {
       final numericId = int.parse(id.replaceAll(RegExp(r'\D'), ''));
       final validRelationTypes = [
-        "CURRENT", "SEQUEL", "PREQUEL", "SIDE_STORY", "PARENT", "ALTERNATIVE", "SPIN_OFF", "ADAPTATION", "SUMMARY"
+        "CURRENT",
+        "SEQUEL",
+        "PREQUEL",
+        "SIDE_STORY",
+        "PARENT",
+        "ALTERNATIVE",
+        "SPIN_OFF",
+        "ADAPTATION",
+        "SUMMARY",
       ];
 
       final Map<int, Map<String, dynamic>> allNodesMap = {};
       final List<Map<String, dynamic>> queue = [];
       final Set<int> visited = {};
 
-      final initialData = await _fetch<Map<String, dynamic>>(gql, variables: {'id': numericId});
+      final initialData = await _fetch<Map<String, dynamic>>(
+        gql,
+        variables: {'id': numericId},
+      );
       final rootMedia = initialData['Media'] as Map<String, dynamic>?;
       if (rootMedia == null) return [];
 
-      allNodesMap[rootMedia['id'] as int] = {...rootMedia, 'relationType': 'CURRENT'};
+      allNodesMap[rootMedia['id'] as int] = {
+        ...rootMedia,
+        'relationType': 'CURRENT',
+      };
       visited.add(rootMedia['id'] as int);
 
-      final initialRelations = rootMedia['relations']?['edges'] as List<dynamic>? ?? [];
+      final initialRelations =
+          rootMedia['relations']?['edges'] as List<dynamic>? ?? [];
       for (final edge in initialRelations) {
         final node = edge['node'] as Map<String, dynamic>;
         final relType = edge['relationType'] as String;
-        if (node['type'] == 'ANIME' && validRelationTypes.contains(relType) && !visited.contains(node['id'])) {
+        if (node['type'] == 'ANIME' &&
+            validRelationTypes.contains(relType) &&
+            !visited.contains(node['id'])) {
           queue.add({'id': node['id'], 'relType': relType});
         }
       }
@@ -269,38 +338,49 @@ class AnilistService {
         final batchIds = batch.map((e) => e['id'] as int).toList();
         visited.addAll(batchIds);
 
-        final batchData = await _fetch<Map<String, dynamic>>(relationsQuery, variables: {'id_in': batchIds});
+        final batchData = await _fetch<Map<String, dynamic>>(
+          relationsQuery,
+          variables: {'id_in': batchIds},
+        );
         final mediaItems = batchData['Page']?['media'] as List<dynamic>? ?? [];
 
         for (final mediaRaw in mediaItems) {
           final media = mediaRaw as Map<String, dynamic>;
           final mId = media['id'] as int;
           final queuedItem = batch.where((b) => b['id'] == mId).firstOrNull;
-          final actualRelation = queuedItem != null ? queuedItem['relType'] as String : 'SEQUEL';
+          final actualRelation = queuedItem != null
+              ? queuedItem['relType'] as String
+              : 'SEQUEL';
 
           if (!allNodesMap.containsKey(mId)) {
             allNodesMap[mId] = {...media, 'relationType': actualRelation};
           }
 
-          final relations = media['relations']?['edges'] as List<dynamic>? ?? [];
-          for (final edge in relations) {
-            final node = edge['node'] as Map<String, dynamic>;
-            final relType = edge['relationType'] as String;
-            if (node['type'] == 'ANIME' && validRelationTypes.contains(relType) && !visited.contains(node['id'])) {
-              queue.add({'id': node['id'], 'relType': relType});
-            }
-          }
+          // Depth 1 only: We do NOT parse further relations from batchData to avoid infinite loops and complexity limits
         }
       }
 
-      final validMedia = allNodesMap.values.where((node) => validRelationTypes.contains(node['relationType'] as String)).toList();
+      final validMedia = allNodesMap.values
+          .where(
+            (node) =>
+                validRelationTypes.contains(node['relationType'] as String),
+          )
+          .toList();
 
       validMedia.sort((a, b) {
-        final dateA = a['startDate']?['year'] != null 
-            ? DateTime(a['startDate']['year'] as int, a['startDate']['month'] as int? ?? 1, a['startDate']['day'] as int? ?? 1).millisecondsSinceEpoch 
+        final dateA = a['startDate']?['year'] != null
+            ? DateTime(
+                a['startDate']['year'] as int,
+                a['startDate']['month'] as int? ?? 1,
+                a['startDate']['day'] as int? ?? 1,
+              ).millisecondsSinceEpoch
             : 9007199254740991;
-        final dateB = b['startDate']?['year'] != null 
-            ? DateTime(b['startDate']['year'] as int, b['startDate']['month'] as int? ?? 1, b['startDate']['day'] as int? ?? 1).millisecondsSinceEpoch 
+        final dateB = b['startDate']?['year'] != null
+            ? DateTime(
+                b['startDate']['year'] as int,
+                b['startDate']['month'] as int? ?? 1,
+                b['startDate']['day'] as int? ?? 1,
+              ).millisecondsSinceEpoch
             : 9007199254740991;
         if (dateA != dateB) return dateA.compareTo(dateB);
         return (a['id'] as int).compareTo(b['id'] as int);
@@ -313,13 +393,109 @@ class AnilistService {
           number: index++,
           name: _resolveTitle(node['title'] as Map<String, dynamic>?),
           episodeCount: node['episodes'] as int? ?? 0,
-          overview: relType == 'CURRENT' ? 'Current Series' : '${relType.replaceAll('_', ' ')} - ${_resolveTitle(node['title'] as Map<String, dynamic>?)}',
-          posterUrl: (node['coverImage']?['extraLarge'] as String?) ?? (node['coverImage']?['large'] as String?),
+          overview: relType == 'CURRENT'
+              ? 'Current Series'
+              : '${relType.replaceAll('_', ' ')} - ${_resolveTitle(node['title'] as Map<String, dynamic>?)}',
+          posterUrl:
+              (node['coverImage']?['extraLarge'] as String?) ??
+              (node['coverImage']?['large'] as String?),
           mediaId: 'anilist-${node['id']}',
           malId: node['idMal'] as int?,
           mediaType: MediaType.anime,
           format: node['format'] as String?,
           relationType: relType,
+        );
+      }).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Episode>> getAnimeEpisodes(int idMal) async {
+    List<StoryArc> animeArcs = [];
+
+    try {
+      final String arcDataString = await rootBundle.loadString(
+        'assets/data/arc_data.json',
+      );
+      final List<dynamic> arcDataJson = json.decode(arcDataString);
+      final animeArcJson = arcDataJson.firstWhere(
+        (a) => a['anime_id'] == idMal,
+        orElse: () => null,
+      );
+
+      animeArcs =
+          (animeArcJson?['arcs'] as List<dynamic>?)
+              ?.map((a) => StoryArc.fromJson(a as Map<String, dynamic>))
+              .toList() ??
+          [];
+    } catch (e) {
+      debugPrint('Failed to load arc_data.json: $e');
+    }
+
+    if (animeArcs.isNotEmpty) {
+      List<Episode> generatedEpisodes = [];
+      for (var arc in animeArcs) {
+        for (int i = arc.start; i <= arc.end; i++) {
+          generatedEpisodes.add(
+            Episode(
+              number: i,
+              name: 'Episode $i',
+              overview: '',
+              arcName: arc.name,
+              sagaName: arc.saga,
+            ),
+          );
+        }
+      }
+      return generatedEpisodes;
+    }
+
+    try {
+      List<dynamic> allEpisodes = [];
+      int page = 1;
+      bool hasNextPage = true;
+
+      while (hasNextPage && page <= 2) {
+        // limit to 2 pages (200 eps) max for performance
+        try {
+          final response = await _dio.get(
+            'https://api.jikan.moe/v4/anime/$idMal/episodes?page=$page',
+          );
+          final data = response.data['data'] as List<dynamic>?;
+          if (data == null) break;
+
+          allEpisodes.addAll(data);
+          hasNextPage = response.data['pagination']?['has_next_page'] ?? false;
+
+          if (hasNextPage) {
+            page++;
+            await Future.delayed(const Duration(milliseconds: 350));
+          }
+        } catch (e) {
+          if (e is DioException && e.response?.statusCode == 429) {
+            await Future.delayed(const Duration(seconds: 1));
+            continue;
+          }
+          break;
+        }
+      }
+
+      return allEpisodes.map((epData) {
+        final epId = epData['mal_id'] as int? ?? 0;
+        final arc = animeArcs.cast<StoryArc?>().firstWhere(
+          (a) => a != null && epId >= a.start && epId <= a.end,
+          orElse: () => null,
+        );
+        return Episode(
+          number: epId,
+          name: epData['title'] as String? ?? '',
+          overview: epData['title_japanese'] as String? ?? '',
+          airDate: epData['aired'] as String?,
+          isFiller: epData['filler'] as bool? ?? false,
+          isRecap: epData['recap'] as bool? ?? false,
+          arcName: arc?.name,
+          sagaName: arc?.saga,
         );
       }).toList();
     } catch (e) {

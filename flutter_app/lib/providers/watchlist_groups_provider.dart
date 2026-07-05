@@ -71,8 +71,22 @@ final watchlistGroupsProvider = Provider<AsyncValue<List<DisplayItem>>>((ref) {
     final groupedIds = <String>{};
     final franchiseMap = <String, _FranchiseTemp>{};
 
-    // 1. Group items with franchiseId
+    final uniqueWatchlist = <WatchlistItem>[];
+    final seenKeys = <String>{};
+
     for (final item in watchlist) {
+      final extId = item.externalId.isNotEmpty ? item.externalId : item.id;
+      final cleanExtId = extId.replaceAll(RegExp(r'tmdb-tv-|tmdb-movie-|anilist-'), '');
+      final key = '$cleanExtId-${item.mediaType.name}';
+      
+      if (!seenKeys.contains(key)) {
+        seenKeys.add(key);
+        uniqueWatchlist.add(item);
+      }
+    }
+
+    // 1. Group items with franchiseId
+    for (final item in uniqueWatchlist) {
       if (item.franchiseId != null && item.franchiseId!.isNotEmpty) {
         if (!franchiseMap.containsKey(item.franchiseId)) {
           franchiseMap[item.franchiseId!] = _FranchiseTemp(
@@ -117,7 +131,7 @@ final watchlistGroupsProvider = Provider<AsyncValue<List<DisplayItem>>>((ref) {
     });
 
     // 3. Add remaining non-grouped items
-    for (final item in watchlist) {
+    for (final item in uniqueWatchlist) {
       if (!groupedIds.contains(item.id)) {
         list.add(SingleDisplayItem(item));
       }

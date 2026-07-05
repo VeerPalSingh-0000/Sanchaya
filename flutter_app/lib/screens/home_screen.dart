@@ -79,6 +79,71 @@ class HomeScreen extends ConsumerWidget {
 
         const SliverToBoxAdapter(child: SizedBox(height: 28)),
 
+        // ── Continue Watching ──
+        SliverToBoxAdapter(
+          child: Consumer(
+            builder: (context, ref, child) {
+              final watchlistAsync = ref.watch(watchlistProvider);
+              return watchlistAsync.when(
+                data: (watchlist) {
+                  final watching = watchlist.where((i) => i.status == WatchStatus.watching).toList();
+                  if (watching.isEmpty) return const SizedBox.shrink();
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SectionHeader(
+                        title: 'Continue Watching',
+                        icon: Icons.play_circle_fill_rounded,
+                      ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        height: 280,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: watching.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 14),
+                          itemBuilder: (context, index) {
+                            final item = watching[index];
+                            final progressText = (item.progress != null && item.totalEpisodes != null && item.totalEpisodes! > 0)
+                                ? 'EP ${item.progress}/${item.totalEpisodes}'
+                                : null;
+
+                            return MediaCard(
+                              title: item.title,
+                              posterUrl: item.posterUrl,
+                              rating: item.rating,
+                              subtitle: progressText,
+                              typeBadge: item.mediaType.name.toUpperCase(),
+                              isAdded: true,
+                              onTap: () {
+                                String mediaRouteId = item.externalId;
+                                if (!mediaRouteId.startsWith('tmdb-') && !mediaRouteId.startsWith('anilist-')) {
+                                  switch (item.mediaType) {
+                                    case MediaType.movie: mediaRouteId = 'tmdb-movie-${item.externalId}'; break;
+                                    case MediaType.series: mediaRouteId = 'tmdb-tv-${item.externalId}'; break;
+                                    case MediaType.anime: mediaRouteId = 'anilist-${item.externalId}'; break;
+                                  }
+                                }
+                                context.push('/media/$mediaRouteId');
+                              },
+                            ).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: 30 * index));
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
+        ),
+
         // ── Trending Movies ──
         SliverToBoxAdapter(
           child: SectionHeader(

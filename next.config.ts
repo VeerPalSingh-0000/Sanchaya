@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
         hostname: 'img.anili.st',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'wsrv.nl',
+        pathname: '/**',
+      },
     ],
   },
 };

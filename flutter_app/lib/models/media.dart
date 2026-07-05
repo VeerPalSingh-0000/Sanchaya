@@ -22,7 +22,7 @@ String mediaTypeToString(MediaType type) {
     case MediaType.movie:
       return 'movie';
     case MediaType.series:
-      return 'series';
+      return 'tv'; // Changed to match Next.js website
     case MediaType.anime:
       return 'anime';
   }
@@ -264,6 +264,29 @@ class Season {
       if (format != null) 'format': format,
       if (relationType != null) 'relationType': relationType,
     };
+  }
+}
+
+class StoryArc {
+  final String name;
+  final int start;
+  final int end;
+  final String? saga;
+
+  StoryArc({
+    required this.name,
+    required this.start,
+    required this.end,
+    this.saga,
+  });
+
+  factory StoryArc.fromJson(Map<String, dynamic> json) {
+    return StoryArc(
+      name: json['name'] as String,
+      start: json['start'] as int,
+      end: json['end'] as int,
+      saga: json['saga'] as String?,
+    );
   }
 }
 

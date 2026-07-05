@@ -35,9 +35,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final query = ref.watch(searchQueryProvider);
-    final filter = ref.watch(searchFilterProvider);
-    final results = ref.watch(searchResultsProvider);
+    final query = ref.watch(widget.isSearchMode ? homeSearchQueryProvider : discoverSearchQueryProvider);
+    final filter = ref.watch(widget.isSearchMode ? homeSearchFilterProvider : discoverSearchFilterProvider);
+    final results = ref.watch(widget.isSearchMode ? homeSearchResultsProvider : discoverSearchResultsProvider);
 
     return Scaffold(
       appBar: ProfileAppBar(title: widget.isSearchMode ? 'Search' : 'Discover'),
@@ -55,7 +55,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                 controller: _controller,
                 focusNode: _focusNode,
                 onChanged: (value) {
-                  ref.read(searchQueryProvider.notifier).updateQuery(value);
+                  ref.read(widget.isSearchMode ? homeSearchQueryProvider.notifier : discoverSearchQueryProvider.notifier).updateQuery(value);
                 },
                 style: const TextStyle(color: AppTheme.textMain, fontSize: 15),
                 decoration: InputDecoration(
@@ -66,7 +66,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                       ? GestureDetector(
                           onTap: () {
                             _controller.clear();
-                            ref.read(searchQueryProvider.notifier).updateQuery('');
+                            ref.read(widget.isSearchMode ? homeSearchQueryProvider.notifier : discoverSearchQueryProvider.notifier).updateQuery('');
                           },
                           child: const Icon(Icons.close_rounded,
                               color: AppTheme.textSubtle, size: 20),
@@ -90,7 +90,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                       padding: const EdgeInsets.only(right: 8),
                       child: GestureDetector(
                         onTap: () {
-                          ref.read(searchFilterProvider.notifier).updateFilter(f);
+                          ref.read(widget.isSearchMode ? homeSearchFilterProvider.notifier : discoverSearchFilterProvider.notifier).updateFilter(f);
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
@@ -126,12 +126,28 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               ),
             ).animate().fadeIn(duration: 300.ms, delay: 100.ms),
 
+            if (query.startsWith('#genre:'))
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.local_offer_rounded, size: 16, color: AppTheme.primary),
+                    const SizedBox(width: 8),
+                    const Text('Browsing: ', style: TextStyle(color: AppTheme.textSubtle, fontSize: 13)),
+                    Text(
+                      _GenreChips.popularGenres[int.tryParse(query.split(':')[1])] ?? 'Unknown',
+                      style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ],
+                ).animate().fadeIn(duration: 200.ms),
+              ),
+
             const SizedBox(height: 16),
 
             // ── Results ──
             Expanded(
               child: query.isEmpty
-                  ? const _EmptySearchState()
+                  ? _EmptySearchState(isSearchMode: widget.isSearchMode)
                   : results.when(
                       data: (result) {
                         if (result.results.isEmpty) {
@@ -193,15 +209,17 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 // ────────────────────────────────────────────────────────────
 
 class _EmptySearchState extends StatelessWidget {
-  const _EmptySearchState();
+  final bool isSearchMode;
+  const _EmptySearchState({required this.isSearchMode});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
             width: 80,
             height: 80,
             decoration: BoxDecoration(
@@ -231,7 +249,10 @@ class _EmptySearchState extends StatelessWidget {
               fontSize: 14,
             ),
           ),
+          const SizedBox(height: 32),
+          _GenreChips(isSearchMode: isSearchMode),
         ],
+      ),
       ),
     ).animate().fadeIn(duration: 500.ms).scale(
           begin: const Offset(0.9, 0.9),
@@ -239,6 +260,67 @@ class _EmptySearchState extends StatelessWidget {
           duration: 500.ms,
           curve: Curves.easeOut,
         );
+  }
+}
+
+class _GenreChips extends ConsumerWidget {
+  final bool isSearchMode;
+  const _GenreChips({required this.isSearchMode});
+
+  static const Map<int, String> popularGenres = {
+    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
+    80: 'Crime', 18: 'Drama', 14: 'Fantasy', 27: 'Horror',
+    9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi', 53: 'Thriller',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Browse by Genre',
+            style: TextStyle(
+              color: AppTheme.textMain,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 12,
+            children: popularGenres.entries.map((entry) {
+              return GestureDetector(
+                onTap: () {
+                  final provider = isSearchMode ? homeSearchQueryProvider : discoverSearchQueryProvider;
+                  ref.read(provider.notifier).updateQuery('#genre:${entry.key}');
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppTheme.divider),
+                  ),
+                  child: Text(
+                    entry.value,
+                    style: const TextStyle(
+                      color: AppTheme.textSubtle,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 }
 
