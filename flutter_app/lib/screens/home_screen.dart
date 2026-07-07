@@ -18,6 +18,8 @@ import '../providers/watchlist_provider.dart';
 import '../widgets/watchlist_bottom_sheet.dart';
 import '../providers/auth_provider.dart';
 
+import '../widgets/error_retry_widget.dart';
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -29,8 +31,17 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: const ProfileAppBar(title: 'Sanchaya'),
-      body: CustomScrollView(
-        slivers: [
+      body: RefreshIndicator(
+        color: AppTheme.primary,
+        backgroundColor: AppTheme.surfaceLight,
+        onRefresh: () async {
+          ref.invalidate(trendingMoviesProvider);
+          ref.invalidate(trendingTVProvider);
+          ref.invalidate(trendingAnimeProvider);
+          await ref.read(watchlistProvider.notifier).refresh();
+        },
+        child: CustomScrollView(
+          slivers: [
         // ── Search Bar Placeholder ──
         SliverToBoxAdapter(
           child: Padding(
@@ -73,7 +84,7 @@ class HomeScreen extends ConsumerWidget {
               return _HeroCarousel(items: heroItems);
             },
             loading: () => const _HeroCarouselShimmer(),
-            error: (_, __) => const SizedBox(height: 220),
+            error: (_, _) => const SizedBox(height: 220),
           ),
         ),
 
@@ -104,7 +115,7 @@ class HomeScreen extends ConsumerWidget {
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           itemCount: watching.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 14),
+                          separatorBuilder: (_, _) => const SizedBox(width: 14),
                           itemBuilder: (context, index) {
                             final item = watching[index];
                             final progressText = (item.progress != null && item.totalEpisodes != null && item.totalEpisodes! > 0)
@@ -138,7 +149,7 @@ class HomeScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               );
             },
           ),
@@ -156,7 +167,11 @@ class HomeScreen extends ConsumerWidget {
           child: trendingMovies.when(
             data: (movies) => _MediaRow(items: movies, typeBadge: 'MOVIE'),
             loading: () => ShimmerCardRow(),
-            error: (e, _) => _ErrorRow(message: 'Failed to load movies', error: e),
+            error: (e, _) => ErrorRetryWidget(
+              message: 'Failed to load movies',
+              error: e,
+              onRetry: () => ref.invalidate(trendingMoviesProvider),
+            ),
           ),
         ),
 
@@ -174,7 +189,11 @@ class HomeScreen extends ConsumerWidget {
           child: trendingTV.when(
             data: (shows) => _MediaRow(items: shows, typeBadge: 'TV'),
             loading: () => ShimmerCardRow(),
-            error: (e, _) => _ErrorRow(message: 'Failed to load TV shows', error: e),
+            error: (e, _) => ErrorRetryWidget(
+              message: 'Failed to load TV shows',
+              error: e,
+              onRetry: () => ref.invalidate(trendingTVProvider),
+            ),
           ),
         ),
 
@@ -192,13 +211,18 @@ class HomeScreen extends ConsumerWidget {
           child: trendingAnime.when(
             data: (anime) => _MediaRow(items: anime, typeBadge: 'ANIME'),
             loading: () => ShimmerCardRow(),
-            error: (e, _) => _ErrorRow(message: 'Failed to load anime', error: e),
+            error: (e, _) => ErrorRetryWidget(
+              message: 'Failed to load anime',
+              error: e,
+              onRetry: () => ref.invalidate(trendingAnimeProvider),
+            ),
           ),
         ),
 
         // ── Bottom padding for nav bar ──
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],
+    ),
     ),
     );
   }
@@ -254,8 +278,13 @@ class _HeroCarousel extends StatelessWidget {
                   CachedNetworkImage(
                     imageUrl: imageUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: AppTheme.surfaceLight),
-                    errorWidget: (_, __, ___) => Container(color: AppTheme.surfaceLight),
+                    placeholder: (_, _) => Container(color: AppTheme.surfaceLight),
+                    errorWidget: (_, _, _) => Container(
+                      color: AppTheme.surfaceLight,
+                      child: const Center(
+                        child: Icon(Icons.broken_image_outlined, color: AppTheme.textSubtle, size: 32),
+                      ),
+                    ),
                   )
                 else
                   Container(color: AppTheme.surfaceLight),
@@ -449,7 +478,7 @@ class _MediaRow extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 14),
+        separatorBuilder: (_, _) => const SizedBox(width: 14),
         itemBuilder: (context, index) {
           final media = items[index];
           final year = media.releaseDate != null && media.releaseDate!.length >= 4
@@ -462,7 +491,7 @@ class _MediaRow extends ConsumerWidget {
             rating: media.rating,
             subtitle: year,
             typeBadge: typeBadge,
-            isAdded: ref.read(watchlistProvider.notifier).isAdded(media),
+            isAdded: ref.watch(watchlistProvider.notifier).isAdded(media),
             onTap: () => context.push('/media/${media.id}'),
             onAddWatchlist: () {
               final user = ref.read(currentUserProvider);
@@ -510,51 +539,4 @@ class _MediaRow extends ConsumerWidget {
   }
 }
 
-// ────────────────────────────────────────────────────────────
-// Error Row
-// ────────────────────────────────────────────────────────────
-
-class _ErrorRow extends StatelessWidget {
-  final String message;
-  final Object? error;
-  
-  const _ErrorRow({required this.message, this.error});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 120,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.cloud_off_rounded,
-                color: AppTheme.textSubtle, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: const TextStyle(
-                color: AppTheme.textSubtle,
-                fontSize: 13,
-              ),
-            ),
-            if (error != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Text(
-                  error.toString(),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppTheme.error.withValues(alpha: 0.8),
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Removed _ErrorRow in favor of ErrorRetryWidget

@@ -76,7 +76,7 @@ final watchlistGroupsProvider = Provider<AsyncValue<List<DisplayItem>>>((ref) {
 
     for (final item in watchlist) {
       final extId = item.externalId.isNotEmpty ? item.externalId : item.id;
-      final cleanExtId = extId.replaceAll(RegExp(r'tmdb-tv-|tmdb-movie-|anilist-'), '');
+      final cleanExtId = extId.replaceAll(RegExp(r'^(tmdb-tv-|tmdb-movie-|anilist-)+'), '');
       final key = '$cleanExtId-${item.mediaType.name}';
       
       if (!seenKeys.contains(key)) {
@@ -88,14 +88,15 @@ final watchlistGroupsProvider = Provider<AsyncValue<List<DisplayItem>>>((ref) {
     // 1. Group items with franchiseId
     for (final item in uniqueWatchlist) {
       if (item.franchiseId != null && item.franchiseId!.isNotEmpty) {
-        if (!franchiseMap.containsKey(item.franchiseId)) {
-          franchiseMap[item.franchiseId!] = _FranchiseTemp(
+        final cleanFranchiseId = item.franchiseId!.replaceAll(RegExp(r'^(tmdb-tv-|tmdb-movie-|anilist-)+'), '');
+        if (!franchiseMap.containsKey(cleanFranchiseId)) {
+          franchiseMap[cleanFranchiseId] = _FranchiseTemp(
             title: item.franchiseTitle ?? item.title,
             posterUrl: item.franchisePosterUrl ?? item.posterUrl,
             items: [],
           );
         }
-        franchiseMap[item.franchiseId!]!.items.add(item);
+        franchiseMap[cleanFranchiseId]!.items.add(item);
         groupedIds.add(item.id);
       }
     }

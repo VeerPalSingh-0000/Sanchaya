@@ -10,6 +10,9 @@ import '../providers/watchlist_provider.dart';
 import '../providers/watchlist_groups_provider.dart';
 
 import '../widgets/profile_app_bar.dart';
+import '../widgets/media_card.dart';
+
+enum WatchlistTab { all, watching, planToWatch, completed, onHold, dropped }
 
 class WatchlistScreen extends ConsumerStatefulWidget {
   const WatchlistScreen({super.key});
@@ -20,11 +23,12 @@ class WatchlistScreen extends ConsumerStatefulWidget {
 
 class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTickerProviderStateMixin {
   static const _tabs = [
-    WatchStatus.watching,
-    WatchStatus.planToWatch,
-    WatchStatus.completed,
-    WatchStatus.onHold,
-    WatchStatus.dropped,
+    WatchlistTab.all,
+    WatchlistTab.watching,
+    WatchlistTab.planToWatch,
+    WatchlistTab.completed,
+    WatchlistTab.onHold,
+    WatchlistTab.dropped,
   ];
 
   late TabController _tabController;
@@ -141,7 +145,7 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
-                tabs: _tabs.map((status) {
+                tabs: _tabs.map((tab) {
                   return Tab(
                     child: Container(
                       padding:
@@ -149,9 +153,9 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(_statusIcon(status), size: 14),
+                          Icon(_tabIcon(tab), size: 14),
                           const SizedBox(width: 6),
-                          Text(_statusLabel(status)),
+                          Text(_tabLabel(tab)),
                         ],
                       ),
                     ),
@@ -164,13 +168,23 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
 
             // ── Tab content ──
             Expanded(
-              child: watchlistAsync.when(
-                data: (items) {
-                  return TabBarView(
-                    controller: _tabController,
-                    children: _tabs.map((status) {
+              child: RefreshIndicator(
+                color: AppTheme.primary,
+                backgroundColor: AppTheme.surfaceLight,
+                onRefresh: () async {
+                  await ref.read(watchlistProvider.notifier).refresh();
+                },
+                child: watchlistAsync.when(
+                  data: (items) {
+                    return TabBarView(
+                      controller: _tabController,
+                      children: _tabs.map((tab) {
                       final filtered = items.where((i) {
-                        if (i.aggregateStatus != status) return false;
+                        if (tab != WatchlistTab.all) {
+                          final status = _tabToStatus(tab);
+                          if (i.aggregateStatus != status) return false;
+                        }
+                        
                         if (_searchQuery.isEmpty) return true;
                         
                         if (i is SingleDisplayItem) {
@@ -183,9 +197,9 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
                       }).toList();
 
                       if (filtered.isEmpty) {
-                        return _EmptyTab(status: status);
+                        return _EmptyTab(tab: tab);
                       }
-                      return _WatchlistItemList(items: filtered);
+                      return _WatchlistGrid(items: filtered);
                     }).toList(),
                   );
                 },
@@ -213,6 +227,7 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
                     ],
                   ),
                 ),
+                ),
               ),
             ),
           ],
@@ -221,33 +236,36 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
     );
   }
 
-  String _statusLabel(WatchStatus status) {
-    switch (status) {
-      case WatchStatus.watching:
-        return 'Watching';
-      case WatchStatus.planToWatch:
-        return 'Plan to Watch';
-      case WatchStatus.completed:
-        return 'Completed';
-      case WatchStatus.onHold:
-        return 'On Hold';
-      case WatchStatus.dropped:
-        return 'Dropped';
+  String _tabLabel(WatchlistTab tab) {
+    switch (tab) {
+      case WatchlistTab.all: return 'All Items';
+      case WatchlistTab.watching: return 'Watching';
+      case WatchlistTab.planToWatch: return 'Plan to Watch';
+      case WatchlistTab.completed: return 'Completed';
+      case WatchlistTab.onHold: return 'On Hold';
+      case WatchlistTab.dropped: return 'Dropped';
     }
   }
 
-  IconData _statusIcon(WatchStatus status) {
-    switch (status) {
-      case WatchStatus.watching:
-        return Icons.play_circle_outline_rounded;
-      case WatchStatus.planToWatch:
-        return Icons.access_time_rounded;
-      case WatchStatus.completed:
-        return Icons.check_circle_outline_rounded;
-      case WatchStatus.onHold:
-        return Icons.pause_circle_outline_rounded;
-      case WatchStatus.dropped:
-        return Icons.cancel_outlined;
+  IconData _tabIcon(WatchlistTab tab) {
+    switch (tab) {
+      case WatchlistTab.all: return Icons.all_inbox_rounded;
+      case WatchlistTab.watching: return Icons.play_circle_outline_rounded;
+      case WatchlistTab.planToWatch: return Icons.access_time_rounded;
+      case WatchlistTab.completed: return Icons.check_circle_outline_rounded;
+      case WatchlistTab.onHold: return Icons.pause_circle_outline_rounded;
+      case WatchlistTab.dropped: return Icons.cancel_outlined;
+    }
+  }
+
+  WatchStatus _tabToStatus(WatchlistTab tab) {
+    switch (tab) {
+      case WatchlistTab.watching: return WatchStatus.watching;
+      case WatchlistTab.planToWatch: return WatchStatus.planToWatch;
+      case WatchlistTab.completed: return WatchStatus.completed;
+      case WatchlistTab.onHold: return WatchStatus.onHold;
+      case WatchlistTab.dropped: return WatchStatus.dropped;
+      default: return WatchStatus.watching; // Fallback
     }
   }
 }
@@ -257,20 +275,21 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
 // ────────────────────────────────────────────────────────────
 
 class _EmptyTab extends StatelessWidget {
-  final WatchStatus status;
-  const _EmptyTab({required this.status});
+  final WatchlistTab tab;
+  const _EmptyTab({required this.tab});
 
   @override
   Widget build(BuildContext context) {
     final messages = {
-      WatchStatus.watching: ('Nothing playing', 'Start watching something!'),
-      WatchStatus.planToWatch: ('Your queue is empty', 'Add titles to watch later'),
-      WatchStatus.completed: ('No completions yet', 'Finish watching something!'),
-      WatchStatus.onHold: ('Nothing on hold', 'Paused shows will appear here'),
-      WatchStatus.dropped: ('Nothing dropped', 'Dropped titles appear here'),
+      WatchlistTab.all: ('Watchlist is empty', 'Start adding movies and shows!'),
+      WatchlistTab.watching: ('Nothing playing', 'Start watching something!'),
+      WatchlistTab.planToWatch: ('Your queue is empty', 'Add titles to watch later'),
+      WatchlistTab.completed: ('No completions yet', 'Finish watching something!'),
+      WatchlistTab.onHold: ('Nothing on hold', 'Paused shows will appear here'),
+      WatchlistTab.dropped: ('Nothing dropped', 'Dropped titles appear here'),
     };
 
-    final (title, subtitle) = messages[status]!;
+    final (title, subtitle) = messages[tab]!;
 
     return Center(
       child: Column(
@@ -310,26 +329,31 @@ class _EmptyTab extends StatelessWidget {
 }
 
 // ────────────────────────────────────────────────────────────
-// Watchlist item list
+// Watchlist grid layout
 // ────────────────────────────────────────────────────────────
 
-class _WatchlistItemList extends StatelessWidget {
+class _WatchlistGrid extends StatelessWidget {
   final List<DisplayItem> items;
-  const _WatchlistItemList({required this.items});
+  const _WatchlistGrid({required this.items});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return GridView.builder(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 0.46,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 16,
+      ),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final displayItem = items[index];
         final Widget child;
         if (displayItem is SingleDisplayItem) {
-          child = _WatchlistTile(item: displayItem.item);
+          child = _WatchlistCard(item: displayItem.item);
         } else if (displayItem is FranchiseDisplayItem) {
-          child = _FranchiseTile(displayItem: displayItem);
+          child = _FranchiseCard(displayItem: displayItem);
         } else {
           child = const SizedBox.shrink();
         }
@@ -338,227 +362,64 @@ class _WatchlistItemList extends StatelessWidget {
             .animate()
             .fadeIn(
               duration: 300.ms,
-              delay: Duration(milliseconds: (40 * index).clamp(0, 300)),
-            )
-            .slideY(
-              begin: 0.05,
-              duration: 300.ms,
-              delay: Duration(milliseconds: (40 * index).clamp(0, 300)),
-              curve: Curves.easeOut,
+              delay: index > 12 ? Duration.zero : Duration(milliseconds: (30 * index).clamp(0, 300)),
             );
       },
     );
   }
 }
 
-class _WatchlistTile extends StatelessWidget {
+class _WatchlistCard extends StatelessWidget {
   final WatchlistItem item;
-  const _WatchlistTile({required this.item});
+  const _WatchlistCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
-    final hasProgress = item.progress != null && item.totalEpisodes != null && item.totalEpisodes! > 0;
-    final progressFraction = hasProgress ? (item.progress! / item.totalEpisodes!) : 0.0;
-
-    return GestureDetector(
+    return MediaCard(
+      title: item.title,
+      posterUrl: item.posterUrl,
+      rating: item.rating,
+      width: double.infinity,
+      height: 155,
+      typeBadge: _typeLabel(item.mediaType),
       onTap: () {
         String mediaRouteId = item.externalId;
-        // Backwards compatibility for incorrectly saved IDs that miss the prefix
         if (!mediaRouteId.startsWith('tmdb-') && !mediaRouteId.startsWith('anilist-')) {
           switch (item.mediaType) {
-            case MediaType.movie:
-              mediaRouteId = 'tmdb-movie-${item.externalId}';
-              break;
-            case MediaType.series:
-              mediaRouteId = 'tmdb-tv-${item.externalId}';
-              break;
-            case MediaType.anime:
-              mediaRouteId = 'anilist-${item.externalId}';
-              break;
+            case MediaType.movie: mediaRouteId = 'tmdb-movie-${item.externalId}'; break;
+            case MediaType.series: mediaRouteId = 'tmdb-tv-${item.externalId}'; break;
+            case MediaType.anime: mediaRouteId = 'anilist-${item.externalId}'; break;
           }
         }
         context.push('/media/$mediaRouteId');
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: AppTheme.divider.withValues(alpha: 0.3),
-            width: 0.5,
-          ),
-        ),
-        child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            // Poster
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 60,
-                height: 85,
-                child: item.posterUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: item.posterUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(color: AppTheme.surfaceLight),
-                        errorWidget: (_, __, ___) =>
-                            Container(color: AppTheme.surfaceLight),
-                      )
-                    : Container(
-                        color: AppTheme.surfaceLight,
-                        child: const Icon(Icons.movie_outlined,
-                            color: AppTheme.textSubtle, size: 24),
-                      ),
-              ),
-            ),
-
-            const SizedBox(width: 14),
-
-            // Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  Text(
-                    item.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      height: 1.3,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  // Type + rating row
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          _typeLabel(item.mediaType),
-                          style: const TextStyle(
-                            color: AppTheme.primary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      if (item.rating > 0)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.star_rounded,
-                                color: Color(0xFFFBBF24), size: 13),
-                            const SizedBox(width: 3),
-                            Text(
-                              item.rating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                color: AppTheme.textMuted,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      // Reaction emoji
-                      if (item.reaction != null)
-                        Text(
-                          _reactionEmoji(item.reaction!),
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                    ],
-                  ),
-
-                  // Progress bar
-                  if (hasProgress) ...[
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: progressFraction.clamp(0.0, 1.0),
-                              backgroundColor: AppTheme.surfaceLight,
-                              valueColor:
-                                  const AlwaysStoppedAnimation(AppTheme.primary),
-                              minHeight: 4,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '${item.progress}/${item.totalEpisodes}',
-                          style: const TextStyle(
-                            color: AppTheme.textSubtle,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    ));
+    );
   }
 
   String _typeLabel(MediaType type) {
     switch (type) {
-      case MediaType.movie:
-        return 'MOVIE';
-      case MediaType.series:
-        return 'TV';
-      case MediaType.anime:
-        return 'ANIME';
-    }
-  }
-
-  String _reactionEmoji(Reaction reaction) {
-    switch (reaction) {
-      case Reaction.love:
-        return '❤️';
-      case Reaction.good:
-        return '👍';
-      case Reaction.bad:
-        return '👎';
+      case MediaType.movie: return 'MOVIE';
+      case MediaType.series: return 'TV';
+      case MediaType.anime: return 'ANIME';
     }
   }
 }
 
 // ────────────────────────────────────────────────────────────
-// Franchise group tile
+// Franchise group card (Stacked style)
 // ────────────────────────────────────────────────────────────
 
-class _FranchiseTile extends StatelessWidget {
+class _FranchiseCard extends StatelessWidget {
   final FranchiseDisplayItem displayItem;
-  const _FranchiseTile({required this.displayItem});
+  const _FranchiseCard({required this.displayItem});
 
   @override
   Widget build(BuildContext context) {
     final group = displayItem.group;
     final items = displayItem.items;
 
-    // Use poster of the currently active item, fallback to root poster, then fallback to first item
+    if (items.isEmpty) return const SizedBox.shrink();
+
     final watchingItem = items.where((i) => i.status == WatchStatus.watching).firstOrNull;
     final sortedItems = List<WatchlistItem>.from(items)..sort((a, b) => a.title.compareTo(b.title));
     final targetItem = watchingItem ?? 
@@ -567,86 +428,135 @@ class _FranchiseTile extends StatelessWidget {
         
     final posterUrl = targetItem.posterUrl.isNotEmpty ? targetItem.posterUrl : (group.rootPosterUrl.isNotEmpty ? group.rootPosterUrl : '');
     final title = (group.rootTitle != 'Unknown' && group.rootTitle.isNotEmpty) ? group.rootTitle : sortedItems.first.title;
+    
+    final int extraItems = items.length - 1;
 
     return GestureDetector(
       onTap: () {
         String mediaRouteId = targetItem.externalId;
-        // Backwards compatibility for incorrectly saved IDs that miss the prefix
         if (!mediaRouteId.startsWith('tmdb-') && !mediaRouteId.startsWith('anilist-')) {
           switch (targetItem.mediaType) {
-            case MediaType.movie:
-              mediaRouteId = 'tmdb-movie-${targetItem.externalId}';
-              break;
-            case MediaType.series:
-              mediaRouteId = 'tmdb-tv-${targetItem.externalId}';
-              break;
-            case MediaType.anime:
-              mediaRouteId = 'anilist-${targetItem.externalId}';
-              break;
+            case MediaType.movie: mediaRouteId = 'tmdb-movie-${targetItem.externalId}'; break;
+            case MediaType.series: mediaRouteId = 'tmdb-tv-${targetItem.externalId}'; break;
+            case MediaType.anime: mediaRouteId = 'anilist-${targetItem.externalId}'; break;
           }
         }
         context.push('/media/$mediaRouteId');
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: AppTheme.divider.withValues(alpha: 0.3),
-            width: 0.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Poster
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 60,
-                  height: 90,
-                  child: posterUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: posterUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => Container(
-                            color: AppTheme.surfaceLight,
-                          ),
-                          errorWidget: (_, __, ___) => Container(
-                            color: AppTheme.surfaceLight,
-                            child: const Icon(Icons.broken_image, size: 24, color: AppTheme.textMuted),
-                          ),
-                        )
-                      : Container(
-                          color: AppTheme.surfaceLight,
-                          child: const Icon(Icons.movie, size: 24, color: AppTheme.textMuted),
-                        ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppTheme.textMain,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        height: 1.3,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Stacked Poster
+          SizedBox(
+            width: double.infinity,
+            height: 155,
+            child: Stack(
+              children: [
+                // Background card
+                if (extraItems > 0)
+                  Positioned(
+                    top: 0,
+                    left: 6,
+                    right: 6,
+                    bottom: 12,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceLight,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppTheme.divider.withValues(alpha: 0.3)),
                       ),
                     ),
-                  ],
+                  ),
+                // Foreground card
+                Positioned(
+                  top: extraItems > 0 ? 8 : 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppTheme.divider.withValues(alpha: 0.3), width: 0.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          posterUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: posterUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, _) => Container(color: AppTheme.surfaceLight),
+                                  errorWidget: (_, _, _) => Container(
+                                    color: AppTheme.surfaceLight,
+                                    child: const Center(
+                                      child: Icon(Icons.broken_image_outlined, color: AppTheme.textSubtle, size: 24),
+                                    ),
+                                  ),
+                                )
+                              : Container(color: AppTheme.surfaceLight),
+                          // Badge for grouping
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.collections_bookmark_rounded, size: 10, color: Colors.white),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    items.length.toString(),
+                                    style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppTheme.textMain,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${items.length} titles',
+            style: const TextStyle(
+              color: AppTheme.textSubtle,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

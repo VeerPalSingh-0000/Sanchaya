@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../config/theme.dart';
 import '../providers/media_details_provider.dart';
 import '../providers/franchise_timeline_provider.dart';
@@ -15,6 +16,7 @@ import '../widgets/reaction_selector.dart';
 import '../widgets/watchlist_dropdown_button.dart';
 import '../widgets/anime_timeline.dart';
 import '../widgets/story_arcs_widget.dart';
+import '../widgets/season_episodes_widget.dart';
 
 class MediaDetailsScreen extends ConsumerWidget {
   final String mediaId;
@@ -56,10 +58,14 @@ class MediaDetailsScreen extends ConsumerWidget {
                         CachedNetworkImage(
                           imageUrl: coverUrl,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) =>
+                          placeholder: (_, _) =>
                               Container(color: AppTheme.surfaceLight),
-                          errorWidget: (_, __, ___) =>
-                              Container(color: AppTheme.surfaceLight),
+                          errorWidget: (_, _, _) => Container(
+                            color: AppTheme.surfaceLight,
+                            child: const Center(
+                              child: Icon(Icons.broken_image_outlined, color: AppTheme.textSubtle, size: 48),
+                            ),
+                          ),
                         ),
                       Container(
                         decoration: BoxDecoration(
@@ -130,6 +136,17 @@ class MediaDetailsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 16),
                           ],
+                          if (media.totalEpisodes != null && media.totalEpisodes! > 0) ...[
+                            Text(
+                              '${media.totalEpisodes} EPS',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.textSubtle,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                          ],
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -159,16 +176,12 @@ class MediaDetailsScreen extends ConsumerWidget {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: media.genres.map((genre) {
+                          children: media.genres.take(3).map((genre) {
                             return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
                                 color: AppTheme.surfaceLight,
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: AppTheme.divider),
                               ),
                               child: Text(
                                 genre.name,
@@ -181,6 +194,22 @@ class MediaDetailsScreen extends ConsumerWidget {
                             );
                           }).toList(),
                         ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+
+                      if (media.originalTitle != null && media.originalTitle!.isNotEmpty && media.originalTitle != media.title) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          'Original Title: ${media.originalTitle}',
+                          style: const TextStyle(color: AppTheme.textSubtle, fontSize: 13, fontStyle: FontStyle.italic),
+                        ),
+                      ],
+                      
+                      if (media.studios != null && media.studios!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Studio: ${media.studios!.join(', ')}',
+                          style: const TextStyle(color: AppTheme.textSubtle, fontSize: 13),
+                        ),
+                      ],
 
                       const SizedBox(height: 24),
 
@@ -205,6 +234,27 @@ class MediaDetailsScreen extends ConsumerWidget {
                                       media: media,
                                     ),
                                   ),
+                                  
+                                  if (media.trailer != null && media.trailer!.isNotEmpty) ...[
+                                    const SizedBox(width: 12),
+                                    SizedBox(
+                                      height: 48,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () async {
+                                          final url = Uri.parse(media.trailer!);
+                                          if (await canLaunchUrl(url)) {
+                                            await launchUrl(url);
+                                          }
+                                        },
+                                        icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
+                                        label: const Text('Trailer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppTheme.primary,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
 
                                   if (existingItem != null) ...[
                                     const SizedBox(width: 12),
@@ -241,10 +291,16 @@ class MediaDetailsScreen extends ConsumerWidget {
                       ).animate().fadeIn(delay: 400.ms),
 
                       // --- Franchise / Seasons Timeline ---
-                      AnimeTimeline(media: media),
+                      if (media.seasons != null && media.seasons!.isNotEmpty)
+                        AnimeTimeline(media: media),
 
-                      // --- Story Arcs ---
-                      StoryArcsWidget(media: media),
+                      // --- Seasons & Episodes List (Non-Anime TV) ---
+                      if (media.type == MediaType.series && media.malId == null && !media.id.startsWith('anilist-'))
+                        SeasonEpisodesWidget(media: media),
+
+                      // --- Story Arcs & Episodes List (Anime) ---
+                      if (media.type == MediaType.anime || media.malId != null || media.id.startsWith('anilist-'))
+                        StoryArcsWidget(media: media),
                     ],
                   ),
                 ),

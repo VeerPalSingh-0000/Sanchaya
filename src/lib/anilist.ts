@@ -321,6 +321,9 @@ export async function getAnimeSeasons(id: string): Promise<Season[]> {
       "SPIN_OFF",
       "ADAPTATION",
       "SUMMARY",
+      "COMPILATION",
+      "CONTAINS",
+      "SOURCE",
     ];
 
     const allNodesMap = new Map<number, any>();
@@ -377,8 +380,52 @@ export async function getAnimeSeasons(id: string): Promise<Season[]> {
     }
 
     const allMediaInTimeline = Array.from(allNodesMap.values());
+
+    const nodesForRoot = [...allMediaInTimeline].sort((a, b) => {
+      const aIsTV = a.format === 'TV' ? 0 : 1;
+      const bIsTV = b.format === 'TV' ? 0 : 1;
+      if (aIsTV !== bIsTV) return aIsTV - bIsTV;
+
+      const dateA = a.startDate?.year ? new Date(a.startDate.year, (a.startDate.month || 1) - 1, a.startDate.day || 1).getTime() : Infinity;
+      const dateB = b.startDate?.year ? new Date(b.startDate.year, (b.startDate.month || 1) - 1, b.startDate.day || 1).getTime() : Infinity;
+      if (dateA !== dateB) return dateA - dateB;
+      return a.id - b.id;
+    });
+
+    const rootNode = nodesForRoot[0];
+    if (rootNode) {
+      const newRelationMap = new Map<number, string>();
+      newRelationMap.set(rootNode.id, "CURRENT");
+      
+      const memQueue = [rootNode.id];
+      const memVisited = new Set<number>([rootNode.id]);
+
+      while (memQueue.length > 0) {
+        const currentId = memQueue.shift()!;
+        const currentNode = allNodesMap.get(currentId);
+        if (!currentNode) continue;
+
+        const relations = currentNode.relations?.edges || [];
+        for (const edge of relations) {
+          if (
+            edge.node.type === "ANIME" &&
+            validRelationTypes.includes(edge.relationType) &&
+            !memVisited.has(edge.node.id)
+          ) {
+            memVisited.add(edge.node.id);
+            newRelationMap.set(edge.node.id, edge.relationType);
+            memQueue.push(edge.node.id);
+          }
+        }
+      }
+
+      for (const node of allMediaInTimeline) {
+        node.relationType = newRelationMap.get(node.id) || "SEQUEL";
+      }
+    }
+
     const validMedia = allMediaInTimeline.filter((node) =>
-      validRelationTypes.includes(node.relationType),
+      validRelationTypes.includes(node.relationType)
     );
 
     const sortedMedia = validMedia.sort((a, b) => {

@@ -69,6 +69,7 @@ class MediaCard extends StatelessWidget {
                         ? CachedNetworkImage(
                             imageUrl: posterUrl,
                             fit: BoxFit.cover,
+                            memCacheWidth: width.isFinite ? (width * 2).toInt() : null,
                             placeholder: (context, url) => Container(
                               color: AppTheme.surfaceLight,
                               child: const Center(

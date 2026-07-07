@@ -27,6 +27,14 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   final _focusNode = FocusNode();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.isSearchMode) {
+      Future.delayed(const Duration(milliseconds: 100), () => _focusNode.requestFocus());
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
@@ -153,7 +161,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         if (result.results.isEmpty) {
                           return _NoResults(query: query);
                         }
-                        return _ResultsGrid(results: result.results);
+                        return _ResultsGrid(
+                          results: result.results,
+                          isSearchMode: widget.isSearchMode,
+                          hasNextPage: result.page < result.totalPages,
+                        );
                       },
                       loading: () => const _LoadingGrid(),
                       error: (e, _) => Center(
@@ -360,87 +372,242 @@ class _NoResults extends StatelessWidget {
 // Results grid
 // ────────────────────────────────────────────────────────────
 
-class _ResultsGrid extends ConsumerWidget {
+class _ResultsGrid extends ConsumerStatefulWidget {
   final List<Media> results;
-  const _ResultsGrid({required this.results});
+  final bool isSearchMode;
+  final bool hasNextPage;
+
+  const _ResultsGrid({required this.results, required this.isSearchMode, required this.hasNextPage});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.46,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final media = results[index];
-        final year = media.releaseDate != null && media.releaseDate!.length >= 4
-            ? media.releaseDate!.substring(0, 4)
-            : null;
+  ConsumerState<_ResultsGrid> createState() => _ResultsGridState();
+}
 
-        String? badge;
-        switch (media.type) {
-          case MediaType.movie:
-            badge = 'MOVIE';
-            break;
-          case MediaType.series:
-            badge = 'TV';
-            break;
-          case MediaType.anime:
-            badge = 'ANIME';
-            break;
-        }
+class _ResultsGridState extends ConsumerState<_ResultsGrid> {
+  final ScrollController _scrollController = ScrollController();
 
-        return MediaCard(
-          title: media.title,
-          posterUrl: media.posterUrl,
-          rating: media.rating,
-          subtitle: year,
-          width: double.infinity,
-          height: 155, // Reduced slightly to ensure text fits
-          typeBadge: badge,
-          isAdded: ref.read(watchlistProvider.notifier).isAdded(media),
-          onTap: () => context.push('/media/${media.id}'),
-          onAddWatchlist: () {
-            final user = ref.read(currentUserProvider);
-            if (user == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please sign in to use watchlist')),
-              );
-              return;
-            }
-            
-            ref.read(watchlistProvider.notifier).addMediaToWatchlist(media, WatchStatus.planToWatch);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        '${media.title} added to Plan to Watch',
-                        style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (widget.hasNextPage) {
+        final notifier = widget.isSearchMode 
+            ? ref.read(homeSearchResultsProvider.notifier) 
+            : ref.read(discoverSearchResultsProvider.notifier);
+        notifier.fetchNextPage();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.results.isEmpty) return const SizedBox.shrink();
+
+    final firstItem = widget.results.first;
+    final otherItems = widget.results.skip(1).toList();
+
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: _FeaturedCard(media: firstItem),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 0.46,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 16,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final media = otherItems[index];
+                final year = media.releaseDate != null && media.releaseDate!.length >= 4
+                    ? media.releaseDate!.substring(0, 4)
+                    : null;
+
+                String? badge;
+                switch (media.type) {
+                  case MediaType.movie:
+                    badge = 'MOVIE';
+                    break;
+                  case MediaType.series:
+                    badge = 'TV';
+                    break;
+                  case MediaType.anime:
+                    badge = 'ANIME';
+                    break;
+                }
+
+                return MediaCard(
+                  title: media.title,
+                  posterUrl: media.posterUrl,
+                  rating: media.rating,
+                  subtitle: year,
+                  width: double.infinity,
+                  height: 155, // Reduced slightly to ensure text fits
+                  typeBadge: badge,
+                  isAdded: ref.watch(watchlistProvider.notifier).isAdded(media),
+                  onTap: () => context.push('/media/${media.id}'),
+                  onAddWatchlist: () {
+                    final user = ref.read(currentUserProvider);
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please sign in to use watchlist')),
+                      );
+                      return;
+                    }
+                    
+                    ref.read(watchlistProvider.notifier).addMediaToWatchlist(media, WatchStatus.planToWatch);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                '${media.title} added to Plan to Watch',
+                                style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                        backgroundColor: AppTheme.primary,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        duration: const Duration(seconds: 2),
                       ),
-                    ),
-                  ],
+                    );
+                  },
+                ).animate().fadeIn(
+                      duration: 300.ms,
+                      delay: index > 12 ? Duration.zero : Duration(milliseconds: (20 * index).clamp(0, 150)),
+                    );
+              },
+              childCount: otherItems.length,
+            ),
+          ),
+        ),
+        if (widget.hasNextPage)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 100),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
                 ),
-                backgroundColor: AppTheme.primary,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                duration: const Duration(seconds: 2),
               ),
-            );
-          },
-        ).animate().fadeIn(
-              duration: 300.ms,
-              delay: Duration(milliseconds: (30 * index).clamp(0, 300)),
-            );
-      },
+            ),
+          )
+        else
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 100),
+              child: Center(
+                child: Text(
+                  'You\'ve reached the end!',
+                  style: TextStyle(color: AppTheme.textSubtle, fontSize: 13),
+                ),
+              ),
+            ),
+          )
+      ],
+    );
+  }
+}
+
+class _FeaturedCard extends ConsumerWidget {
+  final Media media;
+  const _FeaturedCard({required this.media});
+  
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final year = media.releaseDate != null && media.releaseDate!.length >= 4 ? media.releaseDate!.substring(0, 4) : '';
+    
+    return GestureDetector(
+      onTap: () => context.push('/media/${media.id}'),
+      child: Container(
+        height: 200,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          image: DecorationImage(
+            image: NetworkImage(media.backdropUrl ?? media.posterUrl),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.5), BlendMode.darken),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
+            ),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text('FEATURED', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                media.title, 
+                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, height: 1.2),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  if (media.rating > 0) ...[
+                    const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                    const SizedBox(width: 4),
+                    Text(media.rating.toStringAsFixed(1), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 12),
+                  ],
+                  if (year.isNotEmpty) Text(year, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ).animate().fadeIn(duration: 400.ms),
     );
   }
 }
@@ -459,7 +626,7 @@ class _LoadingGrid extends StatelessWidget {
         mainAxisSpacing: 16,
       ),
       itemCount: 9,
-      itemBuilder: (_, __) => const ShimmerCard(
+      itemBuilder: (_, _) => const ShimmerCard(
         width: double.infinity,
         height: 170,
       ),

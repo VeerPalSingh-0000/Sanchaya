@@ -22,6 +22,21 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     return await supabaseService.getWatchlist(prismaUserId);
   }
 
+  Future<void> refresh() async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+    
+    state = const AsyncLoading();
+    try {
+      final supabaseService = ref.read(supabaseServiceProvider);
+      final prismaUserId = await supabaseService.getOrCreatePrismaUserId(user);
+      final result = await supabaseService.getWatchlist(prismaUserId);
+      state = AsyncData(result);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
   Future<void> addOrUpdate(WatchlistItem item) async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;

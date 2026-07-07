@@ -151,6 +151,12 @@ class AnilistService {
     return null;
   }
 
+  String _proxyUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    if (url.startsWith('https://wsrv.nl') || url.contains('anilist.co')) return url;
+    return 'https://wsrv.nl/?url=$url';
+  }
+
   Media _mapAniListToMedia(Map<String, dynamic> anime) {
     final title = _resolveTitle(anime['title'] as Map<String, dynamic>?);
     final rawGenres = anime['genres'] as List<dynamic>? ?? [];
@@ -175,11 +181,11 @@ class AnilistService {
       title: title,
       originalTitle: anime['title']?['native'] as String?,
       overview: _stripHtml(anime['description'] as String?),
-      posterUrl:
+      posterUrl: _proxyUrl(
           (anime['coverImage']?['extraLarge'] as String?) ??
           (anime['coverImage']?['large'] as String?) ??
-          '',
-      backdropUrl: anime['bannerImage'] as String?,
+          ''),
+      backdropUrl: anime['bannerImage'] != null ? _proxyUrl(anime['bannerImage'] as String?) : null,
       genres: genres,
       rating: ((anime['averageScore'] as num?)?.toDouble() ?? 0) / 10,
       voteCount: anime['popularity'] as int? ?? 0,
@@ -211,6 +217,40 @@ class AnilistService {
       final data = await _fetch<Map<String, dynamic>>(
         gqlQuery,
         variables: {'query': query, 'page': page, 'perPage': perPage},
+      );
+      final pageData = data['Page'] as Map<String, dynamic>;
+      final pageInfo = pageData['pageInfo'] as Map<String, dynamic>;
+      final mediaList = pageData['media'] as List<dynamic>;
+
+      return SearchResult(
+        results: mediaList
+            .map((e) => _mapAniListToMedia(e as Map<String, dynamic>))
+            .toList(),
+        totalResults: pageInfo['total'] as int? ?? 0,
+        totalPages: pageInfo['lastPage'] as int? ?? 0,
+        page: pageInfo['currentPage'] as int? ?? 1,
+      );
+    } catch (e) {
+      return SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
+    }
+  }
+
+  Future<SearchResult> discoverAnimeByGenres(List<String> genres, [int page = 1, int perPage = 20]) async {
+    final String gqlQuery =
+        '''
+      query DiscoverAnime(\$genres: [String], \$page: Int, \$perPage: Int) {
+        Page(page: \$page, perPage: \$perPage) {
+          pageInfo { total currentPage lastPage hasNextPage perPage }
+          media(genre_in: \$genres, type: ANIME, sort: SCORE_DESC) { ...MediaFields studios { edges { isMain node { name } } } }
+        }
+      }
+      $mediaFragment
+    ''';
+
+    try {
+      final data = await _fetch<Map<String, dynamic>>(
+        gqlQuery,
+        variables: {'genres': genres, 'page': page, 'perPage': perPage},
       );
       final pageData = data['Page'] as Map<String, dynamic>;
       final pageInfo = pageData['pageInfo'] as Map<String, dynamic>;
@@ -286,7 +326,7 @@ class AnilistService {
 
     const String relationsQuery =
         '''
-      $timelineNodeFragment query GetRelations(\$id_in: [Int]) { Page(page: 1, perPage: 50) { media(id_in: \$id_in, type: ANIME) { ...TimelineNode } } }
+      $timelineNodeFragment query GetRelations(\$id_in: [Int]) { Page(page: 1, perPage: 50) { media(id_in: \$id_in, type: ANIME) { ...TimelineNode relations { edges { relationType node { id type } } } } } }
     ''';
 
     try {
@@ -301,6 +341,9 @@ class AnilistService {
         "SPIN_OFF",
         "ADAPTATION",
         "SUMMARY",
+        "COMPILATION",
+        "CONTAINS",
+        "SOURCE",
       ];
 
       final Map<int, Map<String, dynamic>> allNodesMap = {};
@@ -356,11 +399,81 @@ class AnilistService {
             allNodesMap[mId] = {...media, 'relationType': actualRelation};
           }
 
-          // Depth 1 only: We do NOT parse further relations from batchData to avoid infinite loops and complexity limits
+          final relations = media['relations']?['edges'] as List<dynamic>? ?? [];
+          for (final edge in relations) {
+            final node = edge['node'] as Map<String, dynamic>;
+            final relType = edge['relationType'] as String;
+            if (node['type'] == 'ANIME' &&
+                validRelationTypes.contains(relType) &&
+                !visited.contains(node['id'])) {
+              queue.add({'id': node['id'], 'relType': relType});
+            }
+          }
         }
       }
 
-      final validMedia = allNodesMap.values
+      final allMediaInTimeline = allNodesMap.values.toList();
+
+      final nodesForRoot = List<Map<String, dynamic>>.from(allMediaInTimeline);
+      nodesForRoot.sort((a, b) {
+        final aIsTV = a['format'] == 'TV' ? 0 : 1;
+        final bIsTV = b['format'] == 'TV' ? 0 : 1;
+        if (aIsTV != bIsTV) return aIsTV.compareTo(bIsTV);
+
+        final dateA = a['startDate']?['year'] != null
+            ? DateTime(
+                a['startDate']['year'] as int,
+                a['startDate']['month'] as int? ?? 1,
+                a['startDate']['day'] as int? ?? 1,
+              ).millisecondsSinceEpoch
+            : 9007199254740991;
+        final dateB = b['startDate']?['year'] != null
+            ? DateTime(
+                b['startDate']['year'] as int,
+                b['startDate']['month'] as int? ?? 1,
+                b['startDate']['day'] as int? ?? 1,
+              ).millisecondsSinceEpoch
+            : 9007199254740991;
+        if (dateA != dateB) return dateA.compareTo(dateB);
+        return (a['id'] as int).compareTo(b['id'] as int);
+      });
+
+      if (nodesForRoot.isNotEmpty) {
+        final rootNode = nodesForRoot.first;
+        final newRelationMap = <int, String>{};
+        newRelationMap[rootNode['id'] as int] = 'CURRENT';
+
+        final memQueue = <int>[rootNode['id'] as int];
+        final memVisited = <int>{rootNode['id'] as int};
+
+        while (memQueue.isNotEmpty) {
+          final currentId = memQueue.removeAt(0);
+          final currentNode = allNodesMap[currentId];
+          if (currentNode == null) continue;
+
+          final relations = currentNode['relations']?['edges'] as List<dynamic>? ?? [];
+          for (final edge in relations) {
+            final node = edge['node'] as Map<String, dynamic>;
+            final relType = edge['relationType'] as String;
+            final nodeId = node['id'] as int;
+
+            if (node['type'] == 'ANIME' &&
+                validRelationTypes.contains(relType) &&
+                !memVisited.contains(nodeId)) {
+              memVisited.add(nodeId);
+              newRelationMap[nodeId] = relType;
+              memQueue.add(nodeId);
+            }
+          }
+        }
+
+        for (final node in allMediaInTimeline) {
+          final nodeId = node['id'] as int;
+          node['relationType'] = newRelationMap[nodeId] ?? 'SEQUEL';
+        }
+      }
+
+      final validMedia = allMediaInTimeline
           .where(
             (node) =>
                 validRelationTypes.contains(node['relationType'] as String),
@@ -396,9 +509,9 @@ class AnilistService {
           overview: relType == 'CURRENT'
               ? 'Current Series'
               : '${relType.replaceAll('_', ' ')} - ${_resolveTitle(node['title'] as Map<String, dynamic>?)}',
-          posterUrl:
+          posterUrl: _proxyUrl(
               (node['coverImage']?['extraLarge'] as String?) ??
-              (node['coverImage']?['large'] as String?),
+              (node['coverImage']?['large'] as String?)),
           mediaId: 'anilist-${node['id']}',
           malId: node['idMal'] as int?,
           mediaType: MediaType.anime,
@@ -412,6 +525,8 @@ class AnilistService {
   }
 
   Future<List<Episode>> getAnimeEpisodes(int idMal) async {
+    if (idMal <= 0) return [];
+    
     List<StoryArc> animeArcs = [];
 
     try {
@@ -430,34 +545,18 @@ class AnilistService {
               .toList() ??
           [];
     } catch (e) {
-      debugPrint('Failed to load arc_data.json: $e');
+      print('Failed to load arc_data.json: $e');
     }
 
-    if (animeArcs.isNotEmpty) {
-      List<Episode> generatedEpisodes = [];
-      for (var arc in animeArcs) {
-        for (int i = arc.start; i <= arc.end; i++) {
-          generatedEpisodes.add(
-            Episode(
-              number: i,
-              name: 'Episode $i',
-              overview: '',
-              arcName: arc.name,
-              sagaName: arc.saga,
-            ),
-          );
-        }
-      }
-      return generatedEpisodes;
-    }
+
 
     try {
       List<dynamic> allEpisodes = [];
       int page = 1;
       bool hasNextPage = true;
 
-      while (hasNextPage && page <= 2) {
-        // limit to 2 pages (200 eps) max for performance
+      while (hasNextPage && page <= 30) {
+        // limit to 30 pages (3000 eps) max to support long anime like One Piece
         try {
           final response = await _dio.get(
             'https://api.jikan.moe/v4/anime/$idMal/episodes?page=$page',

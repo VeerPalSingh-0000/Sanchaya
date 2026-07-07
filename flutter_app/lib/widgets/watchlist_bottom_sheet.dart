@@ -65,8 +65,8 @@ class _WatchlistBottomSheetState extends ConsumerState<WatchlistBottomSheet> {
           final rootItem = seasons.where((s) => s.format == 'TV').firstOrNull ?? seasons.first;
           for (final s in seasons) {
             franchiseMedia.add(Media(
-              id: 'anilist-${s.mediaId}',
-              externalId: s.mediaId.toString(),
+              id: s.mediaId?.toString() ?? '',
+              externalId: s.mediaId?.toString() ?? '',
               type: MediaType.anime,
               title: s.name,
               overview: '',

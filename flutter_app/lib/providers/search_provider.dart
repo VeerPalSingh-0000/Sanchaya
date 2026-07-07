@@ -3,6 +3,7 @@ import '../models/media.dart';
 import '../models/search_result.dart';
 import 'service_providers.dart';
 import 'dart:async';
+import '../services/tmdb_service.dart';
 
 class SearchQueryNotifier extends Notifier<String> {
   @override
@@ -27,6 +28,10 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
   NotifierProvider<SearchFilterNotifier, MediaFilter> get filterProvider;
   
   Timer? _debounceTimer;
+  int _currentPage = 1;
+  bool _isLoadingNextPage = false;
+  String _lastQuery = '';
+  MediaFilter _lastFilter = MediaFilter.all;
 
   @override
   Future<SearchResult> build() async {
@@ -37,79 +42,125 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
       return SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
     }
 
+    _currentPage = 1;
+    _lastQuery = query;
+    _lastFilter = filter;
     final completer = Completer<SearchResult>();
 
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
       try {
         final cacheService = ref.read(cacheServiceProvider);
-        final cacheKey = 'search_${filter.name}_$query';
+        final cacheKey = 'search_${filter.name}_${query}_page_1';
         final cached = cacheService.getSearchCache(cacheKey);
         if (cached != null) {
           completer.complete(SearchResult.fromJson(cached));
           return;
         }
 
-        final tmdbService = ref.read(tmdbServiceProvider);
-        final anilistService = ref.read(anilistServiceProvider);
-
-        SearchResult result = SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
-
-        if (query.startsWith('#genre:')) {
-          final genreIdStr = query.replaceFirst('#genre:', '');
-          final genreId = int.tryParse(genreIdStr);
-          if (genreId != null) {
-            result = await tmdbService.discoverByGenre(genreId);
-            await cacheService.setSearchCache(cacheKey, result.toJson());
-            completer.complete(result);
-            return;
-          }
-        }
-
-        switch (filter) {
-          case MediaFilter.movie:
-            result = await tmdbService.searchMovies(query);
-            break;
-          case MediaFilter.series:
-            result = await tmdbService.searchTV(query);
-            break;
-          case MediaFilter.anime:
-            result = await anilistService.searchAnime(query);
-            break;
-          case MediaFilter.all:
-            final tmdbMulti = await tmdbService.searchMulti(query);
-            final anilistAnime = await anilistService.searchAnime(query, 1, 10);
-            
-            final combinedResults = <Media>[];
-            
-            // Filter out Japanese animation from TMDB if we have Anilist results
-            for (final tmdbItem in tmdbMulti.results) {
-              if (tmdbItem.originCountry == 'JP' && tmdbItem.genres.any((g) => g.name == 'Animation')) {
-                continue;
-              }
-              combinedResults.add(tmdbItem);
-            }
-            
-            combinedResults.addAll(anilistAnime.results);
-            combinedResults.sort((a, b) => b.voteCount.compareTo(a.voteCount));
-
-            result = SearchResult(
-              results: combinedResults,
-              totalResults: tmdbMulti.totalResults + anilistAnime.totalResults,
-              totalPages: 1, // Simplifying pagination for combined
-              page: 1,
-            );
-            break;
-        }
-
+        final result = await _fetchResults(query, filter, 1);
         await cacheService.setSearchCache(cacheKey, result.toJson());
         completer.complete(result);
       } catch (e, st) {
-        completer.completeError(e, st);
+        if (!completer.isCompleted) {
+          completer.completeError(e, st);
+        }
       }
     });
 
     return completer.future;
+  }
+
+  Future<void> fetchNextPage() async {
+    if (_isLoadingNextPage) return;
+    if (state.value == null) return;
+    
+    final currentResult = state.value!;
+    if (currentResult.page >= currentResult.totalPages || currentResult.totalPages == 0) return;
+    
+    _isLoadingNextPage = true;
+    final nextPage = _currentPage + 1;
+    
+    try {
+      final newResult = await _fetchResults(_lastQuery, _lastFilter, nextPage);
+      
+      _currentPage = nextPage;
+      state = AsyncValue.data(SearchResult(
+        results: [...currentResult.results, ...newResult.results],
+        totalResults: newResult.totalResults,
+        totalPages: newResult.totalPages,
+        page: _currentPage,
+      ));
+    } finally {
+      _isLoadingNextPage = false;
+    }
+  }
+
+  Future<SearchResult> _fetchResults(String query, MediaFilter filter, int page) async {
+    final tmdbService = ref.read(tmdbServiceProvider);
+    final anilistService = ref.read(anilistServiceProvider);
+
+    if (query.startsWith('#genre:')) {
+      final genreIdStr = query.replaceFirst('#genre:', '');
+      final genreId = int.tryParse(genreIdStr);
+      if (genreId != null) {
+        final genreName = TmdbService.tmdbGenreMap[genreId] ?? '';
+        final anilistGenre = genreName == 'Sci-Fi' ? 'Sci-Fi' : genreName;
+
+        switch (filter) {
+          case MediaFilter.movie:
+             return await tmdbService.discoverByGenres('movie', [genreId], page);
+          case MediaFilter.series:
+             return await tmdbService.discoverByGenres('tv', [genreId], page);
+          case MediaFilter.anime:
+             return await anilistService.discoverAnimeByGenres([anilistGenre], page);
+          case MediaFilter.all:
+             final m = await tmdbService.discoverByGenres('movie', [genreId], page);
+             final t = await tmdbService.discoverByGenres('tv', [genreId], page);
+             final a = await anilistService.discoverAnimeByGenres([anilistGenre], page);
+             
+             final combined = [...m.results, ...t.results, ...a.results];
+             combined.shuffle();
+             
+             return SearchResult(
+                results: combined,
+                totalResults: m.totalResults + t.totalResults + a.totalResults,
+                totalPages: m.totalPages > t.totalPages ? (m.totalPages > a.totalPages ? m.totalPages : a.totalPages) : (t.totalPages > a.totalPages ? t.totalPages : a.totalPages),
+                page: page,
+             );
+        }
+      }
+    }
+
+    switch (filter) {
+      case MediaFilter.movie:
+        return await tmdbService.searchMovies(query, page);
+      case MediaFilter.series:
+        return await tmdbService.searchTV(query, page);
+      case MediaFilter.anime:
+        return await anilistService.searchAnime(query, page);
+      case MediaFilter.all:
+        final tmdbMulti = await tmdbService.searchMulti(query, page);
+        final anilistAnime = await anilistService.searchAnime(query, page, 10);
+        
+        final combinedResults = <Media>[];
+        for (final tmdbItem in tmdbMulti.results) {
+          if (tmdbItem.originCountry == 'JP' && tmdbItem.genres.any((g) => g.name == 'Animation')) {
+            continue;
+          }
+          combinedResults.add(tmdbItem);
+        }
+        
+        combinedResults.addAll(anilistAnime.results);
+        combinedResults.sort((a, b) => b.voteCount.compareTo(a.voteCount));
+
+        return SearchResult(
+          results: combinedResults,
+          totalResults: tmdbMulti.totalResults + anilistAnime.totalResults,
+          totalPages: tmdbMulti.totalPages > anilistAnime.totalPages ? tmdbMulti.totalPages : anilistAnime.totalPages,
+          page: page,
+        );
+    }
   }
 }
 

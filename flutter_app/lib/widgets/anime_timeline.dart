@@ -6,8 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../config/theme.dart';
 import '../models/media.dart';
 import '../providers/franchise_timeline_provider.dart';
-import '../widgets/watchlist_dropdown_button.dart';
-
+import '../providers/watchlist_provider.dart';
+import '../widgets/watchlist_bottom_sheet.dart';
 class AnimeTimeline extends ConsumerStatefulWidget {
   final Media media;
 
@@ -233,8 +233,13 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                         ? CachedNetworkImage(
                                             imageUrl: arc.posterUrl!,
                                             fit: BoxFit.cover,
-                                            placeholder: (_, __) => Container(color: AppTheme.surfaceLight),
-                                            errorWidget: (_, __, ___) => Container(color: AppTheme.surfaceLight),
+                                            placeholder: (_, _) => Container(color: AppTheme.surfaceLight),
+                                            errorWidget: (_, _, _) => Container(
+                                              color: AppTheme.surfaceLight,
+                                              child: const Center(
+                                                child: Icon(Icons.broken_image_outlined, color: AppTheme.textSubtle, size: 24),
+                                              ),
+                                            ),
                                           )
                                         : Container(
                                             color: AppTheme.surfaceLight,
@@ -263,16 +268,9 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                         ),
                                       ),
                                     ),
-                                    // Watchlist Dropdown Button Overlay at the bottom of the poster
-                                    Positioned(
-                                      bottom: 8,
-                                      left: 8,
-                                      right: 8,
-                                      child: WatchlistDropdownButton(media: pseudoMedia, isCompact: true),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
                               
                               const SizedBox(height: 12),
                               
@@ -289,7 +287,8 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Row(
+                              Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   if (arc.episodeCount > 0) ...[
                                     Text(
@@ -317,6 +316,11 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                     ),
                                 ],
                               ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: _StatusButton(media: pseudoMedia),
+                              ),
                             ],
                           ),
                         ],
@@ -332,7 +336,108 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
       loading: () => const Center(
         child: CircularProgressIndicator(color: AppTheme.primary),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _StatusButton extends ConsumerWidget {
+  final Media media;
+
+  const _StatusButton({required this.media});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final watchlistNotifier = ref.watch(watchlistProvider.notifier);
+    final existingItem = watchlistNotifier.getItem(media.externalId, media.type);
+
+    final status = existingItem?.status;
+    final isAdded = status != null;
+
+    Color color = Colors.white70;
+    Color bgColor = Colors.white.withValues(alpha: 0.05);
+    Color borderColor = Colors.white.withValues(alpha: 0.1);
+    String label = '+ Add to List';
+
+    if (isAdded) {
+      switch (status!) {
+        case WatchStatus.planToWatch:
+          color = const Color(0xFFF59E0B);
+          label = 'Plan to Watch';
+          break;
+        case WatchStatus.watching:
+          color = const Color(0xFF22C55E);
+          label = 'Watching';
+          break;
+        case WatchStatus.completed:
+          color = const Color(0xFF3B82F6);
+          label = 'Completed';
+          break;
+        case WatchStatus.onHold:
+          color = const Color(0xFF94A3B8);
+          label = 'On Hold';
+          break;
+        case WatchStatus.dropped:
+          color = const Color(0xFFEF4444);
+          label = 'Dropped';
+          break;
+      }
+      bgColor = color.withValues(alpha: 0.1);
+      borderColor = color.withValues(alpha: 0.4);
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => WatchlistBottomSheet(media: media),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: bgColor,
+          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (isAdded) ...[
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.5),
+                      blurRadius: 4,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+              ).animate(onPlay: (controller) => controller.repeat()).scaleXY(
+                begin: 1.0, end: 1.2, duration: 1000.ms, curve: Curves.easeInOutSine
+              ).then().scaleXY(begin: 1.2, end: 1.0, duration: 1000.ms, curve: Curves.easeInOutSine),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                color: isAdded ? color : Colors.white70,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
