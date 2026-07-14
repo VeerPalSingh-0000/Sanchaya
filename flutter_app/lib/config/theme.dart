@@ -4,35 +4,35 @@ import 'theme_extension.dart';
 
 class AppTheme {
   // ── Core palette ──
-  static const Color background = Color(0xFF06060C);
-  static const Color surface = Color(0xFF111118);
-  static const Color surfaceLight = Color(0xFF1A1A24);
-  static const Color primary = Color(0xFFE2E8F0);     // Silver/White
-  static const Color primaryLight = Color(0xFFF8FAFC); // White
-  static const Color secondary = Color(0xFF64748B);    // Slate-500
-  static const Color textMain = Color(0xFFEDEDF3);
-  static const Color textMuted = Color(0xFF71717A);     // Zinc-500
-  static const Color textSubtle = Color(0xFF52525B);    // Zinc-600
-  static const Color divider = Color(0xFF27272A);       // Zinc-800
-  static const Color error = Color(0xFFF43F5E);         // Rose-500
-  static const Color success = Color(0xFF22C55E);       // Green-500
-  static const Color warning = Color(0xFFF59E0B);       // Amber-500
+  static const Color background = Color(0xFF09090B);
+  static const Color surface = Color(0xFF18181B);
+  static const Color surfaceLight = Color(0xFF27272A);
+  static const Color primary = Color(0xFF6366F1);     // Indigo 500
+  static const Color primaryLight = Color(0xFF818CF8); // Indigo 400
+  static const Color secondary = Color(0xFFA855F7);    // Purple 500
+  static const Color textMain = Color(0xFFFAFAFA);
+  static const Color textMuted = Color(0xFFA1A1AA);
+  static const Color textSubtle = Color(0xFF71717A);
+  static const Color divider = Color(0xFF3F3F46);
+  static const Color error = Color(0xFFEF4444);
+  static const Color success = Color(0xFF22C55E);
+  static const Color warning = Color(0xFFF59E0B);
 
   // ── Gradients ──
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF94A3B8), Color(0xFFCBD5E1), Color(0xFFF1F5F9)],
+    colors: [Color(0xFF6366F1), Color(0xFFA855F7)], // Indigo to Purple
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient cardGradient = LinearGradient(
-    colors: [Color(0xFF111118), Color(0xFF0F0F16)],
+    colors: [Color(0xFF18181B), Color(0xFF09090B)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
   static const LinearGradient shimmerGradient = LinearGradient(
-    colors: [Color(0xFF1A1A24), Color(0xFF252530), Color(0xFF1A1A24)],
+    colors: [Color(0xFF27272A), Color(0xFF3F3F46), Color(0xFF27272A)],
     stops: [0.0, 0.5, 1.0],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -301,9 +301,9 @@ class AppTheme {
           background: Color(0xFFF8FAFC),
           surface: Colors.white,
           surfaceLight: Color(0xFFF1F5F9),
-          primary: Color(0xFF0F172A),
-          primaryLight: Color(0xFF334155),
-          secondary: Color(0xFF475569),
+          primary: Color(0xFF4F46E5), // Indigo 600
+          primaryLight: Color(0xFF6366F1), // Indigo 500
+          secondary: Color(0xFF9333EA), // Purple 600
           textMain: Color(0xFF0F172A),
           textMuted: Color(0xFF64748B),
           textSubtle: Color(0xFF94A3B8),
