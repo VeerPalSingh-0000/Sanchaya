@@ -61,7 +61,7 @@ It hits different because it actually looks like a flagship app. No cap, the UI 
 ## 📱 Download the App
 
 You can download the latest Android APK directly from this repository:
-[Download Sanchaya.apk](releases/sanchaya-app.apk)
+[Download Sanchaya.apk](releases/sanchaya-app.apk?raw=true)
 
 ---
 
