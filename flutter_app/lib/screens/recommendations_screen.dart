@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import '../config/theme.dart';
 import '../models/media.dart';
 import '../providers/recommendations_provider.dart';
 import '../widgets/media_card.dart';
 import '../widgets/shimmer_card.dart';
 import '../widgets/profile_app_bar.dart';
-import '../screens/media_details_screen.dart';
 
 import '../widgets/error_retry_widget.dart';
 
@@ -27,7 +26,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen> {
     final recommendationsAsync = ref.watch(recommendationsProvider);
 
     return Scaffold(
-      appBar: const ProfileAppBar(title: 'For You'),
+      appBar: ProfileAppBar(title: 'For You'),
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -41,11 +40,11 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen> {
                 data: (data) {
                   return SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Personal Discoveries',
                             style: TextStyle(
                               fontSize: 28,
@@ -53,48 +52,48 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen> {
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             data.topGenres.isNotEmpty
                                 ? 'Based on your love for ${data.topGenres.take(3).join(', ')}'
                                 : 'Top picks for you',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
-                              color: AppTheme.textSubtle,
+                              color: context.colors.textSubtle,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
                                 _buildFilterChip('Everything'),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8),
                                 _buildFilterChip('Movies'),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8),
                                 _buildFilterChip('Webseries'),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8),
                                 _buildFilterChip('Anime'),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                         ],
                       ),
                     ),
                   );
                 },
-                loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                error: (e, _) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+                loading: () => SliverToBoxAdapter(child: SizedBox.shrink()),
+                error: (e, _) => SliverToBoxAdapter(child: SizedBox.shrink()),
               ),
               recommendationsAsync.when(
                 data: (data) {
                   if (data.results.isEmpty) {
-                    return const SliverFillRemaining(
+                    return SliverFillRemaining(
                       child: Center(
                         child: Text(
                           'No recommendations available',
-                          style: TextStyle(color: AppTheme.textSubtle),
+                          style: TextStyle(color: context.colors.textSubtle),
                         ),
                       ),
                     );
@@ -113,7 +112,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen> {
                       child: Center(
                         child: Text(
                           'No $_selectedFilter recommendations',
-                          style: const TextStyle(color: AppTheme.textSubtle),
+                          style: TextStyle(color: context.colors.textSubtle),
                         ),
                       ),
                     );
@@ -148,16 +147,16 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen> {
         }
       },
       backgroundColor: Colors.transparent,
-      selectedColor: AppTheme.primary.withValues(alpha: 0.2),
-      checkmarkColor: AppTheme.primary,
+      selectedColor: context.colors.primary.withValues(alpha: 0.2),
+      checkmarkColor: context.colors.primary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? AppTheme.primary : AppTheme.surfaceLight,
+          color: isSelected ? context.colors.primary : context.colors.surfaceLight,
         ),
       ),
       labelStyle: TextStyle(
-        color: isSelected ? AppTheme.primary : AppTheme.textSubtle,
+        color: isSelected ? context.colors.primary : context.colors.textSubtle,
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
     );
@@ -171,9 +170,9 @@ class _RecommendationsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 100),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.55, // Changed to 0.55 to accommodate the match tag
           crossAxisSpacing: 16,
@@ -212,25 +211,25 @@ class _RecommendationsGrid extends StatelessWidget {
                 children: [
                   MediaCard(
                     title: media.title,
-                    posterUrl: media.posterUrl,
+                    posterUrl: media.franchisePosterUrl ?? media.posterUrl,
                     rating: media.rating,
                     subtitle: year,
                     width: double.infinity,
                     typeBadge: badge,
                   ),
                   if (rec.matchedGenres.isNotEmpty) ...[
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        color: context.colors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         'Match: ${rec.matchedGenres.first}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
-                          color: AppTheme.primary,
+                          color: context.colors.primary,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
@@ -258,16 +257,16 @@ class _LoadingGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 100),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.55,
           crossAxisSpacing: 16,
           mainAxisSpacing: 20,
         ),
         delegate: SliverChildBuilderDelegate(
-          (context, index) => const ShimmerCard(
+          (context, index) => ShimmerCard(
             width: double.infinity,
             height: 220,
           ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
-import '../config/theme.dart';
+import '../providers/settings_provider.dart';
 
 class ProfileAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
@@ -12,6 +13,7 @@ class ProfileAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final settings = ref.watch(settingsProvider);
 
     String greeting = 'Good Evening';
     final hour = DateTime.now().hour;
@@ -27,15 +29,15 @@ class ProfileAppBar extends ConsumerWidget implements PreferredSizeWidget {
         children: [
           Text(
             greeting,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: AppTheme.textSubtle,
+              color: context.colors.textSubtle,
             ),
           ),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -44,7 +46,7 @@ class ProfileAppBar extends ConsumerWidget implements PreferredSizeWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 20.0),
+          padding: EdgeInsets.only(right: 20.0),
           child: GestureDetector(
             onTap: () => context.push('/profile'),
             child: Container(
@@ -52,28 +54,29 @@ class ProfileAppBar extends ConsumerWidget implements PreferredSizeWidget {
               height: 36,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.surfaceLight,
+                color: settings.avatarUrl.isEmpty ? context.colors.surfaceLight : null,
                 border: Border.all(
-                  color: AppTheme.divider.withValues(alpha: 0.5),
-                  width: 1,
+                  color: context.colors.primary.withValues(alpha: 0.5),
+                  width: 2,
                 ),
-              ),
-              child: Center(
-                child: user != null && user.email != null
-                    ? Text(
-                        user.email!.substring(0, 1).toUpperCase(),
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                image: settings.avatarUrl.isNotEmpty
+                    ? DecorationImage(
+                        image: settings.avatarUrl.startsWith('http') 
+                          ? NetworkImage(settings.avatarUrl) 
+                          : AssetImage(settings.avatarUrl) as ImageProvider,
+                        fit: BoxFit.cover,
                       )
-                    : const Icon(
+                    : null,
+              ),
+              child: settings.avatarUrl.isEmpty
+                  ? Center(
+                      child: Icon(
                         Icons.person_rounded,
-                        color: AppTheme.textSubtle,
+                        color: context.colors.textSubtle,
                         size: 20,
                       ),
-              ),
+                    )
+                  : null,
             ),
           ),
         ),
@@ -82,5 +85,5 @@ class ProfileAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }

@@ -39,26 +39,34 @@ Convert the existing **Sanchaya** media tracker web app (Next.js + Prisma + Supa
 
 These are steps **you** need to do before I can write/run code:
 
-### Step 0.1 — Install Flutter SDK
-1. Download Flutter SDK from [flutter.dev/docs/get-started/install/windows](https://flutter.dev/docs/get-started/install/windows)
-2. Extract to a folder like `C:\flutter`
-3. Add `C:\flutter\bin` to your **System PATH** environment variable
-4. Close and reopen your terminal
-5. Run:
-   ```powershell
-   flutter --version
-   flutter doctor
+### Step 0.1 — Install Flutter SDK on Ubuntu Linux
+You can install Flutter using the recommended Snap package:
+1. Run the snap install command:
+   ```bash
+   sudo snap install flutter --classic
+   ```
+2. Initialize Flutter by running:
+   ```bash
+   flutter sdk-path
+   ```
+3. (Optional) Create an alias for Dart:
+   ```bash
+   sudo snap alias flutter.dart dart
    ```
 
-### Step 0.2 — Android SDK Setup
-1. You likely already have Android SDK installed (since you have the existing `android-app/`).
-2. Run `flutter doctor` and fix any issues it reports (accept licenses, etc.):
-   ```powershell
+### Step 0.2 — Android SDK Setup & Desktop Dependencies
+1. Run `flutter doctor` and fix any issues it reports (accept licenses, etc.):
+   ```bash
    flutter doctor --android-licenses
+   ```
+2. (Optional) Install Linux desktop development dependencies if you want to run/build for Linux desktop:
+   ```bash
+   sudo apt update
+   sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev libstdc++-12-dev
    ```
 
 ### Step 0.3 — Verify
-```powershell
+```bash
 flutter doctor -v
 ```
 All checkmarks should be green for **Flutter** and **Android toolchain**. Chrome/web and iOS are not needed.

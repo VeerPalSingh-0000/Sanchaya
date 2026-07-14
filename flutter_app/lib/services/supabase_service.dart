@@ -22,11 +22,8 @@ class SupabaseService {
     }
 
     final googleUser = await GoogleSignIn.instance.authenticate();
-    if (googleUser == null) {
-      throw 'Google sign in was aborted.';
-    }
 
-    final googleAuth = await googleUser.authentication;
+    final googleAuth = googleUser.authentication;
     final idToken = googleAuth.idToken;
 
     if (idToken == null) {

@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../config/theme.dart';
 import '../models/media.dart';
 import '../providers/search_provider.dart';
 import '../widgets/media_card.dart';
 import '../widgets/shimmer_card.dart';
 import '../widgets/profile_app_bar.dart';
-import '../widgets/section_header.dart';
-import '../models/watchlist_item.dart';
+import '../widgets/aesthetic_loader.dart';
 import '../providers/watchlist_provider.dart';
-import '../widgets/watchlist_bottom_sheet.dart';
 import '../providers/auth_provider.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
@@ -30,7 +28,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   void initState() {
     super.initState();
     if (widget.isSearchMode) {
-      Future.delayed(const Duration(milliseconds: 100), () => _focusNode.requestFocus());
+      Future.delayed(Duration(milliseconds: 100), () => _focusNode.requestFocus());
     }
   }
 
@@ -54,65 +52,65 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
             // ── Search bar ──
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,
                 onChanged: (value) {
                   ref.read(widget.isSearchMode ? homeSearchQueryProvider.notifier : discoverSearchQueryProvider.notifier).updateQuery(value);
                 },
-                style: const TextStyle(color: AppTheme.textMain, fontSize: 15),
+                style: TextStyle(color: context.colors.textMain, fontSize: 15),
                 decoration: InputDecoration(
                   hintText: 'Search movies, TV shows & anime...',
-                  prefixIcon: const Icon(Icons.search_rounded,
-                      color: AppTheme.textSubtle, size: 22),
+                  prefixIcon: Icon(Icons.search_rounded,
+                      color: context.colors.textSubtle, size: 22),
                   suffixIcon: query.isNotEmpty
                       ? GestureDetector(
                           onTap: () {
                             _controller.clear();
                             ref.read(widget.isSearchMode ? homeSearchQueryProvider.notifier : discoverSearchQueryProvider.notifier).updateQuery('');
                           },
-                          child: const Icon(Icons.close_rounded,
-                              color: AppTheme.textSubtle, size: 20),
+                          child: Icon(Icons.close_rounded,
+                              color: context.colors.textSubtle, size: 20),
                         )
                       : null,
                 ),
               ),
             ).animate().fadeIn(duration: 300.ms, delay: 50.ms),
 
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
 
             // ── Filter chips ──
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: MediaFilter.values.map((f) {
                     final isSelected = filter == f;
                     return Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: EdgeInsets.only(right: 8),
                       child: GestureDetector(
                         onTap: () {
                           ref.read(widget.isSearchMode ? homeSearchFilterProvider.notifier : discoverSearchFilterProvider.notifier).updateFilter(f);
                         },
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
+                          duration: Duration(milliseconds: 200),
+                          padding: EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppTheme.primary.withValues(alpha: 0.2)
-                                : AppTheme.surfaceLight,
+                                ? context.colors.primary.withValues(alpha: 0.2)
+                                : context.colors.surfaceLight,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected
-                                  ? AppTheme.primary.withValues(alpha: 0.5)
-                                  : AppTheme.divider.withValues(alpha: 0.3),
+                                  ? context.colors.primary.withValues(alpha: 0.5)
+                                  : context.colors.divider.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -120,7 +118,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             _filterLabel(f),
                             style: TextStyle(
                               color:
-                                  isSelected ? AppTheme.primary : AppTheme.textMuted,
+                                  isSelected ? context.colors.primary : context.colors.textMuted,
                               fontSize: 13,
                               fontWeight:
                                   isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -136,21 +134,21 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
             if (query.startsWith('#genre:'))
               Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+                padding: EdgeInsets.only(left: 20, right: 20, top: 16),
                 child: Row(
                   children: [
-                    const Icon(Icons.local_offer_rounded, size: 16, color: AppTheme.primary),
-                    const SizedBox(width: 8),
-                    const Text('Browsing: ', style: TextStyle(color: AppTheme.textSubtle, fontSize: 13)),
+                    Icon(Icons.local_offer_rounded, size: 16, color: context.colors.primary),
+                    SizedBox(width: 8),
+                    Text('Browsing: ', style: TextStyle(color: context.colors.textSubtle, fontSize: 13)),
                     Text(
                       _GenreChips.popularGenres[int.tryParse(query.split(':')[1])] ?? 'Unknown',
-                      style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(color: context.colors.primary, fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ],
                 ).animate().fadeIn(duration: 200.ms),
               ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // ── Results ──
             Expanded(
@@ -172,21 +170,21 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.error_outline_rounded,
-                                color: AppTheme.error, size: 36),
-                            const SizedBox(height: 12),
-                            const Text(
+                            Icon(Icons.error_outline_rounded,
+                                color: context.colors.error, size: 36),
+                            SizedBox(height: 12),
+                            Text(
                               'Something went wrong',
-                              style: TextStyle(color: AppTheme.textMuted),
+                              style: TextStyle(color: context.colors.textMuted),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              padding: EdgeInsets.symmetric(horizontal: 24),
                               child: Text(
                                 e.toString(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: AppTheme.error.withValues(alpha: 0.8),
+                                  color: context.colors.error.withValues(alpha: 0.8),
                                   fontSize: 11,
                                 ),
                               ),
@@ -235,17 +233,17 @@ class _EmptySearchState extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
+              color: context.colors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.explore_rounded,
-              color: AppTheme.primary,
+              color: context.colors.primary,
               size: 36,
             ),
           ),
-          const SizedBox(height: 20),
-          const Text(
+          SizedBox(height: 20),
+          Text(
             'Discover something new',
             style: TextStyle(
               color: Colors.white,
@@ -253,22 +251,22 @@ class _EmptySearchState extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             'Search for movies, TV shows & anime',
             style: TextStyle(
-              color: AppTheme.textSubtle,
+              color: context.colors.textSubtle,
               fontSize: 14,
             ),
           ),
-          const SizedBox(height: 32),
-          _GenreChips(isSearchMode: isSearchMode),
+          SizedBox(height: 32),
+          if (!isSearchMode) _GenreChips(isSearchMode: isSearchMode),
         ],
       ),
       ),
     ).animate().fadeIn(duration: 500.ms).scale(
-          begin: const Offset(0.9, 0.9),
-          end: const Offset(1, 1),
+          begin: Offset(0.9, 0.9),
+          end: Offset(1, 1),
           duration: 500.ms,
           curve: Curves.easeOut,
         );
@@ -288,19 +286,19 @@ class _GenreChips extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
+          Text(
             'Browse by Genre',
             style: TextStyle(
-              color: AppTheme.textMain,
+              color: context.colors.textMain,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 10,
@@ -312,16 +310,16 @@ class _GenreChips extends ConsumerWidget {
                   ref.read(provider.notifier).updateQuery('#genre:${entry.key}');
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceLight,
+                    color: context.colors.surfaceLight,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppTheme.divider),
+                    border: Border.all(color: context.colors.divider),
                   ),
                   child: Text(
                     entry.value,
-                    style: const TextStyle(
-                      color: AppTheme.textSubtle,
+                    style: TextStyle(
+                      color: context.colors.textSubtle,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -346,21 +344,21 @@ class _NoResults extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.search_off_rounded,
-              color: AppTheme.textSubtle, size: 48),
-          const SizedBox(height: 16),
+          Icon(Icons.search_off_rounded,
+              color: context.colors.textSubtle, size: 48),
+          SizedBox(height: 16),
           Text(
             'No results for "$query"',
-            style: const TextStyle(
-              color: AppTheme.textMuted,
+            style: TextStyle(
+              color: context.colors.textMuted,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 6),
-          const Text(
+          SizedBox(height: 6),
+          Text(
             'Try a different search term',
-            style: TextStyle(color: AppTheme.textSubtle, fontSize: 13),
+            style: TextStyle(color: context.colors.textSubtle, fontSize: 13),
           ),
         ],
       ),
@@ -411,7 +409,7 @@ class _ResultsGridState extends ConsumerState<_ResultsGrid> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.results.isEmpty) return const SizedBox.shrink();
+    if (widget.results.isEmpty) return SizedBox.shrink();
 
     final firstItem = widget.results.first;
     final otherItems = widget.results.skip(1).toList();
@@ -421,14 +419,14 @@ class _ResultsGridState extends ConsumerState<_ResultsGrid> {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: _FeaturedCard(media: firstItem),
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
           sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               childAspectRatio: 0.46,
               crossAxisSpacing: 12,
@@ -456,7 +454,7 @@ class _ResultsGridState extends ConsumerState<_ResultsGrid> {
 
                 return MediaCard(
                   title: media.title,
-                  posterUrl: media.posterUrl,
+                  posterUrl: media.franchisePosterUrl ?? media.posterUrl,
                   rating: media.rating,
                   subtitle: year,
                   width: double.infinity,
@@ -468,7 +466,7 @@ class _ResultsGridState extends ConsumerState<_ResultsGrid> {
                     final user = ref.read(currentUserProvider);
                     if (user == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please sign in to use watchlist')),
+                        SnackBar(content: Text('Please sign in to use watchlist')),
                       );
                       return;
                     }
@@ -478,21 +476,21 @@ class _ResultsGridState extends ConsumerState<_ResultsGrid> {
                       SnackBar(
                         content: Row(
                           children: [
-                            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                            const SizedBox(width: 12),
+                            Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                            SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 '${media.title} added to Plan to Watch',
-                                style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                               ),
                             ),
                           ],
                         ),
-                        backgroundColor: AppTheme.primary,
+                        backgroundColor: context.colors.primary,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                        duration: const Duration(seconds: 2),
+                        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        duration: Duration(seconds: 2),
                       ),
                     );
                   },
@@ -506,26 +504,22 @@ class _ResultsGridState extends ConsumerState<_ResultsGrid> {
           ),
         ),
         if (widget.hasNextPage)
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.only(bottom: 100),
               child: Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
-                ),
+                child: AestheticLoader(size: 30),
               ),
             ),
           )
         else
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.only(bottom: 100),
               child: Center(
                 child: Text(
                   'You\'ve reached the end!',
-                  style: TextStyle(color: AppTheme.textSubtle, fontSize: 13),
+                  style: TextStyle(color: context.colors.textSubtle, fontSize: 13),
                 ),
               ),
             ),
@@ -559,7 +553,7 @@ class _FeaturedCard extends ConsumerWidget {
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 10,
-              offset: const Offset(0, 5),
+              offset: Offset(0, 5),
             ),
           ],
         ),
@@ -572,36 +566,36 @@ class _FeaturedCard extends ConsumerWidget {
               colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
             ),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary,
+                  color: context.colors.primary,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Text('FEATURED', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                child: Text('FEATURED', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 media.title, 
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, height: 1.2),
+                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, height: 1.2),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Row(
                 children: [
                   if (media.rating > 0) ...[
-                    const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-                    const SizedBox(width: 4),
-                    Text(media.rating.toStringAsFixed(1), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                    const SizedBox(width: 12),
+                    Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                    SizedBox(width: 4),
+                    Text(media.rating.toStringAsFixed(1), style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                    SizedBox(width: 12),
                   ],
-                  if (year.isNotEmpty) Text(year, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  if (year.isNotEmpty) Text(year, style: TextStyle(color: Colors.white70, fontSize: 12)),
                 ],
               ),
             ],
@@ -618,15 +612,15 @@ class _LoadingGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 100),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 0.46,
         crossAxisSpacing: 12,
         mainAxisSpacing: 16,
       ),
       itemCount: 9,
-      itemBuilder: (_, _) => const ShimmerCard(
+      itemBuilder: (_, _) => ShimmerCard(
         width: double.infinity,
         height: 170,
       ),

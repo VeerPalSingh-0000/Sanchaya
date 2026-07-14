@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/theme.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -18,23 +18,23 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, color: AppTheme.primary, size: 20),
-            const SizedBox(width: 8),
+            Icon(icon, color: context.colors.primary, size: 20),
+            SizedBox(width: 8),
           ],
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.3,
             ),
           ),
-          const Spacer(),
+          Spacer(),
           if (actionText != null)
             GestureDetector(
               onTap: onAction,
@@ -43,16 +43,16 @@ class SectionHeader extends StatelessWidget {
                 children: [
                   Text(
                     actionText!,
-                    style: const TextStyle(
-                      color: AppTheme.primary,
+                    style: TextStyle(
+                      color: context.colors.primary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: 2),
-                  const Icon(
+                  SizedBox(width: 2),
+                  Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: AppTheme.primary,
+                    color: context.colors.primary,
                     size: 12,
                   ),
                 ],

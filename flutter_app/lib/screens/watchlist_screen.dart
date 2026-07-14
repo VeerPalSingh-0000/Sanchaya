@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../config/theme.dart';
 import '../models/watchlist_item.dart';
 import '../models/media.dart';
 import '../providers/watchlist_provider.dart';
 import '../providers/watchlist_groups_provider.dart';
 
-import '../widgets/profile_app_bar.dart';
 import '../widgets/media_card.dart';
+import '../widgets/aesthetic_loader.dart';
+import '../widgets/profile_app_bar.dart';
 
 enum WatchlistTab { all, watching, planToWatch, completed, onHold, dropped }
 
@@ -21,7 +22,8 @@ class WatchlistScreen extends ConsumerStatefulWidget {
   ConsumerState<WatchlistScreen> createState() => _WatchlistScreenState();
 }
 
-class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTickerProviderStateMixin {
+class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
+    with SingleTickerProviderStateMixin {
   static const _tabs = [
     WatchlistTab.all,
     WatchlistTab.watching,
@@ -58,103 +60,113 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
     final watchlistAsync = ref.watch(watchlistGroupsProvider);
 
     return Scaffold(
+      appBar: ProfileAppBar(title: 'Watchlist'),
       body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Title & Tabs ──
+            SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-              child: const Text(
-                'Watchlist',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                  color: AppTheme.textMain,
-                ),
-              ),
-            ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search watchlist...',
-                  hintStyle: const TextStyle(color: AppTheme.textSubtle, fontSize: 14),
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSubtle, size: 20),
+                  hintStyle: TextStyle(
+                    color: context.colors.textSubtle,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: context.colors.textSubtle,
+                    size: 20,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, color: AppTheme.textSubtle, size: 18),
+                          icon: Icon(
+                            Icons.clear_rounded,
+                            color: context.colors.textSubtle,
+                            size: 18,
+                          ),
                           onPressed: () => _searchController.clear(),
                         )
                       : null,
                   filled: true,
-                  fillColor: AppTheme.surfaceLight,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  fillColor: context.colors.surfaceLight,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppTheme.divider.withValues(alpha: 0.5)),
+                    borderSide: BorderSide(
+                      color: context.colors.divider.withValues(alpha: 0.5),
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppTheme.divider.withValues(alpha: 0.5)),
+                    borderSide: BorderSide(
+                      color: context.colors.divider.withValues(alpha: 0.5),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.5)),
+                    borderSide: BorderSide(
+                      color: context.colors.primary.withValues(alpha: 0.5),
+                    ),
                   ),
                 ),
-                style: const TextStyle(color: AppTheme.textMain, fontSize: 14),
+                style: TextStyle(color: context.colors.textMain, fontSize: 14),
               ),
             ).animate().fadeIn(duration: 400.ms),
 
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
+              margin: EdgeInsets.symmetric(horizontal: 16),
               height: 42,
               decoration: BoxDecoration(
-                color: AppTheme.surfaceLight,
+                color: context.colors.surfaceLight,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: AppTheme.divider.withValues(alpha: 0.5),
+                  color: context.colors.divider.withValues(alpha: 0.5),
                 ),
               ),
               child: TabBar(
                 controller: _tabController,
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
-                labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+                labelPadding: EdgeInsets.symmetric(horizontal: 6),
                 indicatorSize: TabBarIndicatorSize.label,
                 dividerColor: Colors.transparent,
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: AppTheme.primary.withValues(alpha: 0.2),
+                  color: context.colors.primary.withValues(alpha: 0.2),
                   border: Border.all(
-                    color: AppTheme.primary.withValues(alpha: 0.4),
+                    color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                 ),
-                labelColor: AppTheme.primary,
-                unselectedLabelColor: AppTheme.textSubtle,
-                labelStyle: const TextStyle(
+                labelColor: context.colors.primary,
+                unselectedLabelColor: context.colors.textSubtle,
+                labelStyle: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
-                unselectedLabelStyle: const TextStyle(
+                unselectedLabelStyle: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
                 tabs: _tabs.map((tab) {
                   return Tab(
                     child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 0,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(_tabIcon(tab), size: 14),
-                          const SizedBox(width: 6),
+                          SizedBox(width: 6),
                           Text(_tabLabel(tab)),
                         ],
                       ),
@@ -164,13 +176,13 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
               ),
             ).animate().fadeIn(duration: 300.ms, delay: 50.ms),
 
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
 
             // ── Tab content ──
             Expanded(
               child: RefreshIndicator(
-                color: AppTheme.primary,
-                backgroundColor: AppTheme.surfaceLight,
+                color: context.colors.primary,
+                backgroundColor: context.colors.surfaceLight,
                 onRefresh: () async {
                   await ref.read(watchlistProvider.notifier).refresh();
                 },
@@ -179,54 +191,67 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
                     return TabBarView(
                       controller: _tabController,
                       children: _tabs.map((tab) {
-                      final filtered = items.where((i) {
-                        if (tab != WatchlistTab.all) {
-                          final status = _tabToStatus(tab);
-                          if (i.aggregateStatus != status) return false;
-                        }
-                        
-                        if (_searchQuery.isEmpty) return true;
-                        
-                        if (i is SingleDisplayItem) {
-                          return i.item.title.toLowerCase().contains(_searchQuery);
-                        } else if (i is FranchiseDisplayItem) {
-                          return i.group.rootTitle.toLowerCase().contains(_searchQuery) ||
-                                 i.items.any((child) => child.title.toLowerCase().contains(_searchQuery));
-                        }
-                        return false;
-                      }).toList();
+                        final filtered = items.where((i) {
+                          if (tab != WatchlistTab.all) {
+                            final status = _tabToStatus(tab);
+                            if (i.aggregateStatus != status) return false;
+                          }
 
-                      if (filtered.isEmpty) {
-                        return _EmptyTab(tab: tab);
-                      }
-                      return _WatchlistGrid(items: filtered);
-                    }).toList(),
-                  );
-                },
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppTheme.primary),
-                ),
-                error: (e, _) => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline_rounded,
-                          color: AppTheme.error, size: 36),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Failed to load watchlist',
-                        style: TextStyle(color: AppTheme.textMuted),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        e.toString(),
-                        style: const TextStyle(
-                            color: AppTheme.textSubtle, fontSize: 12),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                          if (_searchQuery.isEmpty) return true;
+
+                          if (i is SingleDisplayItem) {
+                            return i.item.title.toLowerCase().contains(
+                              _searchQuery,
+                            );
+                          } else if (i is FranchiseDisplayItem) {
+                            return i.group.rootTitle.toLowerCase().contains(
+                                  _searchQuery,
+                                ) ||
+                                i.items.any(
+                                  (child) => child.title.toLowerCase().contains(
+                                    _searchQuery,
+                                  ),
+                                );
+                          }
+                          return false;
+                        }).toList();
+
+                        if (filtered.isEmpty) {
+                          return _EmptyTab(tab: tab);
+                        }
+                        return _WatchlistGrid(items: filtered);
+                      }).toList(),
+                    );
+                  },
+                  loading: () => Center(
+                    child: AestheticLoader(size: 50),
                   ),
-                ),
+                  error: (e, _) => Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          color: context.colors.error,
+                          size: 36,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          'Failed to load watchlist',
+                          style: TextStyle(color: context.colors.textMuted),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          e.toString(),
+                          style: TextStyle(
+                            color: context.colors.textSubtle,
+                            fontSize: 12,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -238,34 +263,52 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen> with SingleTi
 
   String _tabLabel(WatchlistTab tab) {
     switch (tab) {
-      case WatchlistTab.all: return 'All Items';
-      case WatchlistTab.watching: return 'Watching';
-      case WatchlistTab.planToWatch: return 'Plan to Watch';
-      case WatchlistTab.completed: return 'Completed';
-      case WatchlistTab.onHold: return 'On Hold';
-      case WatchlistTab.dropped: return 'Dropped';
+      case WatchlistTab.all:
+        return 'All Items';
+      case WatchlistTab.watching:
+        return 'Watching';
+      case WatchlistTab.planToWatch:
+        return 'Plan to Watch';
+      case WatchlistTab.completed:
+        return 'Completed';
+      case WatchlistTab.onHold:
+        return 'On Hold';
+      case WatchlistTab.dropped:
+        return 'Dropped';
     }
   }
 
   IconData _tabIcon(WatchlistTab tab) {
     switch (tab) {
-      case WatchlistTab.all: return Icons.all_inbox_rounded;
-      case WatchlistTab.watching: return Icons.play_circle_outline_rounded;
-      case WatchlistTab.planToWatch: return Icons.access_time_rounded;
-      case WatchlistTab.completed: return Icons.check_circle_outline_rounded;
-      case WatchlistTab.onHold: return Icons.pause_circle_outline_rounded;
-      case WatchlistTab.dropped: return Icons.cancel_outlined;
+      case WatchlistTab.all:
+        return Icons.all_inbox_rounded;
+      case WatchlistTab.watching:
+        return Icons.play_circle_outline_rounded;
+      case WatchlistTab.planToWatch:
+        return Icons.access_time_rounded;
+      case WatchlistTab.completed:
+        return Icons.check_circle_outline_rounded;
+      case WatchlistTab.onHold:
+        return Icons.pause_circle_outline_rounded;
+      case WatchlistTab.dropped:
+        return Icons.cancel_outlined;
     }
   }
 
   WatchStatus _tabToStatus(WatchlistTab tab) {
     switch (tab) {
-      case WatchlistTab.watching: return WatchStatus.watching;
-      case WatchlistTab.planToWatch: return WatchStatus.planToWatch;
-      case WatchlistTab.completed: return WatchStatus.completed;
-      case WatchlistTab.onHold: return WatchStatus.onHold;
-      case WatchlistTab.dropped: return WatchStatus.dropped;
-      default: return WatchStatus.watching; // Fallback
+      case WatchlistTab.watching:
+        return WatchStatus.watching;
+      case WatchlistTab.planToWatch:
+        return WatchStatus.planToWatch;
+      case WatchlistTab.completed:
+        return WatchStatus.completed;
+      case WatchlistTab.onHold:
+        return WatchStatus.onHold;
+      case WatchlistTab.dropped:
+        return WatchStatus.dropped;
+      default:
+        return WatchStatus.watching; // Fallback
     }
   }
 }
@@ -281,10 +324,19 @@ class _EmptyTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final messages = {
-      WatchlistTab.all: ('Watchlist is empty', 'Start adding movies and shows!'),
+      WatchlistTab.all: (
+        'Watchlist is empty',
+        'Start adding movies and shows!',
+      ),
       WatchlistTab.watching: ('Nothing playing', 'Start watching something!'),
-      WatchlistTab.planToWatch: ('Your queue is empty', 'Add titles to watch later'),
-      WatchlistTab.completed: ('No completions yet', 'Finish watching something!'),
+      WatchlistTab.planToWatch: (
+        'Your queue is empty',
+        'Add titles to watch later',
+      ),
+      WatchlistTab.completed: (
+        'No completions yet',
+        'Finish watching something!',
+      ),
       WatchlistTab.onHold: ('Nothing on hold', 'Paused shows will appear here'),
       WatchlistTab.dropped: ('Nothing dropped', 'Dropped titles appear here'),
     };
@@ -299,28 +351,28 @@ class _EmptyTab extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
+              color: context.colors.surfaceLight,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.bookmark_border_rounded,
-              color: AppTheme.textSubtle,
+              color: context.colors.textSubtle,
               size: 28,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             title,
-            style: const TextStyle(
-              color: AppTheme.textMain,
+            style: TextStyle(
+              color: context.colors.textMain,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(color: AppTheme.textSubtle, fontSize: 13),
+            style: TextStyle(color: context.colors.textSubtle, fontSize: 13),
           ),
         ],
       ),
@@ -339,8 +391,8 @@ class _WatchlistGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.fromLTRB(20, 8, 20, 100),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 0.46,
         crossAxisSpacing: 12,
@@ -355,52 +407,61 @@ class _WatchlistGrid extends StatelessWidget {
         } else if (displayItem is FranchiseDisplayItem) {
           child = _FranchiseCard(displayItem: displayItem);
         } else {
-          child = const SizedBox.shrink();
+          child = SizedBox.shrink();
         }
 
-        return child
-            .animate()
-            .fadeIn(
-              duration: 300.ms,
-              delay: index > 12 ? Duration.zero : Duration(milliseconds: (30 * index).clamp(0, 300)),
-            );
+        return child;
       },
     );
   }
 }
 
-class _WatchlistCard extends StatelessWidget {
+class _WatchlistCard extends ConsumerWidget {
   final WatchlistItem item;
   const _WatchlistCard({required this.item});
 
   @override
-  Widget build(BuildContext context) {
-    return MediaCard(
-      title: item.title,
-      posterUrl: item.posterUrl,
-      rating: item.rating,
-      width: double.infinity,
-      height: 155,
-      typeBadge: _typeLabel(item.mediaType),
-      onTap: () {
-        String mediaRouteId = item.externalId;
-        if (!mediaRouteId.startsWith('tmdb-') && !mediaRouteId.startsWith('anilist-')) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      onLongPress: () => _showRemoveDialog(context, ref, item),
+      child: MediaCard(
+        title: item.title,
+        posterUrl: item.franchisePosterUrl ?? item.posterUrl,
+        rating: item.rating,
+        width: double.infinity,
+        height: 155,
+        typeBadge: _typeLabel(item.mediaType),
+        onTap: () {
+          String cleanId = item.externalId.replaceAll(RegExp(r'^(tmdb-movie-|tmdb-tv-|anilist-)+'), '');
+          String mediaRouteId = cleanId;
           switch (item.mediaType) {
-            case MediaType.movie: mediaRouteId = 'tmdb-movie-${item.externalId}'; break;
-            case MediaType.series: mediaRouteId = 'tmdb-tv-${item.externalId}'; break;
-            case MediaType.anime: mediaRouteId = 'anilist-${item.externalId}'; break;
+            case MediaType.movie:
+              mediaRouteId = 'tmdb-movie-$cleanId';
+              break;
+            case MediaType.series:
+              mediaRouteId = 'tmdb-tv-$cleanId';
+              break;
+            case MediaType.anime:
+              mediaRouteId = 'anilist-$cleanId';
+              break;
           }
-        }
-        context.push('/media/$mediaRouteId');
-      },
+          if (mediaRouteId.contains('-season-')) {
+            mediaRouteId = mediaRouteId.split('-season-').first;
+          }
+          context.push('/media/$mediaRouteId');
+        },
+      ),
     );
   }
 
   String _typeLabel(MediaType type) {
     switch (type) {
-      case MediaType.movie: return 'MOVIE';
-      case MediaType.series: return 'TV';
-      case MediaType.anime: return 'ANIME';
+      case MediaType.movie:
+        return 'MOVIE';
+      case MediaType.series:
+        return 'TV';
+      case MediaType.anime:
+        return 'ANIME';
     }
   }
 }
@@ -409,40 +470,68 @@ class _WatchlistCard extends StatelessWidget {
 // Franchise group card (Stacked style)
 // ────────────────────────────────────────────────────────────
 
-class _FranchiseCard extends StatelessWidget {
+class _FranchiseCard extends ConsumerWidget {
   final FranchiseDisplayItem displayItem;
   const _FranchiseCard({required this.displayItem});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final group = displayItem.group;
     final items = displayItem.items;
 
-    if (items.isEmpty) return const SizedBox.shrink();
+    if (items.isEmpty) return SizedBox.shrink();
 
-    final watchingItem = items.where((i) => i.status == WatchStatus.watching).firstOrNull;
-    final sortedItems = List<WatchlistItem>.from(items)..sort((a, b) => a.title.compareTo(b.title));
-    final targetItem = watchingItem ?? 
-        sortedItems.where((i) => i.status == WatchStatus.planToWatch).firstOrNull ?? 
+    final watchingItem = items
+        .where((i) => i.status == WatchStatus.watching)
+        .firstOrNull;
+    final sortedItems = List<WatchlistItem>.from(items)
+      ..sort((a, b) {
+        final aDate = (a.releaseDate?.isEmpty ?? true) ? null : a.releaseDate;
+        final bDate = (b.releaseDate?.isEmpty ?? true) ? null : b.releaseDate;
+        if (aDate != null && bDate != null) {
+          return aDate.compareTo(bDate);
+        }
+        if (aDate != null) return -1;
+        if (bDate != null) return 1;
+        return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+      });
+    final targetItem =
+        watchingItem ??
+        sortedItems
+            .where((i) => i.status == WatchStatus.planToWatch)
+            .firstOrNull ??
         sortedItems.first;
-        
-    final posterUrl = targetItem.posterUrl.isNotEmpty ? targetItem.posterUrl : (group.rootPosterUrl.isNotEmpty ? group.rootPosterUrl : '');
-    final title = (group.rootTitle != 'Unknown' && group.rootTitle.isNotEmpty) ? group.rootTitle : sortedItems.first.title;
-    
+
+    final posterUrl = targetItem.posterUrl.isNotEmpty
+        ? targetItem.posterUrl
+        : (group.rootPosterUrl.isNotEmpty ? group.rootPosterUrl : '');
+    final title = (group.rootTitle != 'Unknown' && group.rootTitle.isNotEmpty)
+        ? group.rootTitle
+        : sortedItems.first.title;
+
     final int extraItems = items.length - 1;
 
     return GestureDetector(
       onTap: () {
-        String mediaRouteId = targetItem.externalId;
-        if (!mediaRouteId.startsWith('tmdb-') && !mediaRouteId.startsWith('anilist-')) {
-          switch (targetItem.mediaType) {
-            case MediaType.movie: mediaRouteId = 'tmdb-movie-${targetItem.externalId}'; break;
-            case MediaType.series: mediaRouteId = 'tmdb-tv-${targetItem.externalId}'; break;
-            case MediaType.anime: mediaRouteId = 'anilist-${targetItem.externalId}'; break;
-          }
+        String cleanId = targetItem.externalId.replaceAll(RegExp(r'^(tmdb-movie-|tmdb-tv-|anilist-)+'), '');
+        String mediaRouteId = cleanId;
+        switch (targetItem.mediaType) {
+          case MediaType.movie:
+            mediaRouteId = 'tmdb-movie-$cleanId';
+            break;
+          case MediaType.series:
+            mediaRouteId = 'tmdb-tv-$cleanId';
+            break;
+          case MediaType.anime:
+            mediaRouteId = 'anilist-$cleanId';
+            break;
+        }
+        if (mediaRouteId.contains('-season-')) {
+          mediaRouteId = mediaRouteId.split('-season-').first;
         }
         context.push('/media/$mediaRouteId');
       },
+      onLongPress: () => _showFranchiseManageSheet(context, ref, displayItem),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -462,9 +551,11 @@ class _FranchiseCard extends StatelessWidget {
                     bottom: 12,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppTheme.surfaceLight,
+                        color: context.colors.surfaceLight,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppTheme.divider.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: context.colors.divider.withValues(alpha: 0.3),
+                        ),
                       ),
                     ),
                   ),
@@ -477,12 +568,15 @@ class _FranchiseCard extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppTheme.divider.withValues(alpha: 0.3), width: 0.5),
+                      border: Border.all(
+                        color: context.colors.divider.withValues(alpha: 0.3),
+                        width: 0.5,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.4),
                           blurRadius: 10,
-                          offset: const Offset(0, 5),
+                          offset: Offset(0, 5),
                         ),
                       ],
                     ),
@@ -495,33 +589,50 @@ class _FranchiseCard extends StatelessWidget {
                               ? CachedNetworkImage(
                                   imageUrl: posterUrl,
                                   fit: BoxFit.cover,
-                                  placeholder: (_, _) => Container(color: AppTheme.surfaceLight),
+                                  memCacheHeight: 310, // ~155 * 2 for high DPI
+                                  placeholder: (_, _) =>
+                                      Container(color: context.colors.surfaceLight),
                                   errorWidget: (_, _, _) => Container(
-                                    color: AppTheme.surfaceLight,
-                                    child: const Center(
-                                      child: Icon(Icons.broken_image_outlined, color: AppTheme.textSubtle, size: 24),
+                                    color: context.colors.surfaceLight,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.broken_image_outlined,
+                                        color: context.colors.textSubtle,
+                                        size: 24,
+                                      ),
                                     ),
                                   ),
                                 )
-                              : Container(color: AppTheme.surfaceLight),
+                              : Container(color: context.colors.surfaceLight),
                           // Badge for grouping
                           Positioned(
                             top: 8,
                             right: 8,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.9),
+                                color: context.colors.primary.withValues(alpha: 0.9),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.collections_bookmark_rounded, size: 10, color: Colors.white),
-                                  const SizedBox(width: 2),
+                                  Icon(
+                                    Icons.collections_bookmark_rounded,
+                                    size: 10,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 2),
                                   Text(
                                     items.length.toString(),
-                                    style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -535,23 +646,23 @@ class _FranchiseCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text(
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppTheme.textMain,
+            style: TextStyle(
+              color: context.colors.textMain,
               fontSize: 13,
               fontWeight: FontWeight.w600,
               height: 1.3,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2),
           Text(
             '${items.length} titles',
-            style: const TextStyle(
-              color: AppTheme.textSubtle,
+            style: TextStyle(
+              color: context.colors.textSubtle,
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -559,5 +670,279 @@ class _FranchiseCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// Dialogs & Sheets for Deletion
+// ────────────────────────────────────────────────────────────
+
+void _showRemoveDialog(BuildContext context, WidgetRef ref, WatchlistItem item) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: context.colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: context.colors.divider.withValues(alpha: 0.5)),
+      ),
+      title: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: context.colors.error, size: 24),
+          SizedBox(width: 8),
+          Text(
+            'Remove Item',
+            style: TextStyle(color: context.colors.textMain, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+      content: Text(
+        'Are you sure you want to remove "${item.title}" from your watchlist?',
+        style: TextStyle(color: context.colors.textMuted, fontSize: 14),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: context.colors.textMuted),
+          ),
+        ),
+        FilledButton(
+          onPressed: () {
+            ref.read(watchlistProvider.notifier).remove(item.externalId, item.mediaType);
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Removed ${item.title} from watchlist'),
+                backgroundColor: context.colors.surfaceLight,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          style: FilledButton.styleFrom(
+            backgroundColor: context.colors.error,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text('Remove'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showFranchiseManageSheet(BuildContext context, WidgetRef ref, FranchiseDisplayItem displayItem) {
+  final group = displayItem.group;
+  final items = displayItem.items;
+
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: context.colors.surface,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      group.rootTitle,
+                      style: TextStyle(
+                        color: context.colors.textMain,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showFranchiseBulkDeleteConfirm(context, ref, group.rootTitle, items);
+                    },
+                    icon: Icon(Icons.delete_sweep_rounded, color: context.colors.error, size: 18),
+                    label: Text(
+                      'Remove All',
+                      style: TextStyle(color: context.colors.error, fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Select items to remove from watchlist:',
+                style: TextStyle(color: context.colors.textMuted, fontSize: 13),
+              ),
+              SizedBox(height: 16),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceLight,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: context.colors.divider.withValues(alpha: 0.3),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          // Tiny poster thumbnail
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: SizedBox(
+                              width: 32,
+                              height: 48,
+                              child: item.posterUrl.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: item.posterUrl,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (_, _, _) => Container(
+                                        color: context.colors.surface,
+                                        child: Icon(Icons.broken_image_outlined, size: 16, color: context.colors.textSubtle),
+                                      ),
+                                    )
+                                  : Container(color: context.colors.surface),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title,
+                                  style: TextStyle(
+                                    color: context.colors.textMain,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  _statusLabel(item.status),
+                                  style: TextStyle(
+                                    color: context.colors.textSubtle,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              ref.read(watchlistProvider.notifier).remove(item.externalId, item.mediaType);
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Removed ${item.title} from watchlist'),
+                                  backgroundColor: context.colors.surfaceLight,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.delete_outline_rounded, color: context.colors.error),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void _showFranchiseBulkDeleteConfirm(BuildContext context, WidgetRef ref, String title, List<WatchlistItem> items) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: context.colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: context.colors.divider.withValues(alpha: 0.5)),
+      ),
+      title: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: context.colors.error, size: 24),
+          SizedBox(width: 8),
+          Text(
+            'Remove Franchise',
+            style: TextStyle(color: context.colors.textMain, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+      content: Text(
+        'Are you sure you want to remove all ${items.length} items of "$title" from your watchlist?',
+        style: TextStyle(color: context.colors.textMuted, fontSize: 14),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: context.colors.textMuted),
+          ),
+        ),
+        FilledButton(
+          onPressed: () {
+            ref.read(watchlistProvider.notifier).bulkRemoveFranchise(items);
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Removed all items of $title from watchlist'),
+                backgroundColor: context.colors.surfaceLight,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          style: FilledButton.styleFrom(
+            backgroundColor: context.colors.error,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text('Remove All'),
+        ),
+      ],
+    ),
+  );
+}
+
+String _statusLabel(WatchStatus status) {
+  switch (status) {
+    case WatchStatus.watching:
+      return 'Watching';
+    case WatchStatus.planToWatch:
+      return 'Plan to Watch';
+    case WatchStatus.completed:
+      return 'Completed';
+    case WatchStatus.onHold:
+      return 'On Hold';
+    case WatchStatus.dropped:
+      return 'Dropped';
   }
 }

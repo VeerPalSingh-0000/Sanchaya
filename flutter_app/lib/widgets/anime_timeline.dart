@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../config/theme.dart';
+import 'aesthetic_loader.dart';
 import '../models/media.dart';
 import '../providers/franchise_timeline_provider.dart';
 import '../providers/watchlist_provider.dart';
 import '../widgets/watchlist_bottom_sheet.dart';
+
 class AnimeTimeline extends ConsumerStatefulWidget {
   final Media media;
 
@@ -18,7 +20,7 @@ class AnimeTimeline extends ConsumerStatefulWidget {
 }
 
 class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
-  bool _mainStoryOnly = false;
+  bool _mainStoryOnly = true;
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +28,20 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
 
     return timelineAsync.when(
       data: (arcs) {
-        if (arcs.isEmpty) return const SizedBox.shrink();
+        if (arcs.isEmpty) return SizedBox.shrink();
 
-        final isAnime = widget.media.type == MediaType.anime ||
-            (widget.media.originCountry == 'JP' && widget.media.genres.any((g) => g.name == 'Animation'));
-            
-        final title = isAnime ? 'Franchise' : (widget.media.type == MediaType.series ? 'Seasons' : 'Collection Parts');
+        final isAnime =
+            widget.media.type == MediaType.anime ||
+            (widget.media.originCountry == 'JP' &&
+                widget.media.genres.any((g) => g.name == 'Animation'));
 
-        final displayedArcs = _mainStoryOnly 
+        final title = isAnime
+            ? 'Franchise'
+            : (widget.media.type == MediaType.series
+                  ? 'Seasons'
+                  : 'Collection Parts');
+
+        final displayedArcs = _mainStoryOnly
             ? arcs.where((arc) {
                 if (arc.relationType != null) {
                   final canon = ['CURRENT', 'PREQUEL', 'SEQUEL', 'PARENT'];
@@ -59,55 +67,70 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.textMain,
+                        color: context.colors.textMain,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Text(
+                    SizedBox(width: 8),
+                    Text(
                       'WATCH ORDER',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.5,
-                        color: AppTheme.primary,
+                        color: context.colors.primary,
                       ),
                     ),
                   ],
                 ),
-                
+
                 if (isAnime)
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
                     ),
-                    padding: const EdgeInsets.all(2),
+                    padding: EdgeInsets.all(2),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         GestureDetector(
-                          onTap: () => setState(() => _mainStoryOnly = false),
+                          onTap: () => setState(() => _mainStoryOnly = true),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: !_mainStoryOnly ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+                              color: _mainStoryOnly
+                                  ? Colors.white.withValues(alpha: 0.1)
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(18),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.layers_rounded, size: 12, color: !_mainStoryOnly ? Colors.blueAccent : Colors.white54),
-                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 12,
+                                  color: _mainStoryOnly
+                                      ? Colors.amber
+                                      : Colors.white54,
+                                ),
+                                SizedBox(width: 4),
                                 Text(
-                                  'ALL CONTENT',
+                                  'MAIN STORY',
                                   style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 0.5,
-                                    color: !_mainStoryOnly ? Colors.white : Colors.white54,
+                                    color: _mainStoryOnly
+                                        ? Colors.white
+                                        : Colors.white54,
                                   ),
                                 ),
                               ],
@@ -115,24 +138,37 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => setState(() => _mainStoryOnly = true),
+                          onTap: () => setState(() => _mainStoryOnly = false),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: _mainStoryOnly ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+                              color: !_mainStoryOnly
+                                  ? Colors.white.withValues(alpha: 0.1)
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(18),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.auto_awesome_rounded, size: 12, color: _mainStoryOnly ? Colors.amber : Colors.white54),
-                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.layers_rounded,
+                                  size: 12,
+                                  color: !_mainStoryOnly
+                                      ? Colors.blueAccent
+                                      : Colors.white54,
+                                ),
+                                SizedBox(width: 4),
                                 Text(
-                                  'MAIN STORY',
+                                  'ALL CONTENT',
                                   style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 0.5,
-                                    color: _mainStoryOnly ? Colors.white : Colors.white54,
+                                    color: !_mainStoryOnly
+                                        ? Colors.white
+                                        : Colors.white54,
                                   ),
                                 ),
                               ],
@@ -144,8 +180,8 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                   ),
               ],
             ),
-            const SizedBox(height: 20),
-            
+            SizedBox(height: 20),
+
             // Carousel
             SizedBox(
               height: 310,
@@ -153,16 +189,26 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                 scrollDirection: Axis.horizontal,
                 clipBehavior: Clip.none,
                 itemCount: displayedArcs.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 16),
+                separatorBuilder: (context, index) => SizedBox(width: 16),
                 itemBuilder: (context, index) {
                   final arc = displayedArcs[index];
-                  final isCurrent = arc.relationType == 'CURRENT' || arc.mediaId == widget.media.id || arc.mediaId == widget.media.externalId;
+                  final isCurrent =
+                      arc.relationType == 'CURRENT' ||
+                      arc.mediaId == widget.media.id ||
+                      arc.mediaId == widget.media.externalId;
                   final indexStr = (index + 1).toString().padLeft(2, '0');
-                  
-                  // Generate pseudo media for the dropdown button
-                  final cleanMediaId = arc.mediaId?.replaceAll('anilist-', '').replaceAll('tmdb-movie-', '') ?? '';
+
+                  final cleanMediaId = (arc.mediaId ?? widget.media.externalId)
+                          .replaceAll('anilist-', '')
+                          .replaceAll('tmdb-movie-', '')
+                          .replaceAll('tmdb-tv-', '');
+                  final targetType = arc.mediaType ?? widget.media.type;
+                  final prefix = isAnime
+                      ? 'anilist-'
+                      : (targetType == MediaType.movie ? 'tmdb-movie-' : 'tmdb-tv-');
+
                   final pseudoMedia = Media(
-                    id: '${isAnime ? "anilist-" : "tmdb-movie-"}$cleanMediaId',
+                    id: '$prefix$cleanMediaId',
                     externalId: cleanMediaId,
                     type: arc.mediaType ?? widget.media.type,
                     title: arc.name,
@@ -173,14 +219,21 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                     voteCount: 0,
                     status: 'Airing',
                     franchiseId: widget.media.franchiseId,
-                    franchiseTitle: widget.media.franchiseTitle ?? widget.media.title,
-                    franchisePosterUrl: widget.media.franchisePosterUrl ?? widget.media.posterUrl,
+                    franchiseTitle:
+                        widget.media.franchiseTitle ?? widget.media.title,
+                    franchisePosterUrl:
+                        widget.media.franchisePosterUrl ??
+                        widget.media.posterUrl,
                   );
-                  
+
                   return GestureDetector(
                     onTap: () {
                       if (arc.mediaId != null && !isCurrent) {
-                        context.push('/media/${arc.mediaId}');
+                        String routeId = pseudoMedia.id;
+                        if (routeId.contains('-season-')) {
+                          routeId = routeId.split('-season-').first;
+                        }
+                        context.push('/media/$routeId');
                       }
                     },
                     child: SizedBox(
@@ -203,7 +256,7 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                               ),
                             ),
                           ),
-                          
+
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -214,13 +267,19 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: isCurrent ? AppTheme.primary.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.1),
+                                    color: isCurrent
+                                        ? context.colors.primary.withValues(
+                                            alpha: 0.5,
+                                          )
+                                        : Colors.white.withValues(alpha: 0.1),
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.5),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       blurRadius: 15,
-                                      offset: const Offset(0, 10),
+                                      offset: Offset(0, 10),
                                     ),
                                   ],
                                 ),
@@ -230,36 +289,56 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
                                       child: arc.posterUrl != null
-                                        ? CachedNetworkImage(
-                                            imageUrl: arc.posterUrl!,
-                                            fit: BoxFit.cover,
-                                            placeholder: (_, _) => Container(color: AppTheme.surfaceLight),
-                                            errorWidget: (_, _, _) => Container(
-                                              color: AppTheme.surfaceLight,
-                                              child: const Center(
-                                                child: Icon(Icons.broken_image_outlined, color: AppTheme.textSubtle, size: 24),
+                                          ? CachedNetworkImage(
+                                              imageUrl: arc.posterUrl!,
+                                              fit: BoxFit.cover,
+                                              placeholder: (_, _) => Container(
+                                                color: context.colors.surfaceLight,
+                                              ),
+                                              errorWidget: (_, _, _) => Container(
+                                                color: context.colors.surfaceLight,
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.broken_image_outlined,
+                                                    color: context.colors.textSubtle,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          : Container(
+                                              color: context.colors.surfaceLight,
+                                              child: Icon(
+                                                Icons.movie,
+                                                color: context.colors.textMuted,
                                               ),
                                             ),
-                                          )
-                                        : Container(
-                                            color: AppTheme.surfaceLight,
-                                            child: const Icon(Icons.movie, color: AppTheme.textMuted),
-                                          ),
                                     ),
                                     // Part Badge
                                     Positioned(
                                       top: 8,
                                       left: 8,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: Colors.black.withValues(alpha: 0.6),
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.6,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.2,
+                                            ),
+                                          ),
                                         ),
                                         child: Text(
                                           'PART $indexStr',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 9,
                                             fontWeight: FontWeight.w900,
@@ -268,25 +347,27 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                         ),
                                       ),
                                     ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
-                              
-                              const SizedBox(height: 12),
-                              
+                              ),
+
+                              SizedBox(height: 12),
+
                               // Info
                               Text(
                                 arc.name,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: isCurrent ? AppTheme.primary : AppTheme.textMain,
+                                  color: isCurrent
+                                      ? context.colors.primary
+                                      : context.colors.textMain,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
                                   height: 1.2,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Wrap(
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
@@ -294,21 +375,30 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                     Text(
                                       '${arc.episodeCount} EP',
                                       style: TextStyle(
-                                        color: AppTheme.textSubtle.withValues(alpha: 0.7),
+                                        color: context.colors.textSubtle.withValues(
+                                          alpha: 0.7,
+                                        ),
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                     Text(
                                       ' • ',
-                                      style: TextStyle(color: AppTheme.textMuted.withValues(alpha: 0.5), fontSize: 10),
+                                      style: TextStyle(
+                                        color: context.colors.textMuted.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                        fontSize: 10,
+                                      ),
                                     ),
                                   ],
                                   if (arc.format != null)
                                     Text(
                                       arc.format!.toUpperCase(),
                                       style: TextStyle(
-                                        color: AppTheme.textSubtle.withValues(alpha: 0.7),
+                                        color: context.colors.textSubtle.withValues(
+                                          alpha: 0.7,
+                                        ),
                                         fontSize: 10,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 0.5,
@@ -316,10 +406,13 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                     ),
                                 ],
                               ),
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12),
                               SizedBox(
                                 width: double.infinity,
-                                child: _StatusButton(media: pseudoMedia),
+                                child: _StatusButton(
+                                  media: pseudoMedia,
+                                  franchiseTimeline: arcs,
+                                ),
                               ),
                             ],
                           ),
@@ -333,23 +426,25 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
           ],
         ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.1);
       },
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: AppTheme.primary),
+      loading: () => Center(
+        child: AestheticLoader(size: 40),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => SizedBox.shrink(),
     );
   }
 }
 
 class _StatusButton extends ConsumerWidget {
   final Media media;
+  final List<Season>? franchiseTimeline;
 
-  const _StatusButton({required this.media});
+  const _StatusButton({required this.media, this.franchiseTimeline});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final watchlistNotifier = ref.watch(watchlistProvider.notifier);
-    final existingItem = watchlistNotifier.getItem(media.externalId, media.type);
+    ref.watch(watchlistProvider);
+    final watchlistNotifier = ref.read(watchlistProvider.notifier);
+    final existingItem = watchlistNotifier.getItem(media.id, media.type);
 
     final status = existingItem?.status;
     final isAdded = status != null;
@@ -360,25 +455,25 @@ class _StatusButton extends ConsumerWidget {
     String label = '+ Add to List';
 
     if (isAdded) {
-      switch (status!) {
+      switch (status) {
         case WatchStatus.planToWatch:
-          color = const Color(0xFFF59E0B);
+          color = Color(0xFFF59E0B);
           label = 'Plan to Watch';
           break;
         case WatchStatus.watching:
-          color = const Color(0xFF22C55E);
+          color = Color(0xFF22C55E);
           label = 'Watching';
           break;
         case WatchStatus.completed:
-          color = const Color(0xFF3B82F6);
+          color = Color(0xFF3B82F6);
           label = 'Completed';
           break;
         case WatchStatus.onHold:
-          color = const Color(0xFF94A3B8);
+          color = Color(0xFF94A3B8);
           label = 'On Hold';
           break;
         case WatchStatus.dropped:
-          color = const Color(0xFFEF4444);
+          color = Color(0xFFEF4444);
           label = 'Dropped';
           break;
       }
@@ -393,11 +488,14 @@ class _StatusButton extends ConsumerWidget {
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => WatchlistBottomSheet(media: media),
+          builder: (context) => WatchlistBottomSheet(
+            media: media,
+            franchiseTimeline: franchiseTimeline,
+          ),
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         decoration: BoxDecoration(
           color: bgColor,
           border: Border.all(color: borderColor),
@@ -408,31 +506,46 @@ class _StatusButton extends ConsumerWidget {
           children: [
             if (isAdded) ...[
               Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.5),
-                      blurRadius: 4,
-                      spreadRadius: 2,
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.5),
+                          blurRadius: 4,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ).animate(onPlay: (controller) => controller.repeat()).scaleXY(
-                begin: 1.0, end: 1.2, duration: 1000.ms, curve: Curves.easeInOutSine
-              ).then().scaleXY(begin: 1.2, end: 1.0, duration: 1000.ms, curve: Curves.easeInOutSine),
-              const SizedBox(width: 6),
+                  )
+                  .animate(onPlay: (controller) => controller.repeat())
+                  .scaleXY(
+                    begin: 1.0,
+                    end: 1.2,
+                    duration: 1000.ms,
+                    curve: Curves.easeInOutSine,
+                  )
+                  .then()
+                  .scaleXY(
+                    begin: 1.2,
+                    end: 1.0,
+                    duration: 1000.ms,
+                    curve: Curves.easeInOutSine,
+                  ),
+              SizedBox(width: 6),
             ],
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                color: isAdded ? color : Colors.white70,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.5,
+            Flexible(
+              child: Text(
+                label.toUpperCase(),
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: isAdded ? color : Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                ),
               ),
             ),
           ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../config/theme.dart';
 
 class MediaCard extends StatelessWidget {
   final String title;
@@ -48,14 +48,14 @@ class MediaCard extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: AppTheme.divider.withValues(alpha: 0.3),
+                  color: context.colors.divider.withValues(alpha: 0.3),
                   width: 0.5,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.4),
                     blurRadius: 16,
-                    offset: const Offset(0, 8),
+                    offset: Offset(0, 8),
                   ),
                 ],
               ),
@@ -69,34 +69,34 @@ class MediaCard extends StatelessWidget {
                         ? CachedNetworkImage(
                             imageUrl: posterUrl,
                             fit: BoxFit.cover,
-                            memCacheWidth: width.isFinite ? (width * 2).toInt() : null,
+                            memCacheHeight: height.isFinite ? (height * 2).toInt() : 400,
                             placeholder: (context, url) => Container(
-                              color: AppTheme.surfaceLight,
-                              child: const Center(
+                              color: context.colors.surfaceLight,
+                              child: Center(
                                 child: Icon(
                                   Icons.movie_outlined,
-                                  color: AppTheme.textSubtle,
+                                  color: context.colors.textSubtle,
                                   size: 32,
                                 ),
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: AppTheme.surfaceLight,
-                              child: const Center(
+                              color: context.colors.surfaceLight,
+                              child: Center(
                                 child: Icon(
                                   Icons.broken_image_outlined,
-                                  color: AppTheme.textSubtle,
+                                  color: context.colors.textSubtle,
                                   size: 32,
                                 ),
                               ),
                             ),
                           )
                         : Container(
-                            color: AppTheme.surfaceLight,
-                            child: const Center(
+                            color: context.colors.surfaceLight,
+                            child: Center(
                               child: Icon(
                                 Icons.movie_outlined,
-                                color: AppTheme.textSubtle,
+                                color: context.colors.textSubtle,
                                 size: 32,
                               ),
                             ),
@@ -128,7 +128,7 @@ class MediaCard extends StatelessWidget {
                         top: 8,
                         left: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                               horizontal: 7, vertical: 3),
                           decoration: BoxDecoration(
                             color: _ratingColor(rating!).withValues(alpha: 0.9),
@@ -137,12 +137,12 @@ class MediaCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.star_rounded,
+                              Icon(Icons.star_rounded,
                                   size: 12, color: Colors.white),
-                              const SizedBox(width: 2),
+                              SizedBox(width: 2),
                               Text(
                                 rating!.toStringAsFixed(1),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -159,15 +159,15 @@ class MediaCard extends StatelessWidget {
                         top: 8,
                         right: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                               horizontal: 6, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppTheme.primary.withValues(alpha: 0.85),
+                            color: context.colors.primary.withValues(alpha: 0.85),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             typeBadge!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
@@ -182,19 +182,19 @@ class MediaCard extends StatelessWidget {
                         bottom: 8,
                         right: 8,
                         child: Container(
-                          padding: const EdgeInsets.all(6),
+                          padding: EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF22C55E).withValues(alpha: 0.9), // Success green
+                            color: Color(0xFF22C55E).withValues(alpha: 0.9), // Success green
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 4,
-                                offset: const Offset(0, 2),
+                                offset: Offset(0, 2),
                               )
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.check_rounded,
                             color: Colors.white,
                             size: 18,
@@ -211,19 +211,19 @@ class MediaCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                             onTap: onAddWatchlist,
                             child: Ink(
-                              padding: const EdgeInsets.all(6),
+                              padding: EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.9),
+                                color: context.colors.primary.withValues(alpha: 0.9),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.3),
                                     blurRadius: 4,
-                                    offset: const Offset(0, 2),
+                                    offset: Offset(0, 2),
                                   )
                                 ],
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.add_rounded,
                                 color: Colors.white,
                                 size: 18,
@@ -237,15 +237,15 @@ class MediaCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
 
             // ── Title ──
             Text(
               title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppTheme.textMain,
+              style: TextStyle(
+                color: context.colors.textMain,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 height: 1.3,
@@ -254,13 +254,13 @@ class MediaCard extends StatelessWidget {
 
             // ── Subtitle ──
             if (subtitle != null) ...[
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Text(
                 subtitle!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppTheme.textSubtle,
+                style: TextStyle(
+                  color: context.colors.textSubtle,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
@@ -273,8 +273,8 @@ class MediaCard extends StatelessWidget {
   }
 
   Color _ratingColor(double r) {
-    if (r >= 8.0) return const Color(0xFF22C55E);
-    if (r >= 6.5) return const Color(0xFFF59E0B);
-    return const Color(0xFFEF4444);
+    if (r >= 8.0) return Color(0xFF22C55E);
+    if (r >= 6.5) return Color(0xFFF59E0B);
+    return Color(0xFFEF4444);
   }
 }

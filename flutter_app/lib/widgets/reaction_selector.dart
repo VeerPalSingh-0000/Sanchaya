@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../config/theme.dart';
 import '../models/watchlist_item.dart';
 import '../providers/watchlist_provider.dart';
 
@@ -15,9 +15,9 @@ class ReactionSelectorWidget extends ConsumerStatefulWidget {
 
 class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget> {
   final List<Map<String, dynamic>> _reactions = [
-    {'id': Reaction.love, 'label': 'Love it', 'icon': Icons.favorite_rounded, 'color': const Color(0xFFF43F5E)},
-    {'id': Reaction.good, 'label': "It's good", 'icon': Icons.thumb_up_rounded, 'color': const Color(0xFF10B981)},
-    {'id': Reaction.bad, 'label': "It's bad", 'icon': Icons.thumb_down_rounded, 'color': const Color(0xFF64748B)},
+    {'id': Reaction.love, 'label': 'Love it', 'icon': Icons.favorite_rounded, 'color': Color(0xFFF43F5E)},
+    {'id': Reaction.good, 'label': "It's good", 'icon': Icons.thumb_up_rounded, 'color': Color(0xFF10B981)},
+    {'id': Reaction.bad, 'label': "It's bad", 'icon': Icons.thumb_down_rounded, 'color': Color(0xFF64748B)},
   ];
 
   Future<void> _handleReactionSelect(Reaction? reactionId) async {
@@ -42,9 +42,9 @@ class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.only(bottom: 24, top: 12),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceLight,
+        padding: EdgeInsets.only(bottom: 24, top: 12),
+        decoration: BoxDecoration(
+          color: context.colors.surfaceLight,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -61,7 +61,7 @@ class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget>
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               ..._reactions.map((r) {
                 final rId = r['id'] as Reaction;
                 final isActive = widget.item.reaction == rId;
@@ -73,15 +73,15 @@ class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget>
                     _handleReactionSelect(rId);
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     child: Row(
                       children: [
-                        Icon(r['icon'] as IconData, color: isActive ? color : AppTheme.textSubtle, size: 24),
-                        const SizedBox(width: 16),
+                        Icon(r['icon'] as IconData, color: isActive ? color : context.colors.textSubtle, size: 24),
+                        SizedBox(width: 16),
                         Text(
                           r['label'] as String,
                           style: TextStyle(
-                            color: isActive ? color : AppTheme.textMain,
+                            color: isActive ? color : context.colors.textMain,
                             fontSize: 16,
                             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
                           ),
@@ -105,13 +105,13 @@ class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget>
     return Material(
       color: activeReaction != null 
           ? (activeReaction['color'] as Color).withValues(alpha: 0.2)
-          : AppTheme.surfaceLight.withValues(alpha: 0.8),
+          : context.colors.surfaceLight.withValues(alpha: 0.8),
       borderRadius: BorderRadius.circular(24),
       child: InkWell(
         onTap: () => _showReactionMenu(context),
         borderRadius: BorderRadius.circular(24),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
@@ -120,30 +120,10 @@ class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget>
                   : Colors.white.withValues(alpha: 0.1),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                activeReaction != null ? activeReaction['icon'] as IconData : Icons.star_border_rounded,
-                color: activeReaction != null ? activeReaction['color'] as Color : AppTheme.textMain,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                activeReaction != null ? activeReaction['label'] as String : 'Rate',
-                style: TextStyle(
-                  color: activeReaction != null ? activeReaction['color'] as Color : AppTheme.textMain,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: activeReaction != null ? activeReaction['color'] as Color : AppTheme.textSubtle,
-                size: 16,
-              ),
-            ],
+          child: Icon(
+            activeReaction != null ? activeReaction['icon'] as IconData : Icons.star_border_rounded,
+            color: activeReaction != null ? activeReaction['color'] as Color : context.colors.textMain,
+            size: 24,
           ),
         ),
       ),

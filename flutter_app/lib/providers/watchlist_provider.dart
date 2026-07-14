@@ -8,7 +8,7 @@ import 'auth_provider.dart';
 String _generateCuid() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   final rnd = Random.secure();
-  return 'c' + List.generate(24, (index) => chars[rnd.nextInt(chars.length)]).join('');
+  return 'c${List.generate(24, (index) => chars[rnd.nextInt(chars.length)]).join('')}';
 }
 
 class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
@@ -25,7 +25,7 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
   Future<void> refresh() async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
-    
+
     state = const AsyncLoading();
     try {
       final supabaseService = ref.read(supabaseServiceProvider);
@@ -43,8 +43,10 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
 
     // Optimistic update
     final previousState = state.value ?? [];
-    final existingIndex = previousState.indexWhere((e) => e.externalId == item.externalId && e.mediaType == item.mediaType);
-    
+    final existingIndex = previousState.indexWhere(
+      (e) => e.externalId == item.externalId && e.mediaType == item.mediaType,
+    );
+
     final newState = List<WatchlistItem>.from(previousState);
     if (existingIndex >= 0) {
       newState[existingIndex] = item;
@@ -69,13 +71,19 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     if (user == null) return;
 
     final previousState = state.value ?? [];
-    final newState = previousState.where((e) => !(e.externalId == externalId && e.mediaType == mediaType)).toList();
+    final newState = previousState
+        .where((e) => !(e.externalId == externalId && e.mediaType == mediaType))
+        .toList();
     state = AsyncData(newState);
 
     try {
       final supabaseService = ref.read(supabaseServiceProvider);
       final prismaUserId = await supabaseService.getOrCreatePrismaUserId(user);
-      await supabaseService.removeFromWatchlist(prismaUserId, externalId, mediaTypeToString(mediaType));
+      await supabaseService.removeFromWatchlist(
+        prismaUserId,
+        externalId,
+        mediaTypeToString(mediaType),
+      );
     } catch (e) {
       state = AsyncData(previousState);
       rethrow;
@@ -84,7 +92,7 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
 
   Future<void> addMediaToWatchlist(Media media, WatchStatus status) async {
     Media mediaToAdd = media;
-    
+
     if (mediaToAdd.franchiseId == null) {
       if (mediaToAdd.type == MediaType.movie) {
         final tmdb = ref.read(tmdbServiceProvider);
@@ -96,7 +104,9 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
         final anilist = ref.read(anilistServiceProvider);
         final seasons = await anilist.getAnimeSeasons(mediaToAdd.externalId);
         if (seasons.isNotEmpty) {
-          final rootItem = seasons.where((s) => s.format == 'TV').firstOrNull ?? seasons.first;
+          final rootItem =
+              seasons.where((s) => s.format == 'TV').firstOrNull ??
+              seasons.first;
           mediaToAdd = Media(
             id: mediaToAdd.id,
             externalId: mediaToAdd.externalId,
@@ -123,7 +133,8 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
 
     final newItem = WatchlistItem(
       id: _generateCuid(),
-      externalId: mediaToAdd.id, // Use full ID (e.g. tmdb-movie-1234) to match Next.js
+      externalId:
+          mediaToAdd.id, // Use full ID (e.g. tmdb-movie-1234) to match Next.js
       mediaType: mediaToAdd.type,
       title: mediaToAdd.title,
       posterUrl: mediaToAdd.posterUrl,
@@ -144,42 +155,142 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
   }
 
   Future<void> updateStatus(WatchlistItem item, WatchStatus status) async {
-    final updatedItem = item.copyWith(status: status, updatedAt: DateTime.now());
+    final updatedItem = item.copyWith(
+      status: status,
+      updatedAt: DateTime.now(),
+    );
     await addOrUpdate(updatedItem);
   }
 
+  Future<void> updateStatusWithPropagation(
+    Media currentMedia,
+    WatchStatus status,
+    List<Season>? franchiseTimeline,
+  ) async {
+    var existingItem = getItem(currentMedia.id, currentMedia.type);
+    if (existingItem != null) {
+      await updateStatus(existingItem, status);
+    } else {
+      await addMediaToWatchlist(currentMedia, status);
+    }
+
+    if (franchiseTimeline == null || franchiseTimeline.isEmpty) return;
+
+    final currentIndex = franchiseTimeline.indexWhere((s) {
+      final cleanId = (s.mediaId ?? currentMedia.externalId)
+          .replaceAll('anilist-', '')
+          .replaceAll('tmdb-movie-', '')
+          .replaceAll('tmdb-tv-', '');
+      return cleanId == currentMedia.externalId.replaceAll('anilist-', '').replaceAll('tmdb-movie-', '').replaceAll('tmdb-tv-', '');
+    });
+
+    if (currentIndex == -1) return;
+
+    if (status == WatchStatus.completed) {
+      // Mark previous main story items as completed
+      for (int i = currentIndex - 1; i >= 0; i--) {
+        await _propagateStatusToArc(franchiseTimeline[i], currentMedia, WatchStatus.completed);
+      }
+    }
+  }
+
+  Future<void> _propagateStatusToArc(Season arc, Media parentMedia, WatchStatus status) async {
+    // Only propagate to main story items for anime
+    if (parentMedia.type == MediaType.anime) {
+      final isMainStory = arc.relationType != 'SPIN_OFF' &&
+          arc.relationType != 'SIDE_STORY' &&
+          arc.relationType != 'CHARACTER' &&
+          arc.relationType != 'SUMMARY' &&
+          arc.relationType != 'ALTERNATIVE' &&
+          arc.relationType != 'OTHER';
+      if (!isMainStory) return;
+    }
+
+    final cleanMediaId = (arc.mediaId ?? parentMedia.externalId)
+        .replaceAll('anilist-', '')
+        .replaceAll('tmdb-movie-', '')
+        .replaceAll('tmdb-tv-', '');
+    final targetType = arc.mediaType ?? parentMedia.type;
+    final isAnime = parentMedia.type == MediaType.anime;
+    final prefix = isAnime
+        ? 'anilist-'
+        : (targetType == MediaType.movie ? 'tmdb-movie-' : 'tmdb-tv-');
+    final targetId = '$prefix$cleanMediaId';
+
+    final existing = getItem(targetId, targetType);
+    if (existing != null) {
+      if (existing.status != status) {
+        await updateStatus(existing, status);
+      }
+    } else {
+      final pseudoMedia = Media(
+        id: targetId,
+        externalId: cleanMediaId,
+        type: targetType,
+        title: arc.name.isNotEmpty ? arc.name : parentMedia.title,
+        overview: arc.overview,
+        posterUrl: arc.posterUrl ?? parentMedia.posterUrl,
+        genres: parentMedia.genres,
+        rating: 0.0,
+        voteCount: 0,
+        status: 'Airing',
+        franchiseId: parentMedia.franchiseId,
+        franchiseTitle: parentMedia.franchiseTitle ?? parentMedia.title,
+        franchisePosterUrl:
+            parentMedia.franchisePosterUrl ?? parentMedia.posterUrl,
+        releaseDate: arc.airDate ?? parentMedia.releaseDate,
+      );
+      await addMediaToWatchlist(pseudoMedia, status);
+    }
+  }
+
   Future<void> updateReaction(WatchlistItem item, Reaction? reaction) async {
-    final updatedItem = item.copyWith(reaction: reaction, updatedAt: DateTime.now());
+    final updatedItem = item.copyWith(
+      reaction: reaction,
+      updatedAt: DateTime.now(),
+    );
     await addOrUpdate(updatedItem);
   }
 
   Future<void> updateProgress(WatchlistItem item, int progress) async {
-    final updatedItem = item.copyWith(progress: progress, updatedAt: DateTime.now());
+    final updatedItem = item.copyWith(
+      progress: progress,
+      updatedAt: DateTime.now(),
+    );
     await addOrUpdate(updatedItem);
   }
 
-  bool isInWatchlist(String externalId, MediaType mediaType) {
-    return state.value?.any((e) => e.externalId == externalId && e.mediaType == mediaType) ?? false;
+  bool isInWatchlist(String mediaId, MediaType mediaType) {
+    return state.value?.any(
+          (e) => e.externalId == mediaId && e.mediaType == mediaType,
+        ) ??
+        false;
   }
 
-  WatchlistItem? getItem(String externalId, MediaType mediaType) {
-    return state.value?.where((e) => e.externalId == externalId && e.mediaType == mediaType).firstOrNull;
+  WatchlistItem? getItem(String mediaId, MediaType mediaType) {
+    return state.value
+        ?.where((e) => e.externalId == mediaId && e.mediaType == mediaType)
+        .firstOrNull;
   }
 
   // --- Advanced Franchise Logic ---
 
   List<WatchlistItem> getFranchiseItems(Media media) {
     final list = state.value ?? [];
-    return list.where((item) => 
-      (media.franchiseId != null && item.franchiseId == media.franchiseId) || 
-      (item.externalId == media.externalId && item.mediaType == media.type)
-    ).toList();
+    return list
+        .where(
+          (item) =>
+              (media.franchiseId != null &&
+                  item.franchiseId == media.franchiseId) ||
+              (item.externalId == media.id && item.mediaType == media.type),
+        )
+        .toList();
   }
 
   WatchStatus getAggregateStatus(Media media) {
     final items = getFranchiseItems(media);
     if (items.isEmpty) return WatchStatus.planToWatch;
-    
+
     if (items.any((i) => i.status == WatchStatus.watching)) {
       return WatchStatus.watching;
     } else if (items.every((i) => i.status == WatchStatus.completed)) {
@@ -197,9 +308,12 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     return getFranchiseItems(media).isNotEmpty;
   }
 
-  Future<void> bulkUpdateFranchise(List<Media> franchiseMedia, WatchStatus status) async {
+  Future<void> bulkUpdateFranchise(
+    List<Media> franchiseMedia,
+    WatchStatus status,
+  ) async {
     for (final m in franchiseMedia) {
-      final existing = getItem(m.externalId, m.type);
+      final existing = getItem(m.id, m.type);
       if (existing != null) {
         await updateStatus(existing, status);
       } else {
@@ -233,4 +347,7 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
   }
 }
 
-final watchlistProvider = AsyncNotifierProvider<WatchlistNotifier, List<WatchlistItem>>(WatchlistNotifier.new);
+final watchlistProvider =
+    AsyncNotifierProvider<WatchlistNotifier, List<WatchlistItem>>(
+      WatchlistNotifier.new,
+    );

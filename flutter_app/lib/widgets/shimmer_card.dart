@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/theme_extension.dart';
 import 'package:shimmer/shimmer.dart';
-import '../config/theme.dart';
 
 class ShimmerCard extends StatelessWidget {
   final double width;
@@ -21,39 +21,39 @@ class ShimmerCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Shimmer.fromColors(
-            baseColor: AppTheme.surfaceLight,
-            highlightColor: AppTheme.surfaceLight.withValues(alpha: 0.5),
+            baseColor: context.colors.surfaceLight,
+            highlightColor: context.colors.surfaceLight.withValues(alpha: 0.5),
             child: Container(
               width: width,
               height: height,
               decoration: BoxDecoration(
-                color: AppTheme.surfaceLight,
+                color: context.colors.surfaceLight,
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Shimmer.fromColors(
-            baseColor: AppTheme.surfaceLight,
-            highlightColor: AppTheme.surfaceLight.withValues(alpha: 0.5),
+            baseColor: context.colors.surfaceLight,
+            highlightColor: context.colors.surfaceLight.withValues(alpha: 0.5),
             child: Container(
               width: width * 0.8,
               height: 12,
               decoration: BoxDecoration(
-                color: AppTheme.surfaceLight,
+                color: context.colors.surfaceLight,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Shimmer.fromColors(
-            baseColor: AppTheme.surfaceLight,
-            highlightColor: AppTheme.surfaceLight.withValues(alpha: 0.5),
+            baseColor: context.colors.surfaceLight,
+            highlightColor: context.colors.surfaceLight.withValues(alpha: 0.5),
             child: Container(
               width: width * 0.5,
               height: 10,
               decoration: BoxDecoration(
-                color: AppTheme.surfaceLight,
+                color: context.colors.surfaceLight,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -83,9 +83,9 @@ class ShimmerCardRow extends StatelessWidget {
       height: cardHeight + 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 20),
         itemCount: count,
-        separatorBuilder: (_, _) => const SizedBox(width: 14),
+        separatorBuilder: (_, _) => SizedBox(width: 14),
         itemBuilder: (_, _) => ShimmerCard(
           width: cardWidth,
           height: cardHeight,

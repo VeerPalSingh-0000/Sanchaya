@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../config/constants.dart';
 import '../models/media.dart';
@@ -128,7 +129,9 @@ class TmdbService {
       voteCount: int.tryParse(movie['vote_count']?.toString() ?? '') ?? 0,
       releaseDate: movie['release_date'] as String?,
       status: movie['status'] as String? ?? 'Released',
-      studios: (movie['production_companies'] as List<dynamic>?)?.map((c) => c['name'] as String).toList(),
+      studios: (movie['production_companies'] as List<dynamic>?)
+          ?.map((c) => c['name']?.toString() ?? 'Unknown')
+          .toList(),
       trailer: _findTrailerKey(movie['videos']?['results'] as List<dynamic>?),
       franchiseId: collection != null ? 'tmdb-collection-${collection['id']}' : null,
       franchiseTitle: collection != null ? collection['name'] as String? : null,
@@ -155,8 +158,12 @@ class TmdbService {
     )).toList();
 
     final studios = <String>[];
-    studios.addAll((tv['production_companies'] as List<dynamic>?)?.map((c) => c['name'] as String) ?? []);
-    studios.addAll((tv['networks'] as List<dynamic>?)?.map((n) => n['name'] as String) ?? []);
+    studios.addAll((tv['production_companies'] as List<dynamic>?)?.map(
+            (c) => c['name']?.toString() ?? 'Unknown',
+          ) ?? []);
+    studios.addAll(
+      (tv['networks'] as List<dynamic>?)?.map((n) => n['name']?.toString() ?? 'Unknown') ?? [],
+    );
 
     return Media(
       id: 'tmdb-tv-${tv['id']}',
@@ -177,6 +184,9 @@ class TmdbService {
       totalEpisodes: int.tryParse(tv['number_of_episodes']?.toString() ?? ''),
       studios: studios,
       trailer: _findTrailerKey(tv['videos']?['results'] as List<dynamic>?),
+      franchiseId: 'tmdb-tv-${tv['id']}',
+      franchiseTitle: tv['name'] as String? ?? 'Unknown',
+      franchisePosterUrl: getImageUrl(tv['poster_path'] as String?),
     );
   }
 
@@ -219,6 +229,9 @@ class TmdbService {
       voteCount: int.tryParse(item['vote_count']?.toString() ?? '') ?? 0,
       releaseDate: item['first_air_date'] as String?,
       status: 'Unknown',
+      franchiseId: 'tmdb-tv-${item['id']}',
+      franchiseTitle: item['name'] as String? ?? 'Unknown',
+      franchisePosterUrl: getImageUrl(item['poster_path'] as String?),
     );
   }
 
@@ -321,8 +334,9 @@ class TmdbService {
     try {
       final data = await _fetch<Map<String, dynamic>>('/movie/$cleanId', params: {'append_to_response': 'videos'});
       return _mapMovieToMedia(data);
-    } catch (e) {
-      return null;
+    } catch (e, st) {
+      debugPrint('[TMDB] getMovieDetails error: $e\n$st');
+      rethrow;
     }
   }
 
@@ -403,8 +417,9 @@ class TmdbService {
         }
       }
       return media;
-    } catch (e) {
-      return null;
+    } catch (e, st) {
+      debugPrint('[TMDB] getTVDetails error: $e\n$st');
+      rethrow;
     }
   }
 
@@ -413,8 +428,9 @@ class TmdbService {
     try {
       final data = await _fetch<Map<String, dynamic>>('/tv/$cleanId/season/$seasonNumber');
       return _mapSeasonDetail(data);
-    } catch (e) {
-      return null;
+    } catch (e, st) {
+      debugPrint('[TMDB] getTVSeasonDetails error: $e\n$st');
+      rethrow;
     }
   }
 

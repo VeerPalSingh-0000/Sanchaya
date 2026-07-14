@@ -9,9 +9,12 @@ import 'screens/watchlist_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/media_details_screen.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'screens/splash_screen.dart';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/auth_provider.dart';
+import 'providers/settings_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -19,8 +22,12 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/',
+    initialLocation: '/splash',
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/profile',
         builder: (context, state) => const Scaffold(
@@ -82,18 +89,44 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
+class AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics();
+  }
+}
+
 class SanchayaApp extends ConsumerWidget {
   const SanchayaApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final settings = ref.watch(settingsProvider);
 
     return MaterialApp.router(
       title: 'Sanchaya',
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: settings.themeMode,
+      scrollBehavior: AppScrollBehavior(),
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(settings.textScale),
+          ),
+          child: child!,
+        );
+      },
     );
   }
 }

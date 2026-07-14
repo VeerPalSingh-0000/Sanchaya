@@ -8,7 +8,7 @@ import '../services/tmdb_service.dart';
 class SearchQueryNotifier extends Notifier<String> {
   @override
   String build() => '';
-  void updateQuery(String q) => state = q;
+  void updateQuery(String q) => state = q.trim();
 }
 
 class SearchFilterNotifier extends Notifier<MediaFilter> {
@@ -51,7 +51,7 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
     _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
       try {
         final cacheService = ref.read(cacheServiceProvider);
-        final cacheKey = 'search_${filter.name}_${query}_page_1';
+        final cacheKey = 'search_v2_${filter.name}_${query}_page_1';
         final cached = cacheService.getSearchCache(cacheKey);
         if (cached != null) {
           completer.complete(SearchResult.fromJson(cached));
@@ -132,16 +132,37 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
       }
     }
 
+    final tmdbQuery = query;
+
     switch (filter) {
       case MediaFilter.movie:
-        return await tmdbService.searchMovies(query, page);
+        return await tmdbService.searchMovies(tmdbQuery, page);
       case MediaFilter.series:
-        return await tmdbService.searchTV(query, page);
+        return await tmdbService.searchTV(tmdbQuery, page);
       case MediaFilter.anime:
         return await anilistService.searchAnime(query, page);
       case MediaFilter.all:
-        final tmdbMulti = await tmdbService.searchMulti(query, page);
-        final anilistAnime = await anilistService.searchAnime(query, page, 10);
+                SearchResult? tmdbMulti;
+        SearchResult? anilistAnime;
+        
+        try {
+          tmdbMulti = await tmdbService.searchMulti(tmdbQuery, page);
+        } catch (e) {
+          print('TMDB search error: $e');
+        }
+        
+        try {
+          anilistAnime = await anilistService.searchAnime(query, page, 10);
+        } catch (e) {
+          print('Anilist search error: $e');
+        }
+        
+        if (tmdbMulti == null && anilistAnime == null) {
+          throw Exception('Search failed. Please check your internet connection.');
+        }
+        
+        tmdbMulti ??= SearchResult(results: [], totalResults: 0, totalPages: 0, page: page);
+        anilistAnime ??= SearchResult(results: [], totalResults: 0, totalPages: 0, page: page);
         
         final combinedResults = <Media>[];
         for (final tmdbItem in tmdbMulti.results) {

@@ -144,16 +144,20 @@ class AnilistService {
 
   String? _buildTrailerUrl(Map<String, dynamic>? trailer) {
     if (trailer == null) return null;
-    if (trailer['site'] == 'youtube')
+    if (trailer['site'] == 'youtube') {
       return 'https://www.youtube.com/watch?v=${trailer['id']}';
-    if (trailer['site'] == 'dailymotion')
+    }
+    if (trailer['site'] == 'dailymotion') {
       return 'https://www.dailymotion.com/video/${trailer['id']}';
+    }
     return null;
   }
 
   String _proxyUrl(String? url) {
     if (url == null || url.isEmpty) return '';
-    if (url.startsWith('https://wsrv.nl') || url.contains('anilist.co')) return url;
+    if (url.startsWith('https://wsrv.nl') || url.contains('anilist.co')) {
+      return url;
+    }
     return 'https://wsrv.nl/?url=$url';
   }
 
@@ -182,10 +186,13 @@ class AnilistService {
       originalTitle: anime['title']?['native'] as String?,
       overview: _stripHtml(anime['description'] as String?),
       posterUrl: _proxyUrl(
-          (anime['coverImage']?['extraLarge'] as String?) ??
-          (anime['coverImage']?['large'] as String?) ??
-          ''),
-      backdropUrl: anime['bannerImage'] != null ? _proxyUrl(anime['bannerImage'] as String?) : null,
+        (anime['coverImage']?['extraLarge'] as String?) ??
+            (anime['coverImage']?['large'] as String?) ??
+            '',
+      ),
+      backdropUrl: anime['bannerImage'] != null
+          ? _proxyUrl(anime['bannerImage'] as String?)
+          : null,
       genres: genres,
       rating: ((anime['averageScore'] as num?)?.toDouble() ?? 0) / 10,
       voteCount: anime['popularity'] as int? ?? 0,
@@ -231,11 +238,15 @@ class AnilistService {
         page: pageInfo['currentPage'] as int? ?? 1,
       );
     } catch (e) {
-      return SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
+      rethrow;
     }
   }
 
-  Future<SearchResult> discoverAnimeByGenres(List<String> genres, [int page = 1, int perPage = 20]) async {
+  Future<SearchResult> discoverAnimeByGenres(
+    List<String> genres, [
+    int page = 1,
+    int perPage = 20,
+  ]) async {
     final String gqlQuery =
         '''
       query DiscoverAnime(\$genres: [String], \$page: Int, \$perPage: Int) {
@@ -265,7 +276,7 @@ class AnilistService {
         page: pageInfo['currentPage'] as int? ?? 1,
       );
     } catch (e) {
-      return SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
+      rethrow;
     }
   }
 
@@ -283,7 +294,9 @@ class AnilistService {
         variables: {'id': numericId},
       );
       return _mapAniListToMedia(data['Media'] as Map<String, dynamic>);
-    } catch (e) {
+    } catch (e, stack) {
+      print('[AniListService] getAnimeDetails error for id $id: $e');
+      print(stack);
       return null;
     }
   }
@@ -399,7 +412,8 @@ class AnilistService {
             allNodesMap[mId] = {...media, 'relationType': actualRelation};
           }
 
-          final relations = media['relations']?['edges'] as List<dynamic>? ?? [];
+          final relations =
+              media['relations']?['edges'] as List<dynamic>? ?? [];
           for (final edge in relations) {
             final node = edge['node'] as Map<String, dynamic>;
             final relType = edge['relationType'] as String;
@@ -451,7 +465,8 @@ class AnilistService {
           final currentNode = allNodesMap[currentId];
           if (currentNode == null) continue;
 
-          final relations = currentNode['relations']?['edges'] as List<dynamic>? ?? [];
+          final relations =
+              currentNode['relations']?['edges'] as List<dynamic>? ?? [];
           for (final edge in relations) {
             final node = edge['node'] as Map<String, dynamic>;
             final relType = edge['relationType'] as String;
@@ -510,8 +525,9 @@ class AnilistService {
               ? 'Current Series'
               : '${relType.replaceAll('_', ' ')} - ${_resolveTitle(node['title'] as Map<String, dynamic>?)}',
           posterUrl: _proxyUrl(
-              (node['coverImage']?['extraLarge'] as String?) ??
-              (node['coverImage']?['large'] as String?)),
+            (node['coverImage']?['extraLarge'] as String?) ??
+                (node['coverImage']?['large'] as String?),
+          ),
           mediaId: 'anilist-${node['id']}',
           malId: node['idMal'] as int?,
           mediaType: MediaType.anime,
@@ -526,7 +542,7 @@ class AnilistService {
 
   Future<List<Episode>> getAnimeEpisodes(int idMal) async {
     if (idMal <= 0) return [];
-    
+
     List<StoryArc> animeArcs = [];
 
     try {
@@ -547,8 +563,6 @@ class AnilistService {
     } catch (e) {
       print('Failed to load arc_data.json: $e');
     }
-
-
 
     try {
       List<dynamic> allEpisodes = [];

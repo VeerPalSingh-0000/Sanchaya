@@ -58,6 +58,13 @@ It hits different because it actually looks like a flagship app. No cap, the UI 
 
 <br/>
 
+## 📱 Download the App
+
+You can download the latest Android APK directly from this repository:
+[Download Sanchaya.apk](releases/sanchaya-app.apk)
+
+---
+
 ## ⚙️ Powered By The Giants
 
 Under the hood, Sanchaya hooks seamlessly into the best APIs on the internet so your data is always fresh, accurate, and blazing fast.

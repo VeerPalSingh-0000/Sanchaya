@@ -5,12 +5,14 @@ class CacheService {
   static const String _trendingBox = 'trending_cache';
   static const String _mediaDetailsBox = 'media_details_cache';
   static const String _searchBox = 'search_cache';
+  static const String _settingsBox = 'settings_cache';
 
   Future<void> init() async {
     await Hive.initFlutter();
     await Hive.openBox(_trendingBox);
     await Hive.openBox(_mediaDetailsBox);
     await Hive.openBox(_searchBox);
+    await Hive.openBox(_settingsBox);
   }
 
   // Generic Cache Wrapper
@@ -70,5 +72,14 @@ class CacheService {
     await Hive.box(_trendingBox).clear();
     await Hive.box(_mediaDetailsBox).clear();
     await Hive.box(_searchBox).clear();
+  }
+
+  // Settings
+  dynamic getSetting(String key, {dynamic defaultValue}) {
+    return Hive.box(_settingsBox).get(key, defaultValue: defaultValue);
+  }
+
+  Future<void> setSetting(String key, dynamic value) async {
+    await Hive.box(_settingsBox).put(key, value);
   }
 }
