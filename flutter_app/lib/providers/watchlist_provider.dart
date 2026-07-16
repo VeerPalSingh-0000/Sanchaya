@@ -260,6 +260,8 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     await addOrUpdate(updatedItem);
   }
 
+
+
   bool isInWatchlist(String mediaId, MediaType mediaType) {
     return state.value?.any(
           (e) => e.externalId == mediaId && e.mediaType == mediaType,

@@ -3,6 +3,7 @@ import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/media.dart';
 import '../providers/watchlist_provider.dart';
+import '../providers/service_providers.dart';
 
 class WatchlistDropdownButton extends ConsumerWidget {
   final Media media;
@@ -83,6 +84,51 @@ class WatchlistDropdownButton extends ConsumerWidget {
         if (value == 'remove') {
           for (var item in franchiseItems) {
             await watchlistNotifier.remove(item.externalId, item.mediaType);
+          }
+        } else if (value == 'mark_all_ptw' || value == 'mark_all_completed') {
+          final targetStatus = value == 'mark_all_ptw' ? WatchStatus.planToWatch : WatchStatus.completed;
+          List<Media> franchiseMedia = [];
+          
+          if (media.type == MediaType.anime) {
+            final anilist = ref.read(anilistServiceProvider);
+            final seasons = await anilist.getAnimeSeasons(media.externalId);
+            
+            if (seasons.isNotEmpty) {
+              final rootItem = seasons.where((s) => s.format == 'TV').firstOrNull ?? seasons.first;
+              for (final season in seasons) {
+                franchiseMedia.add(Media(
+                  id: 'anilist-${season.mediaId}',
+                  externalId: season.mediaId.toString(),
+                  type: MediaType.anime,
+                  title: season.name,
+                  overview: season.overview,
+                  posterUrl: season.posterUrl ?? media.posterUrl,
+                  genres: media.genres,
+                  rating: media.rating,
+                  voteCount: 0,
+                  status: 'released',
+                  totalEpisodes: null,
+                  franchiseId: rootItem.mediaId?.toString() ?? media.id,
+                  franchiseTitle: rootItem.name,
+                  franchisePosterUrl: rootItem.posterUrl ?? media.posterUrl,
+                ));
+              }
+            }
+          } else if (media.type == MediaType.movie) {
+            final tmdb = ref.read(tmdbServiceProvider);
+            Media? mediaWithFranchise = media;
+            if (mediaWithFranchise.franchiseId == null) {
+              mediaWithFranchise = await tmdb.getMovieDetails(media.externalId) ?? media;
+            }
+            if (mediaWithFranchise.franchiseId != null) {
+              franchiseMedia = await tmdb.getCollection(mediaWithFranchise.franchiseId!);
+            }
+          }
+
+          if (franchiseMedia.isNotEmpty) {
+            await watchlistNotifier.bulkUpdateFranchise(franchiseMedia, targetStatus);
+          } else {
+            await watchlistNotifier.addMediaToWatchlist(media, targetStatus);
           }
         } else {
           final newStatus = WatchStatus.values.firstWhere(
@@ -190,6 +236,79 @@ class WatchlistDropdownButton extends ConsumerWidget {
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final showFranchiseOptions = media.franchiseId != null || media.type == MediaType.anime || media.type == MediaType.movie;
+
+        if (showFranchiseOptions) {
+          menuItems.add(PopupMenuDivider());
+          menuItems.add(
+            PopupMenuItem<String>(
+              enabled: false,
+              height: 24,
+              child: Text(
+                'ENTIRE FRANCHISE',
+                style: TextStyle(
+                  color: context.colors.textSubtle,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+          );
+          
+          menuItems.add(
+            PopupMenuItem<String>(
+              value: 'mark_all_ptw',
+              child: Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF59E0B),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Mark all Plan to Watch',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: context.colors.textSubtle),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          menuItems.add(
+            PopupMenuItem<String>(
+              value: 'mark_all_completed',
+              child: Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Color(0xFF3B82F6),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Mark all Completed',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: context.colors.textSubtle),
                     ),
                   ),
                 ],

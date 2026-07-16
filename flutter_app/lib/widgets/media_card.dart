@@ -15,6 +15,7 @@ class MediaCard extends StatelessWidget {
   final bool showRating;
   final String? typeBadge;
   final bool isAdded;
+  final bool isFavorite;
 
   const MediaCard({
     super.key,
@@ -29,6 +30,7 @@ class MediaCard extends StatelessWidget {
     this.showRating = true,
     this.typeBadge,
     this.isAdded = false,
+    this.isFavorite = false,
   });
 
   @override
@@ -173,6 +175,33 @@ class MediaCard extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
                             ),
+                          ),
+                        ),
+                      ),
+                    
+                    // Favorite badge
+                    if (isFavorite)
+                      Positioned(
+                        top: 8,
+                        right: typeBadge != null ? null : 8,
+                        left: typeBadge != null ? 8 : null,
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.pinkAccent.withValues(alpha: 0.85),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              )
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.favorite_rounded,
+                            color: Colors.white,
+                            size: 14,
                           ),
                         ),
                       ),

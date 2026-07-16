@@ -15,6 +15,7 @@ class ReactionSelectorWidget extends ConsumerStatefulWidget {
 
 class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget> {
   final List<Map<String, dynamic>> _reactions = [
+    {'id': Reaction.favorite, 'label': 'Favourite', 'icon': Icons.star_rounded, 'color': Color(0xFFF59E0B)},
     {'id': Reaction.love, 'label': 'Love it', 'icon': Icons.favorite_rounded, 'color': Color(0xFFF43F5E)},
     {'id': Reaction.good, 'label': "It's good", 'icon': Icons.thumb_up_rounded, 'color': Color(0xFF10B981)},
     {'id': Reaction.bad, 'label': "It's bad", 'icon': Icons.thumb_down_rounded, 'color': Color(0xFF64748B)},

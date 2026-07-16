@@ -354,57 +354,63 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                               SizedBox(height: 12),
 
                               // Info
-                              Text(
-                                arc.name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: isCurrent
-                                      ? context.colors.primary
-                                      : context.colors.textMain,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.2,
+                              SizedBox(
+                                height: 34,
+                                child: Text(
+                                  arc.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: isCurrent
+                                        ? context.colors.primary
+                                        : context.colors.textMain,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.2,
+                                  ),
                                 ),
                               ),
                               SizedBox(height: 4),
-                              Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  if (arc.episodeCount > 0) ...[
-                                    Text(
-                                      '${arc.episodeCount} EP',
-                                      style: TextStyle(
-                                        color: context.colors.textSubtle.withValues(
-                                          alpha: 0.7,
+                              SizedBox(
+                                height: 14,
+                                child: Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    if (arc.episodeCount > 0 && targetType != MediaType.movie) ...[
+                                      Text(
+                                        '${arc.episodeCount} EP',
+                                        style: TextStyle(
+                                          color: context.colors.textSubtle.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
                                         ),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
                                       ),
-                                    ),
-                                    Text(
-                                      ' • ',
-                                      style: TextStyle(
-                                        color: context.colors.textMuted.withValues(
-                                          alpha: 0.5,
+                                      Text(
+                                        ' • ',
+                                        style: TextStyle(
+                                          color: context.colors.textMuted.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                          fontSize: 10,
                                         ),
-                                        fontSize: 10,
                                       ),
-                                    ),
+                                    ],
+                                    if (arc.format != null)
+                                      Text(
+                                        arc.format!.toUpperCase(),
+                                        style: TextStyle(
+                                          color: context.colors.textSubtle.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
                                   ],
-                                  if (arc.format != null)
-                                    Text(
-                                      arc.format!.toUpperCase(),
-                                      style: TextStyle(
-                                        color: context.colors.textSubtle.withValues(
-                                          alpha: 0.7,
-                                        ),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                ],
+                                ),
                               ),
                               SizedBox(height: 12),
                               SizedBox(
@@ -495,7 +501,7 @@ class _StatusButton extends ConsumerWidget {
         );
       },
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         decoration: BoxDecoration(
           color: bgColor,
           border: Border.all(color: borderColor),
@@ -542,9 +548,9 @@ class _StatusButton extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: isAdded ? color : Colors.white70,
-                  fontSize: 10,
+                  fontSize: 9.5,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
+                  letterSpacing: 0.5,
                 ),
               ),
             ),

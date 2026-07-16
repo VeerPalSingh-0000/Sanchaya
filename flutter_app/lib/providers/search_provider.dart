@@ -48,7 +48,7 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
     final completer = Completer<SearchResult>();
 
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+    _debounceTimer = Timer(const Duration(milliseconds: 200), () async {
       try {
         final cacheService = ref.read(cacheServiceProvider);
         final cacheKey = 'search_v2_${filter.name}_${query}_page_1';
@@ -115,9 +115,15 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
           case MediaFilter.anime:
              return await anilistService.discoverAnimeByGenres([anilistGenre], page);
           case MediaFilter.all:
-             final m = await tmdbService.discoverByGenres('movie', [genreId], page);
-             final t = await tmdbService.discoverByGenres('tv', [genreId], page);
-             final a = await anilistService.discoverAnimeByGenres([anilistGenre], page);
+             final futures = await Future.wait([
+               tmdbService.discoverByGenres('movie', [genreId], page),
+               tmdbService.discoverByGenres('tv', [genreId], page),
+               anilistService.discoverAnimeByGenres([anilistGenre], page),
+             ]);
+             
+             final m = futures[0];
+             final t = futures[1];
+             final a = futures[2];
              
              final combined = [...m.results, ...t.results, ...a.results];
              combined.shuffle();
@@ -142,27 +148,22 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
       case MediaFilter.anime:
         return await anilistService.searchAnime(query, page);
       case MediaFilter.all:
-                SearchResult? tmdbMulti;
+        SearchResult? tmdbMulti;
         SearchResult? anilistAnime;
         
-        try {
-          tmdbMulti = await tmdbService.searchMulti(tmdbQuery, page);
-        } catch (e) {
-          print('TMDB search error: $e');
-        }
+        final results = await Future.wait([
+          tmdbService.searchMulti(tmdbQuery, page).catchError((e) {
+            print('TMDB search error: $e');
+            return SearchResult(results: [], totalResults: 0, totalPages: 0, page: page);
+          }),
+          anilistService.searchAnime(query, page, 10).catchError((e) {
+            print('Anilist search error: $e');
+            return SearchResult(results: [], totalResults: 0, totalPages: 0, page: page);
+          }),
+        ]);
         
-        try {
-          anilistAnime = await anilistService.searchAnime(query, page, 10);
-        } catch (e) {
-          print('Anilist search error: $e');
-        }
-        
-        if (tmdbMulti == null && anilistAnime == null) {
-          throw Exception('Search failed. Please check your internet connection.');
-        }
-        
-        tmdbMulti ??= SearchResult(results: [], totalResults: 0, totalPages: 0, page: page);
-        anilistAnime ??= SearchResult(results: [], totalResults: 0, totalPages: 0, page: page);
+        tmdbMulti = results[0];
+        anilistAnime = results[1];
         
         final combinedResults = <Media>[];
         for (final tmdbItem in tmdbMulti.results) {

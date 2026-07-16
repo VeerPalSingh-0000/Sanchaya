@@ -1,9 +1,11 @@
 import 'media.dart';
 
-enum Reaction { love, good, bad }
+enum Reaction { favorite, love, good, bad }
 
 Reaction reactionFromString(String value) {
   switch (value.toUpperCase()) {
+    case 'FAVORITE':
+      return Reaction.favorite;
     case 'LOVE':
       return Reaction.love;
     case 'GOOD':
@@ -17,6 +19,8 @@ Reaction reactionFromString(String value) {
 
 String reactionToString(Reaction reaction) {
   switch (reaction) {
+    case Reaction.favorite:
+      return 'FAVORITE';
     case Reaction.love:
       return 'LOVE';
     case Reaction.good:

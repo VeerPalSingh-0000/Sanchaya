@@ -23,6 +23,23 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Oops! Something went wrong.', style: TextStyle(fontSize: 20)),
+            SizedBox(height: 16),
+            Text(state.error?.toString() ?? 'Page not found', textAlign: TextAlign.center),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go('/'),
+              child: Text('Go to Home'),
+            ),
+          ],
+        ),
+      ),
+    ),
     routes: [
       GoRoute(
         path: '/splash',

@@ -1,25 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/media.dart';
+import '../providers/service_providers.dart';
 
-class SeasonEpisodesWidget extends StatefulWidget {
+class SeasonEpisodesWidget extends ConsumerStatefulWidget {
   final Media media;
 
   const SeasonEpisodesWidget({super.key, required this.media});
 
   @override
-  State<SeasonEpisodesWidget> createState() => _SeasonEpisodesWidgetState();
+  ConsumerState<SeasonEpisodesWidget> createState() => _SeasonEpisodesWidgetState();
 }
 
-class _SeasonEpisodesWidgetState extends State<SeasonEpisodesWidget> {
+class _SeasonEpisodesWidgetState extends ConsumerState<SeasonEpisodesWidget> {
   Season? _selectedSeason;
+  bool _isLoading = false;
+  final Map<int, List<Episode>> _fetchedEpisodesCache = {};
 
   @override
   void initState() {
     super.initState();
     if (widget.media.seasons != null && widget.media.seasons!.isNotEmpty) {
       _selectedSeason = widget.media.seasons!.first;
+      if (_selectedSeason!.episodes != null && _selectedSeason!.episodes!.isNotEmpty) {
+        _fetchedEpisodesCache[_selectedSeason!.number] = _selectedSeason!.episodes!;
+      }
+    }
+  }
+
+  List<Episode>? get _currentEpisodes {
+    if (_selectedSeason == null) return null;
+    if (_selectedSeason!.episodes != null && _selectedSeason!.episodes!.isNotEmpty) {
+      return _selectedSeason!.episodes;
+    }
+    return _fetchedEpisodesCache[_selectedSeason!.number];
+  }
+
+  Future<void> _fetchEpisodesIfNeed(Season season) async {
+    if (season.episodes != null && season.episodes!.isNotEmpty) return;
+    if (_fetchedEpisodesCache.containsKey(season.number)) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final tmdb = ref.read(tmdbServiceProvider);
+      final detailedSeason = await tmdb.getTVSeasonDetails(widget.media.externalId, season.number);
+      if (detailedSeason != null && detailedSeason.episodes != null) {
+        _fetchedEpisodesCache[season.number] = detailedSeason.episodes!;
+        if (mounted) setState(() {});
+      }
+    } catch (e) {
+      debugPrint('Failed to load season episodes: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -62,10 +96,11 @@ class _SeasonEpisodesWidgetState extends State<SeasonEpisodesWidget> {
                       dropdownColor: context.colors.surface,
                       style: TextStyle(color: context.colors.textMain, fontSize: 14),
                       onChanged: (Season? newValue) {
-                        if (newValue != null) {
+                        if (newValue != null && newValue.number != _selectedSeason?.number) {
                           setState(() {
                             _selectedSeason = newValue;
                           });
+                          _fetchEpisodesIfNeed(newValue);
                         }
                       },
                       items: widget.media.seasons!.map<DropdownMenuItem<Season>>((Season season) {
@@ -85,15 +120,22 @@ class _SeasonEpisodesWidgetState extends State<SeasonEpisodesWidget> {
           ],
         ),
         SizedBox(height: 16),
-        if (_selectedSeason != null && _selectedSeason!.episodes != null && _selectedSeason!.episodes!.isNotEmpty)
+        if (_isLoading)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(color: context.colors.primary),
+            ),
+          )
+        else if (_currentEpisodes != null && _currentEpisodes!.isNotEmpty)
           ListView.separated(
             padding: EdgeInsets.zero,
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: _selectedSeason!.episodes!.length,
+            itemCount: _currentEpisodes!.length,
             separatorBuilder: (_, _) => SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final episode = _selectedSeason!.episodes![index];
+              final episode = _currentEpisodes![index];
               return _EpisodeTile(episode: episode);
             },
           )

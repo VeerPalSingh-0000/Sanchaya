@@ -80,6 +80,8 @@ class _WatchlistBottomSheetState extends ConsumerState<WatchlistBottomSheet> {
     final isAdded = franchiseItems.isNotEmpty;
     final currentStatus = watchlistNotifier.getAggregateStatus(widget.media);
 
+
+
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surfaceLight,
@@ -151,6 +153,7 @@ class _WatchlistBottomSheetState extends ConsumerState<WatchlistBottomSheet> {
                 ),
               );
             }),
+
 
 
             if (isAdded) ...[
@@ -231,6 +234,4 @@ class _WatchlistBottomSheetState extends ConsumerState<WatchlistBottomSheet> {
       ),
     );
   }
-
-
 }

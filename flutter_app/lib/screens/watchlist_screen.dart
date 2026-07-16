@@ -13,7 +13,7 @@ import '../widgets/media_card.dart';
 import '../widgets/aesthetic_loader.dart';
 import '../widgets/profile_app_bar.dart';
 
-enum WatchlistTab { all, watching, planToWatch, completed, onHold, dropped }
+enum WatchlistTab { all, favorites, watching, planToWatch, completed, onHold, dropped }
 
 class WatchlistScreen extends ConsumerStatefulWidget {
   const WatchlistScreen({super.key});
@@ -26,6 +26,7 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
     with SingleTickerProviderStateMixin {
   static const _tabs = [
     WatchlistTab.all,
+    WatchlistTab.favorites,
     WatchlistTab.watching,
     WatchlistTab.planToWatch,
     WatchlistTab.completed,
@@ -192,7 +193,13 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
                       controller: _tabController,
                       children: _tabs.map((tab) {
                         final filtered = items.where((i) {
-                          if (tab != WatchlistTab.all) {
+                          if (tab == WatchlistTab.favorites) {
+                            if (i is SingleDisplayItem) {
+                              if (i.item.reaction != Reaction.favorite) return false;
+                            } else if (i is FranchiseDisplayItem) {
+                              if (!i.items.any((child) => child.reaction == Reaction.favorite)) return false;
+                            }
+                          } else if (tab != WatchlistTab.all) {
                             final status = _tabToStatus(tab);
                             if (i.aggregateStatus != status) return false;
                           }
@@ -265,6 +272,8 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
     switch (tab) {
       case WatchlistTab.all:
         return 'All Items';
+      case WatchlistTab.favorites:
+        return 'Favourites';
       case WatchlistTab.watching:
         return 'Watching';
       case WatchlistTab.planToWatch:
@@ -282,6 +291,8 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
     switch (tab) {
       case WatchlistTab.all:
         return Icons.all_inbox_rounded;
+      case WatchlistTab.favorites:
+        return Icons.star_rounded;
       case WatchlistTab.watching:
         return Icons.play_circle_outline_rounded;
       case WatchlistTab.planToWatch:
@@ -327,6 +338,10 @@ class _EmptyTab extends StatelessWidget {
       WatchlistTab.all: (
         'Watchlist is empty',
         'Start adding movies and shows!',
+      ),
+      WatchlistTab.favorites: (
+        'No favourites yet',
+        'Mark titles you love with a heart',
       ),
       WatchlistTab.watching: ('Nothing playing', 'Start watching something!'),
       WatchlistTab.planToWatch: (
@@ -431,6 +446,7 @@ class _WatchlistCard extends ConsumerWidget {
         width: double.infinity,
         height: 155,
         typeBadge: _typeLabel(item.mediaType),
+        isFavorite: item.reaction == Reaction.favorite,
         onTap: () {
           String cleanId = item.externalId.replaceAll(RegExp(r'^(tmdb-movie-|tmdb-tv-|anilist-)+'), '');
           String mediaRouteId = cleanId;
@@ -509,6 +525,7 @@ class _FranchiseCard extends ConsumerWidget {
         ? group.rootTitle
         : sortedItems.first.title;
 
+    final bool hasFavorite = items.any((i) => i.reaction == Reaction.favorite);
     final int extraItems = items.length - 1;
 
     return GestureDetector(
@@ -604,6 +621,31 @@ class _FranchiseCard extends ConsumerWidget {
                                   ),
                                 )
                               : Container(color: context.colors.surfaceLight),
+                          // Favorite badge
+                          if (hasFavorite)
+                            Positioned(
+                              top: 8,
+                              left: 8,
+                              child: Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.pinkAccent.withValues(alpha: 0.85),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.3),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    )
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.favorite_rounded,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                              ),
+                            ),
                           // Badge for grouping
                           Positioned(
                             top: 8,
