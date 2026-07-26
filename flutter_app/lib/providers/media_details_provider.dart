@@ -220,3 +220,22 @@ final mediaDetailsProvider = FutureProvider.family<Media?, String>((ref, rawId) 
 
   return media;
 });
+
+final similarTitlesProvider = FutureProvider.family<List<Media>, String>((ref, rawId) async {
+  final id = normalizeMediaId(rawId);
+
+  // Similar titles are currently only supported for TMDB media
+  if (!id.startsWith('tmdb-')) {
+    return [];
+  }
+
+  final tmdbService = ref.read(tmdbServiceProvider);
+  final type = id.startsWith('tmdb-movie-') ? MediaType.movie : MediaType.series;
+  
+  try {
+    return await tmdbService.getSimilar(id, type);
+  } catch (e) {
+    debugPrint('[SimilarTitles] Error fetching for $id: $e');
+    return [];
+  }
+});

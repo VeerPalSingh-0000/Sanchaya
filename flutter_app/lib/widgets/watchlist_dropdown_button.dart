@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/media.dart';
@@ -21,13 +22,12 @@ class WatchlistDropdownButton extends ConsumerWidget {
     final watchlistNotifier = ref.read(watchlistProvider.notifier);
     final existingItem = watchlistNotifier.getItem(media.id, media.type);
     final franchiseItems = watchlistNotifier.getFranchiseItems(media);
-    final isAdded = franchiseItems.isNotEmpty;
-    final aggregateStatus = watchlistNotifier.getAggregateStatus(media);
+    final isAdded = existingItem != null;
 
     String buttonLabel = 'Add to Watchlist';
     Color buttonColor = context.colors.primary;
     if (isAdded) {
-      switch (aggregateStatus) {
+      switch (existingItem.status) {
         case WatchStatus.planToWatch:
           buttonLabel = 'Plan to Watch';
           buttonColor = Color(0xFFF59E0B);
@@ -81,6 +81,7 @@ class WatchlistDropdownButton extends ConsumerWidget {
 
     return PopupMenuButton<String>(
       onSelected: (value) async {
+        HapticFeedback.selectionClick();
         if (value == 'remove') {
           for (var item in franchiseItems) {
             await watchlistNotifier.remove(item.externalId, item.mediaType);
@@ -97,8 +98,8 @@ class WatchlistDropdownButton extends ConsumerWidget {
               final rootItem = seasons.where((s) => s.format == 'TV').firstOrNull ?? seasons.first;
               for (final season in seasons) {
                 franchiseMedia.add(Media(
-                  id: 'anilist-${season.mediaId}',
-                  externalId: season.mediaId.toString(),
+                  id: season.mediaId ?? '',
+                  externalId: season.mediaId?.replaceAll('anilist-', '') ?? '',
                   type: MediaType.anime,
                   title: season.name,
                   overview: season.overview,
@@ -111,6 +112,7 @@ class WatchlistDropdownButton extends ConsumerWidget {
                   franchiseId: rootItem.mediaId?.toString() ?? media.id,
                   franchiseTitle: rootItem.name,
                   franchisePosterUrl: rootItem.posterUrl ?? media.posterUrl,
+                  releaseDate: season.airDate,
                 ));
               }
             }
@@ -123,6 +125,29 @@ class WatchlistDropdownButton extends ConsumerWidget {
             if (mediaWithFranchise.franchiseId != null) {
               franchiseMedia = await tmdb.getCollection(mediaWithFranchise.franchiseId!);
             }
+          } else if (media.type == MediaType.series) {
+            final tmdb = ref.read(tmdbServiceProvider);
+            final details = await tmdb.getTVDetails(media.id);
+            if (details != null && details.seasons != null) {
+              for (var s in details.seasons!) {
+                final cleanId = (s.mediaId ?? '${media.externalId}-season-${s.number}').replaceAll('tmdb-tv-', '');
+                franchiseMedia.add(Media(
+                  id: 'tmdb-tv-$cleanId',
+                  externalId: cleanId,
+                  type: MediaType.series,
+                  title: s.name,
+                  overview: s.overview,
+                  posterUrl: s.posterUrl ?? media.posterUrl,
+                  genres: media.genres,
+                  rating: 0,
+                  voteCount: 0,
+                  status: 'Unknown',
+                  franchiseId: media.franchiseId ?? media.id,
+                ));
+              }
+            }
+            // Add the main show to the list as well
+            franchiseMedia.add(media);
           }
 
           if (franchiseMedia.isNotEmpty) {
@@ -134,13 +159,8 @@ class WatchlistDropdownButton extends ConsumerWidget {
           final newStatus = WatchStatus.values.firstWhere(
             (s) => s.name == value,
           );
-          if (franchiseItems.isNotEmpty) {
-            for (var item in franchiseItems) {
-              await watchlistNotifier.updateStatus(item, newStatus);
-            }
-            if (existingItem == null) {
-              await watchlistNotifier.addMediaToWatchlist(media, newStatus);
-            }
+          if (existingItem != null) {
+            await watchlistNotifier.updateStatus(existingItem, newStatus);
           } else {
             await watchlistNotifier.addMediaToWatchlist(media, newStatus);
           }
@@ -153,33 +173,43 @@ class WatchlistDropdownButton extends ConsumerWidget {
       ),
       offset: Offset(0, 50),
       child: Container(
+        height: isCompact ? 32 : 48,
         padding: EdgeInsets.symmetric(
-          vertical: isCompact ? 8 : 14,
-          horizontal: isCompact ? 12 : 20,
+          horizontal: isCompact ? 12 : 16,
         ),
         decoration: BoxDecoration(
           color: isAdded
-              ? buttonColor.withValues(alpha: 0.1)
+              ? buttonColor.withValues(alpha: 0.15)
               : (isCompact ? Colors.black.withValues(alpha: 0.6) : buttonColor),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isAdded
                 ? buttonColor.withValues(alpha: 0.5)
                 : (isCompact
                       ? Colors.white.withValues(alpha: 0.2)
                       : Colors.transparent),
+            width: isAdded ? 1.5 : 1.0,
           ),
+          boxShadow: (!isAdded && !isCompact)
+              ? [
+                  BoxShadow(
+                    color: buttonColor.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  )
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isAdded ? Icons.check_rounded : Icons.add_rounded,
+              isAdded ? Icons.check_circle_outline_rounded : Icons.add_circle_outline_rounded,
               color: isAdded ? buttonColor : Colors.white,
-              size: isCompact ? 14 : 20,
+              size: isCompact ? 16 : 22,
             ),
-            SizedBox(width: 6),
+            SizedBox(width: 8),
             Expanded(
               child: Text(
                 buttonLabel,
@@ -187,17 +217,24 @@ class WatchlistDropdownButton extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isAdded ? buttonColor : Colors.white,
-                  fontSize: isCompact ? 10 : 14,
-                  fontWeight: FontWeight.bold,
+                  fontSize: isCompact ? 11 : 15,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
                 ),
               ),
             ),
             if (!isCompact) ...[
               SizedBox(width: 8),
+              Container(
+                width: 1,
+                height: 24,
+                color: (isAdded ? buttonColor : Colors.white).withValues(alpha: 0.3),
+              ),
+              SizedBox(width: 8),
               Icon(
                 Icons.keyboard_arrow_down_rounded,
                 color: isAdded ? buttonColor : Colors.white,
-                size: 20,
+                size: 22,
               ),
             ],
           ],
@@ -229,10 +266,10 @@ class WatchlistDropdownButton extends ConsumerWidget {
                       label,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: aggregateStatus == status && isAdded
+                        color: existingItem?.status == status
                             ? Colors.white
                             : context.colors.textSubtle,
-                        fontWeight: aggregateStatus == status && isAdded
+                        fontWeight: existingItem?.status == status
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),

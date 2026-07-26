@@ -448,6 +448,23 @@ class TmdbService {
     }
   }
 
+  Future<List<Media>> getSimilar(String id, MediaType type) async {
+    final cleanId = id.replaceAll(RegExp(r'tmdb-(movie|tv)-'), '');
+    final endpoint = type == MediaType.movie ? '/movie/$cleanId/similar' : '/tv/$cleanId/similar';
+    try {
+      final data = await _fetch<Map<String, dynamic>>(endpoint);
+      final results = (data['results'] as List<dynamic>).map((item) {
+        if (type == MediaType.movie) {
+          return _mapMovieToMedia(item as Map<String, dynamic>);
+        }
+        return _mapTVToMedia(item as Map<String, dynamic>);
+      }).toList();
+      return results;
+    } catch (e) {
+      return [];
+    }
+  }
+
   Future<SearchResult> discoverByGenres(String mediaType, List<int> genreIds, [int page = 1]) async {
     try {
       final endpoint = mediaType == 'movie' ? '/discover/movie' : '/discover/tv';

@@ -203,7 +203,7 @@ class _RecommendationsGrid extends StatelessWidget {
                     case MediaType.anime: mediaRouteId = 'anilist-${media.externalId}'; break;
                   }
                 }
-                context.push('/media/$mediaRouteId');
+                context.push('/media/$mediaRouteId', extra: media);
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

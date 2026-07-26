@@ -17,48 +17,60 @@ class SearchFilterNotifier extends Notifier<MediaFilter> {
   void updateFilter(MediaFilter f) => state = f;
 }
 
+class SearchGenreNotifier extends Notifier<int?> {
+  @override
+  int? build() => null;
+  void updateGenre(int? g) => state = g;
+}
+
 final discoverSearchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
 final discoverSearchFilterProvider = NotifierProvider<SearchFilterNotifier, MediaFilter>(SearchFilterNotifier.new);
+final discoverSearchGenreProvider = NotifierProvider<SearchGenreNotifier, int?>(SearchGenreNotifier.new);
 
 final homeSearchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
 final homeSearchFilterProvider = NotifierProvider<SearchFilterNotifier, MediaFilter>(SearchFilterNotifier.new);
+final homeSearchGenreProvider = NotifierProvider<SearchGenreNotifier, int?>(SearchGenreNotifier.new);
 
 abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
   NotifierProvider<SearchQueryNotifier, String> get queryProvider;
   NotifierProvider<SearchFilterNotifier, MediaFilter> get filterProvider;
+  NotifierProvider<SearchGenreNotifier, int?> get genreProvider;
   
   Timer? _debounceTimer;
   int _currentPage = 1;
   bool _isLoadingNextPage = false;
   String _lastQuery = '';
   MediaFilter _lastFilter = MediaFilter.all;
+  int? _lastGenre;
 
   @override
   Future<SearchResult> build() async {
     final query = ref.watch(queryProvider);
     final filter = ref.watch(filterProvider);
+    final genre = ref.watch(genreProvider);
 
-    if (query.isEmpty) {
+    if (query.isEmpty && genre == null) {
       return SearchResult(results: [], totalResults: 0, totalPages: 0, page: 1);
     }
 
     _currentPage = 1;
     _lastQuery = query;
     _lastFilter = filter;
+    _lastGenre = genre;
     final completer = Completer<SearchResult>();
 
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 200), () async {
       try {
         final cacheService = ref.read(cacheServiceProvider);
-        final cacheKey = 'search_v2_${filter.name}_${query}_page_1';
+        final cacheKey = 'search_v2_${filter.name}_${query}_${genre ?? 0}_page_1';
         final cached = cacheService.getSearchCache(cacheKey);
         if (cached != null) {
           completer.complete(SearchResult.fromJson(cached));
           return;
         }
 
-        final result = await _fetchResults(query, filter, 1);
+        final result = await _fetchResults(query, filter, genre, 1);
         await cacheService.setSearchCache(cacheKey, result.toJson());
         completer.complete(result);
       } catch (e, st) {
@@ -82,7 +94,7 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
     final nextPage = _currentPage + 1;
     
     try {
-      final newResult = await _fetchResults(_lastQuery, _lastFilter, nextPage);
+      final newResult = await _fetchResults(_lastQuery, _lastFilter, _lastGenre, nextPage);
       
       _currentPage = nextPage;
       state = AsyncValue.data(SearchResult(
@@ -96,16 +108,13 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
     }
   }
 
-  Future<SearchResult> _fetchResults(String query, MediaFilter filter, int page) async {
+  Future<SearchResult> _fetchResults(String query, MediaFilter filter, int? genreId, int page) async {
     final tmdbService = ref.read(tmdbServiceProvider);
     final anilistService = ref.read(anilistServiceProvider);
 
-    if (query.startsWith('#genre:')) {
-      final genreIdStr = query.replaceFirst('#genre:', '');
-      final genreId = int.tryParse(genreIdStr);
-      if (genreId != null) {
-        final genreName = TmdbService.tmdbGenreMap[genreId] ?? '';
-        final anilistGenre = genreName == 'Sci-Fi' ? 'Sci-Fi' : genreName;
+    if (genreId != null) {
+      final genreName = TmdbService.tmdbGenreMap[genreId] ?? '';
+      final anilistGenre = genreName == 'Sci-Fi' ? 'Sci-Fi' : genreName;
 
         switch (filter) {
           case MediaFilter.movie:
@@ -135,7 +144,6 @@ abstract class BaseSearchResultsNotifier extends AsyncNotifier<SearchResult> {
                 page: page,
              );
         }
-      }
     }
 
     final tmdbQuery = query;
@@ -191,6 +199,8 @@ class DiscoverSearchResultsNotifier extends BaseSearchResultsNotifier {
   NotifierProvider<SearchQueryNotifier, String> get queryProvider => discoverSearchQueryProvider;
   @override
   NotifierProvider<SearchFilterNotifier, MediaFilter> get filterProvider => discoverSearchFilterProvider;
+  @override
+  NotifierProvider<SearchGenreNotifier, int?> get genreProvider => discoverSearchGenreProvider;
 }
 
 class HomeSearchResultsNotifier extends BaseSearchResultsNotifier {
@@ -198,6 +208,8 @@ class HomeSearchResultsNotifier extends BaseSearchResultsNotifier {
   NotifierProvider<SearchQueryNotifier, String> get queryProvider => homeSearchQueryProvider;
   @override
   NotifierProvider<SearchFilterNotifier, MediaFilter> get filterProvider => homeSearchFilterProvider;
+  @override
+  NotifierProvider<SearchGenreNotifier, int?> get genreProvider => homeSearchGenreProvider;
 }
 
 final discoverSearchResultsProvider = AsyncNotifierProvider<DiscoverSearchResultsNotifier, SearchResult>(DiscoverSearchResultsNotifier.new);

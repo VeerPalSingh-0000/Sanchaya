@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/theme_extension.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'optimized_network_image.dart';
 
 class MediaCard extends StatelessWidget {
   final String title;
@@ -67,42 +67,10 @@ class MediaCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     // Image
-                    posterUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: posterUrl,
-                            fit: BoxFit.cover,
-                            memCacheHeight: height.isFinite ? (height * 2).toInt() : 400,
-                            placeholder: (context, url) => Container(
-                              color: context.colors.surfaceLight,
-                              child: Center(
-                                child: Icon(
-                                  Icons.movie_outlined,
-                                  color: context.colors.textSubtle,
-                                  size: 32,
-                                ),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: context.colors.surfaceLight,
-                              child: Center(
-                                child: Icon(
-                                  Icons.broken_image_outlined,
-                                  color: context.colors.textSubtle,
-                                  size: 32,
-                                ),
-                              ),
-                            ),
-                          )
-                        : Container(
-                            color: context.colors.surfaceLight,
-                            child: Center(
-                              child: Icon(
-                                Icons.movie_outlined,
-                                color: context.colors.textSubtle,
-                                size: 32,
-                              ),
-                            ),
-                          ),
+                    OptimizedNetworkImage(
+                      imageUrl: posterUrl,
+                      memCacheHeight: height.isFinite ? (height * 2).toInt() : 400,
+                    ),
 
                     // Bottom gradient for readability
                     Positioned(

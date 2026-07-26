@@ -58,7 +58,15 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     try {
       final supabaseService = ref.read(supabaseServiceProvider);
       final prismaUserId = await supabaseService.getOrCreatePrismaUserId(user);
-      await supabaseService.addToWatchlist(prismaUserId, item);
+      
+      if (existingIndex >= 0) {
+        final data = item.toJson();
+        data.remove('id');
+        data['userId'] = prismaUserId;
+        await supabaseService.updateWatchlistItem(item.id, data);
+      } else {
+        await supabaseService.addToWatchlist(prismaUserId, item);
+      }
     } catch (e) {
       // Revert on error
       state = AsyncData(previousState);
@@ -160,6 +168,38 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
       updatedAt: DateTime.now(),
     );
     await addOrUpdate(updatedItem);
+    await _reconcileFranchiseStatus(updatedItem.franchiseId);
+  }
+
+  Future<void> _reconcileFranchiseStatus(String? franchiseId) async {
+    if (franchiseId == null || franchiseId.isEmpty) return;
+    
+    final items = state.value?.where((i) => i.franchiseId == franchiseId || i.externalId == franchiseId).toList() ?? [];
+    if (items.isEmpty) return;
+
+    // Check if there are any watching items
+    final hasWatching = items.any((i) => i.status == WatchStatus.watching);
+    final allCompleted = items.every((i) => i.status == WatchStatus.completed);
+
+    final parentItem = items.firstWhere(
+      (i) => i.externalId == franchiseId,
+      orElse: () => items.first, // fallback if parent item isn't tracked directly
+    );
+
+    WatchStatus newParentStatus = parentItem.status;
+    if (hasWatching) {
+      newParentStatus = WatchStatus.watching;
+    } else if (allCompleted) {
+      newParentStatus = WatchStatus.completed;
+    }
+
+    if (parentItem.status != newParentStatus) {
+      final updatedParent = parentItem.copyWith(
+        status: newParentStatus,
+        updatedAt: DateTime.now(),
+      );
+      await addOrUpdate(updatedParent);
+    }
   }
 
   Future<void> updateStatusWithPropagation(
@@ -177,19 +217,83 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     if (franchiseTimeline == null || franchiseTimeline.isEmpty) return;
 
     final currentIndex = franchiseTimeline.indexWhere((s) {
-      final cleanId = (s.mediaId ?? currentMedia.externalId)
+      String baseId = s.mediaId ?? currentMedia.externalId;
+      if (currentMedia.type == MediaType.series && s.mediaId == null) {
+        final parentId = currentMedia.franchiseId ?? currentMedia.externalId;
+        baseId = '${parentId.replaceAll('tmdb-tv-', '')}-season-${s.number}';
+      }
+      final cleanId = baseId
           .replaceAll('anilist-', '')
           .replaceAll('tmdb-movie-', '')
           .replaceAll('tmdb-tv-', '');
       return cleanId == currentMedia.externalId.replaceAll('anilist-', '').replaceAll('tmdb-movie-', '').replaceAll('tmdb-tv-', '');
     });
 
-    if (currentIndex == -1) return;
+    if (currentIndex != -1) {
+      if (status == WatchStatus.completed) {
+        // Mark previous main story items as completed
+        for (int i = currentIndex - 1; i >= 0; i--) {
+          await _propagateStatusToArc(franchiseTimeline[i], currentMedia, WatchStatus.completed);
+        }
+      } else if (status == WatchStatus.planToWatch) {
+        // Mark subsequent main story items as planToWatch
+        for (int i = currentIndex + 1; i < franchiseTimeline.length; i++) {
+          await _propagateStatusToArc(franchiseTimeline[i], currentMedia, WatchStatus.planToWatch);
+        }
+      } else if (status == WatchStatus.watching) {
+        // Mark previous main story items as completed
+        for (int i = currentIndex - 1; i >= 0; i--) {
+          await _propagateStatusToArc(franchiseTimeline[i], currentMedia, WatchStatus.completed);
+        }
+        // Mark subsequent main story items as planToWatch
+        for (int i = currentIndex + 1; i < franchiseTimeline.length; i++) {
+          await _propagateStatusToArc(franchiseTimeline[i], currentMedia, WatchStatus.planToWatch);
+        }
+      }
+    }
 
-    if (status == WatchStatus.completed) {
-      // Mark previous main story items as completed
-      for (int i = currentIndex - 1; i >= 0; i--) {
-        await _propagateStatusToArc(franchiseTimeline[i], currentMedia, WatchStatus.completed);
+    // --- PARENT UPDATE LOGIC ---
+    if (currentMedia.franchiseId != null && currentMedia.franchiseId != currentMedia.externalId) {
+      final parentIdStr = currentMedia.franchiseId!.replaceAll('tmdb-tv-', '').replaceAll('tmdb-movie-', '').replaceAll('anilist-', '');
+      final parentItem = state.value?.where((e) => e.externalId == parentIdStr).firstOrNull;
+      
+      if (parentItem != null) {
+        if (status == WatchStatus.watching && parentItem.status != WatchStatus.watching) {
+           await updateStatus(parentItem, WatchStatus.watching);
+        } else if (status == WatchStatus.completed && parentItem.status != WatchStatus.completed) {
+           // Check if ALL seasons in franchise timeline are completed
+           bool allCompleted = true;
+           for (int i = 0; i < franchiseTimeline.length; i++) {
+             final arc = franchiseTimeline[i];
+             
+             if (currentMedia.type == MediaType.anime) {
+                final isMainStory = arc.relationType != 'SPIN_OFF' &&
+                    arc.relationType != 'SIDE_STORY' &&
+                    arc.relationType != 'CHARACTER' &&
+                    arc.relationType != 'SUMMARY' &&
+                    arc.relationType != 'ALTERNATIVE' &&
+                    arc.relationType != 'OTHER';
+                if (!isMainStory) continue;
+             }
+             
+             String baseId = arc.mediaId ?? parentItem.externalId;
+             if (currentMedia.type == MediaType.series && arc.mediaId == null) {
+               baseId = '${parentItem.externalId}-season-${arc.number}';
+             }
+             final cleanMediaId = baseId.replaceAll('anilist-', '').replaceAll('tmdb-movie-', '').replaceAll('tmdb-tv-', '');
+             final prefix = currentMedia.type == MediaType.anime ? 'anilist-' : (currentMedia.type == MediaType.movie ? 'tmdb-movie-' : 'tmdb-tv-');
+             final targetId = '$prefix$cleanMediaId';
+             
+             final existing = getItem(targetId, currentMedia.type);
+             if (existing == null || existing.status != WatchStatus.completed) {
+               allCompleted = false;
+               break;
+             }
+           }
+           if (allCompleted) {
+             await updateStatus(parentItem, WatchStatus.completed);
+           }
+        }
       }
     }
   }
@@ -206,7 +310,13 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
       if (!isMainStory) return;
     }
 
-    final cleanMediaId = (arc.mediaId ?? parentMedia.externalId)
+    String baseId = arc.mediaId ?? parentMedia.externalId;
+    if (parentMedia.type == MediaType.series && arc.mediaId == null) {
+       final actualParentExternalId = parentMedia.franchiseId ?? parentMedia.externalId; 
+       baseId = '${actualParentExternalId.replaceAll('tmdb-tv-', '')}-season-${arc.number}';
+    }
+
+    final cleanMediaId = baseId
         .replaceAll('anilist-', '')
         .replaceAll('tmdb-movie-', '')
         .replaceAll('tmdb-tv-', '');
@@ -220,6 +330,10 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     final existing = getItem(targetId, targetType);
     if (existing != null) {
       if (existing.status != status) {
+        // Prevent downgrading from Watching/Completed to Plan To Watch
+        if (status == WatchStatus.planToWatch && (existing.status == WatchStatus.watching || existing.status == WatchStatus.completed)) {
+          return; 
+        }
         await updateStatus(existing, status);
       }
     } else {
@@ -297,10 +411,10 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
       return WatchStatus.watching;
     } else if (items.every((i) => i.status == WatchStatus.completed)) {
       return WatchStatus.completed;
-    } else if (items.any((i) => i.status == WatchStatus.planToWatch)) {
-      return WatchStatus.planToWatch;
     } else if (items.any((i) => i.status == WatchStatus.onHold)) {
       return WatchStatus.onHold;
+    } else if (items.any((i) => i.status == WatchStatus.planToWatch)) {
+      return WatchStatus.planToWatch;
     } else {
       return WatchStatus.dropped;
     }
@@ -317,6 +431,10 @@ class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
     for (final m in franchiseMedia) {
       final existing = getItem(m.id, m.type);
       if (existing != null) {
+        // When bulk-adding "Plan to Watch", do not overwrite existing progress!
+        if (status == WatchStatus.planToWatch && existing.status != WatchStatus.planToWatch) {
+          continue;
+        }
         await updateStatus(existing, status);
       } else {
         final newItem = WatchlistItem(

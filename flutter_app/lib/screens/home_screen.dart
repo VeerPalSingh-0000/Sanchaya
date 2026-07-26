@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/optimized_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
@@ -13,6 +13,7 @@ import '../widgets/shimmer_card.dart';
 import '../widgets/section_header.dart';
 import '../widgets/profile_app_bar.dart';
 import '../providers/watchlist_provider.dart';
+import '../providers/watchlist_groups_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/search_provider.dart';
 import '../widgets/error_retry_widget.dart';
@@ -111,9 +112,9 @@ class HomeScreen extends ConsumerWidget {
 
         // ── Continue Watching ──
         SliverToBoxAdapter(
-          child: watchlistAsync.when(
-            data: (watchlist) {
-              final watching = watchlist.where((i) => i.status == WatchStatus.watching).toList();
+          child: ref.watch(watchlistGroupsProvider).when(
+            data: (groups) {
+              final watching = groups.where((i) => i.aggregateStatus == WatchStatus.watching).toList();
               if (watching.isEmpty) return SizedBox.shrink();
 
               return Column(
@@ -133,28 +134,63 @@ class HomeScreen extends ConsumerWidget {
                           itemCount: watching.length,
                           separatorBuilder: (_, _) => SizedBox(width: 14),
                           itemBuilder: (context, index) {
-                            final item = watching[index];
-                            final progressText = (item.progress != null && item.totalEpisodes != null && item.totalEpisodes! > 0)
-                                ? 'EP ${item.progress}/${item.totalEpisodes}'
-                                : null;
+                            final displayItem = watching[index];
+                            late final String title;
+                            late final String posterUrl;
+                            late final double rating;
+                            late final MediaType mediaType;
+                            late final String externalId;
+                            String? progressText;
+                            
+                            if (displayItem is SingleDisplayItem) {
+                              final item = displayItem.item;
+                              title = item.title;
+                              posterUrl = item.franchisePosterUrl ?? item.posterUrl;
+                              rating = item.rating;
+                              mediaType = item.mediaType;
+                              externalId = item.externalId;
+                              progressText = (item.progress != null && item.totalEpisodes != null && item.totalEpisodes! > 0)
+                                  ? 'EP ${item.progress}/${item.totalEpisodes}'
+                                  : null;
+                            } else if (displayItem is FranchiseDisplayItem) {
+                              title = displayItem.group.rootTitle;
+                              posterUrl = displayItem.group.rootPosterUrl;
+                              rating = displayItem.items.first.rating;
+                              mediaType = displayItem.items.first.mediaType;
+                              externalId = displayItem.group.rootId;
+                            } else {
+                              return SizedBox.shrink();
+                            }
 
                             return MediaCard(
-                              title: item.title,
-                              posterUrl: item.franchisePosterUrl ?? item.posterUrl,
-                              rating: item.rating,
+                              title: title,
+                              posterUrl: posterUrl,
+                              rating: rating,
                               subtitle: progressText,
-                              typeBadge: item.mediaType.name.toUpperCase(),
+                              typeBadge: mediaType.name.toUpperCase(),
                               isAdded: true,
                               onTap: () {
-                                String mediaRouteId = item.externalId;
-                                if (!mediaRouteId.startsWith('tmdb-') && !mediaRouteId.startsWith('anilist-')) {
-                                  switch (item.mediaType) {
-                                    case MediaType.movie: mediaRouteId = 'tmdb-movie-${item.externalId}'; break;
-                                    case MediaType.series: mediaRouteId = 'tmdb-tv-${item.externalId}'; break;
-                                    case MediaType.anime: mediaRouteId = 'anilist-${item.externalId}'; break;
-                                  }
+                                String cleanId = externalId.replaceAll('tmdb-movie-', '').replaceAll('tmdb-tv-', '').replaceAll('anilist-', '');
+                                String mediaRouteId = cleanId;
+                                switch (mediaType) {
+                                  case MediaType.movie: mediaRouteId = 'tmdb-movie-$cleanId'; break;
+                                  case MediaType.series: mediaRouteId = 'tmdb-tv-$cleanId'; break;
+                                  case MediaType.anime: mediaRouteId = 'anilist-$cleanId'; break;
                                 }
-                                context.push('/media/$mediaRouteId');
+                                context.push('/media/$mediaRouteId', extra: Media(
+                                  id: externalId,
+                                  externalId: externalId,
+                                  type: mediaType,
+                                  title: title,
+                                  overview: '',
+                                  posterUrl: posterUrl,
+                                  backdropUrl: '',
+                                  genres: [],
+                                  rating: rating,
+                                  voteCount: 0,
+                                  status: '',
+                                  releaseDate: '',
+                                ));
                               },
                             ).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: 30 * index));
                           },
@@ -246,99 +282,106 @@ class HomeScreen extends ConsumerWidget {
 // Hero Carousel
 // ────────────────────────────────────────────────────────────
 
-class _HeroCarousel extends StatelessWidget {
+class _HeroCarousel extends StatefulWidget {
   final List<Media> items;
   const _HeroCarousel({required this.items});
 
   @override
-  Widget build(BuildContext context) {
-    return CarouselSlider.builder(
-      itemCount: items.length,
-      options: CarouselOptions(
-        height: 220,
-        viewportFraction: 0.88,
-        enlargeCenterPage: true,
-        enlargeFactor: 0.18,
-        autoPlay: true,
-        autoPlayInterval: Duration(seconds: 5),
-        autoPlayAnimationDuration: Duration(milliseconds: 800),
-        autoPlayCurve: Curves.easeInOutCubic,
-      ),
-      itemBuilder: (context, index, _) {
-        final media = items[index];
-        final imageUrl = media.backdropUrl ?? media.posterUrl;
+  State<_HeroCarousel> createState() => _HeroCarouselState();
+}
 
-        return GestureDetector(
-          onTap: () => context.push('/media/${media.id}'),
-          child: Container(
-            margin: EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colors.primary.withValues(alpha: 0.15),
-                  blurRadius: 24,
-                  offset: Offset(0, 8),
+class _HeroCarouselState extends State<_HeroCarousel> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CarouselSlider.builder(
+          itemCount: widget.items.length,
+          options: CarouselOptions(
+            height: 260, // Increased height for cinematic content
+            viewportFraction: 0.88,
+            enlargeCenterPage: true,
+            enlargeFactor: 0.18,
+            autoPlay: true,
+            autoPlayInterval: Duration(seconds: 5),
+            autoPlayAnimationDuration: Duration(milliseconds: 800),
+            autoPlayCurve: Curves.easeInOutCubic,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+          itemBuilder: (context, index, _) {
+            final media = widget.items[index];
+            final imageUrl = media.backdropUrl ?? media.posterUrl;
+
+            return GestureDetector(
+              onTap: () => context.push('/media/${media.id}', extra: media),
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.colors.primary.withValues(alpha: 0.15),
+                      blurRadius: 24,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Background image
-                if (imageUrl.isNotEmpty)
-                  CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, _) => Container(color: context.colors.surfaceLight),
-                    errorWidget: (_, _, _) => Container(
-                      color: context.colors.surfaceLight,
-                      child: Center(
-                        child: Icon(Icons.broken_image_outlined, color: context.colors.textSubtle, size: 32),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Background image
+                    if (imageUrl.isNotEmpty)
+                      OptimizedNetworkImage(
+                        imageUrl: imageUrl,
+                        memCacheHeight: 520, // 260 * 2
+                      )
+                    else
+                      Container(color: context.colors.surfaceLight),
+
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.3),
+                            Colors.black.withValues(alpha: 0.85),
+                          ],
+                          stops: [0.0, 0.5, 1.0],
+                        ),
                       ),
                     ),
-                  )
-                else
-                  Container(color: context.colors.surfaceLight),
 
-                // Gradient overlay
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.3),
-                        Colors.black.withValues(alpha: 0.85),
-                      ],
-                      stops: [0.0, 0.5, 1.0],
+                    // Left gradient
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.4),
+                            Colors.transparent,
+                          ],
+                          stops: [0.0, 0.4],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                // Left gradient
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.4),
-                        Colors.transparent,
-                      ],
-                      stops: [0.0, 0.4],
-                    ),
-                  ),
-                ),
-
-                // Content
-                Positioned(
-                  bottom: 16,
-                  left: 16,
-                  right: 16,
+                    // Content
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      right: 16,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -430,7 +473,30 @@ class _HeroCarousel extends StatelessWidget {
               duration: 500.ms,
               curve: Curves.easeOut,
             );
-      },
+          },
+        ),
+        SizedBox(height: 12),
+        // Page indicator dots
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: widget.items.asMap().entries.map((entry) {
+            return GestureDetector(
+              onTap: () => {}, // could add controller to jump to page here
+              child: Container(
+                width: _currentIndex == entry.key ? 24.0 : 8.0,
+                height: 8.0,
+                margin: EdgeInsets.symmetric(horizontal: 4.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4.0),
+                  color: _currentIndex == entry.key
+                      ? context.colors.primary
+                      : context.colors.textSubtle.withValues(alpha: 0.3),
+                ),
+              ),
+            ).animate(target: _currentIndex == entry.key ? 1 : 0).shimmer(duration: 400.ms);
+          }).toList(),
+        ),
+      ],
     );
   }
 }
@@ -506,7 +572,7 @@ class _MediaRow extends ConsumerWidget {
             subtitle: year,
             typeBadge: typeBadge,
             isAdded: ref.watch(watchlistProvider.notifier).isAdded(media),
-            onTap: () => context.push('/media/${media.id}'),
+            onTap: () => context.push('/media/${media.id}', extra: media),
             onAddWatchlist: () {
               final user = ref.read(currentUserProvider);
               if (user == null) {

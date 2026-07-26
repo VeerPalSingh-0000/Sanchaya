@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/theme_extension.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'optimized_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/media.dart';
 import '../providers/service_providers.dart';
@@ -178,16 +178,9 @@ class _EpisodeTile extends StatelessWidget {
               width: 100,
               height: 60,
               child: episode.stillUrl != null && episode.stillUrl!.isNotEmpty
-                  ? CachedNetworkImage(
+                  ? OptimizedNetworkImage(
                       imageUrl: episode.stillUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (_, _) => Container(color: context.colors.surfaceLight),
-                      errorWidget: (_, _, _) => Container(
-                        color: context.colors.surfaceLight,
-                        child: Center(
-                          child: Icon(Icons.broken_image_outlined, color: context.colors.textSubtle, size: 24),
-                        ),
-                      ),
+                      memCacheHeight: 120, // 60 * 2
                     )
                   : Container(
                       color: context.colors.surfaceLight,

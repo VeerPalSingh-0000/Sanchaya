@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'optimized_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'aesthetic_loader.dart';
 import '../models/media.dart';
@@ -289,22 +289,9 @@ class _AnimeTimelineState extends ConsumerState<AnimeTimeline> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
                                       child: arc.posterUrl != null
-                                          ? CachedNetworkImage(
+                                          ? OptimizedNetworkImage(
                                               imageUrl: arc.posterUrl!,
-                                              fit: BoxFit.cover,
-                                              placeholder: (_, _) => Container(
-                                                color: context.colors.surfaceLight,
-                                              ),
-                                              errorWidget: (_, _, _) => Container(
-                                                color: context.colors.surfaceLight,
-                                                child: Center(
-                                                  child: Icon(
-                                                    Icons.broken_image_outlined,
-                                                    color: context.colors.textSubtle,
-                                                    size: 24,
-                                                  ),
-                                                ),
-                                              ),
+                                              memCacheHeight: 400, // ~200 * 2
                                             )
                                           : Container(
                                               color: context.colors.surfaceLight,

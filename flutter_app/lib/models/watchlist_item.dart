@@ -49,6 +49,7 @@ class WatchlistItem {
   final String? franchisePosterUrl;
   final String? releaseDate;
   final Reaction? reaction;
+  final String? notes;
 
   WatchlistItem({
     required this.id,
@@ -69,6 +70,7 @@ class WatchlistItem {
     this.franchisePosterUrl,
     this.releaseDate,
     this.reaction,
+    this.notes,
   });
 
   factory WatchlistItem.fromJson(Map<String, dynamic> json) {
@@ -93,6 +95,7 @@ class WatchlistItem {
       reaction: json['reaction'] != null
           ? reactionFromString(json['reaction'] as String)
           : null,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -114,6 +117,7 @@ class WatchlistItem {
       if (franchisePosterUrl != null) 'franchisePosterUrl': franchisePosterUrl,
       if (releaseDate != null) 'releaseDate': releaseDate,
       if (reaction != null) 'reaction': reactionToString(reaction!),
+      if (notes != null) 'notes': notes,
     };
   }
 
@@ -136,6 +140,7 @@ class WatchlistItem {
     String? franchisePosterUrl,
     String? releaseDate,
     Reaction? reaction,
+    String? notes,
   }) {
     return WatchlistItem(
       id: id ?? this.id,
@@ -156,6 +161,7 @@ class WatchlistItem {
       franchisePosterUrl: franchisePosterUrl ?? this.franchisePosterUrl,
       releaseDate: releaseDate ?? this.releaseDate,
       reaction: reaction ?? this.reaction,
+      notes: notes ?? this.notes,
     );
   }
 }

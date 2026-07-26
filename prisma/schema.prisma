@@ -20,6 +20,7 @@ model User {
   updatedAt DateTime @updatedAt
   
   watchlistItems WatchlistItem[]
+  customLists    CustomList[]
 }
 
 model Account {
@@ -103,4 +104,28 @@ model WatchlistItem {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, mediaId, mediaType])
+}
+
+model CustomList {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  items       CustomListItem[]
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CustomListItem {
+  id           String   @id @default(cuid())
+  customListId String
+  mediaId      String   
+  mediaType    String   
+  addedAt      DateTime @default(now())
+
+  customList   CustomList @relation(fields: [customListId], references: [id], onDelete: Cascade)
+  
+  @@unique([customListId, mediaId, mediaType])
 }

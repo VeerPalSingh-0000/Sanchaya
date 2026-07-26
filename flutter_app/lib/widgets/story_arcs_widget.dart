@@ -27,7 +27,11 @@ class _StoryArcsWidgetState extends ConsumerState<StoryArcsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.media.type != MediaType.anime || widget.media.malId == null || widget.media.malId! <= 0) {
+    final isAnime = widget.media.type == MediaType.anime ||
+        (widget.media.originCountry == 'JP' &&
+            widget.media.genres.any((g) => g.name == 'Animation'));
+
+    if (!isAnime || widget.media.malId == null || widget.media.malId! <= 0) {
       return SizedBox.shrink();
     }
 

@@ -20,6 +20,9 @@ class FranchiseGroup {
 abstract class DisplayItem {
   WatchStatus get aggregateStatus;
   DateTime get sortDate;
+  String get title;
+  double get rating;
+  double get progressPercentage;
 }
 
 class SingleDisplayItem extends DisplayItem {
@@ -32,6 +35,20 @@ class SingleDisplayItem extends DisplayItem {
 
   @override
   DateTime get sortDate => item.addedAt;
+
+  @override
+  String get title => item.title;
+
+  @override
+  double get rating => item.rating;
+
+  @override
+  double get progressPercentage {
+    if (item.totalEpisodes != null && item.totalEpisodes! > 0) {
+      return (item.progress ?? 0) / item.totalEpisodes!;
+    }
+    return item.status == WatchStatus.completed ? 1.0 : 0.0;
+  }
 }
 
 class FranchiseDisplayItem extends DisplayItem {
@@ -48,6 +65,29 @@ class FranchiseDisplayItem extends DisplayItem {
   DateTime get sortDate {
     if (items.isEmpty) return DateTime.now();
     return items.map((e) => e.addedAt).reduce((a, b) => a.isAfter(b) ? a : b);
+  }
+
+  @override
+  String get title => group.rootTitle;
+
+  @override
+  double get rating {
+    if (items.isEmpty) return 0.0;
+    return items.map((e) => e.rating).reduce((a, b) => a + b) / items.length;
+  }
+
+  @override
+  double get progressPercentage {
+    if (items.isEmpty) return 0.0;
+    double totalP = 0;
+    for (var i in items) {
+      if (i.totalEpisodes != null && i.totalEpisodes! > 0) {
+        totalP += (i.progress ?? 0) / i.totalEpisodes!;
+      } else {
+        totalP += i.status == WatchStatus.completed ? 1.0 : 0.0;
+      }
+    }
+    return totalP / items.length;
   }
 }
 
@@ -71,6 +111,24 @@ String _canonicalBaseId(String raw) {
   final seasonIdx = id.indexOf('-season-');
   if (seasonIdx != -1) id = id.substring(0, seasonIdx);
   return id;
+}
+
+enum WatchlistSortOption { dateAdded, title, rating, progress }
+enum WatchlistSortOrder { ascending, descending }
+
+final watchlistSortOptionProvider = NotifierProvider<WatchlistSortOptionNotifier, WatchlistSortOption>(WatchlistSortOptionNotifier.new);
+final watchlistSortOrderProvider = NotifierProvider<WatchlistSortOrderNotifier, WatchlistSortOrder>(WatchlistSortOrderNotifier.new);
+
+class WatchlistSortOptionNotifier extends Notifier<WatchlistSortOption> {
+  @override
+  WatchlistSortOption build() => WatchlistSortOption.dateAdded;
+  void set(WatchlistSortOption option) => state = option;
+}
+
+class WatchlistSortOrderNotifier extends Notifier<WatchlistSortOrder> {
+  @override
+  WatchlistSortOrder build() => WatchlistSortOrder.descending;
+  void set(WatchlistSortOrder order) => state = order;
 }
 
 final watchlistGroupsProvider = Provider<AsyncValue<List<DisplayItem>>>((ref) {
@@ -167,13 +225,15 @@ final watchlistGroupsProvider = Provider<AsyncValue<List<DisplayItem>>>((ref) {
           aggregateStatus = WatchStatus.watching;
         } else if (data.items.every((i) => i.status == WatchStatus.completed)) {
           aggregateStatus = WatchStatus.completed;
-        } else if (data.items.any((i) => i.status == WatchStatus.planToWatch)) {
-          aggregateStatus = WatchStatus.planToWatch;
         } else if (data.items.any((i) => i.status == WatchStatus.onHold)) {
           aggregateStatus = WatchStatus.onHold;
+        } else if (data.items.any((i) => i.status == WatchStatus.planToWatch)) {
+          aggregateStatus = WatchStatus.planToWatch;
         } else {
           aggregateStatus = WatchStatus.dropped;
         }
+
+
 
         // Pick the best poster for the group
         final bestPoster = data.posterUrl.isNotEmpty

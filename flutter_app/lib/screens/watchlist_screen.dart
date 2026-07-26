@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/optimized_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../models/watchlist_item.dart';
 import '../models/media.dart';
@@ -122,144 +122,177 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
               ),
             ).animate().fadeIn(duration: 400.ms),
 
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              height: 42,
-              decoration: BoxDecoration(
-                color: context.colors.surfaceLight,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: context.colors.divider.withValues(alpha: 0.5),
-                ),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                labelPadding: EdgeInsets.symmetric(horizontal: 6),
-                indicatorSize: TabBarIndicatorSize.label,
-                dividerColor: Colors.transparent,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: context.colors.primary.withValues(alpha: 0.2),
-                  border: Border.all(
-                    color: context.colors.primary.withValues(alpha: 0.4),
-                  ),
-                ),
-                labelColor: context.colors.primary,
-                unselectedLabelColor: context.colors.textSubtle,
-                labelStyle: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                unselectedLabelStyle: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-                tabs: _tabs.map((tab) {
-                  return Tab(
+            SizedBox(height: 8),
+
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
                     child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 0,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceLight,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: context.colors.divider.withValues(alpha: 0.5),
+                        ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(_tabIcon(tab), size: 14),
-                          SizedBox(width: 6),
-                          Text(_tabLabel(tab)),
-                        ],
+                      child: TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        labelPadding: EdgeInsets.symmetric(horizontal: 6),
+                        indicatorSize: TabBarIndicatorSize.label,
+                        dividerColor: Colors.transparent,
+                        indicator: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: context.colors.primary.withValues(alpha: 0.2),
+                          border: Border.all(
+                            color: context.colors.primary.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        labelColor: context.colors.primary,
+                        unselectedLabelColor: context.colors.textSubtle,
+                        labelStyle: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        unselectedLabelStyle: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        tabs: _tabs.map((tab) {
+                          return Tab(
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 0,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(_tabIcon(tab), size: 14),
+                                  SizedBox(width: 6),
+                                  Text(_tabLabel(tab)),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                  SizedBox(width: 12),
+                  // Sort button
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final sortOrder = ref.watch(watchlistSortOrderProvider);
+                      final sortBy = ref.watch(watchlistSortOptionProvider);
+                      
+                      return PopupMenuButton<String>(
+                        color: context.colors.surface,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        icon: Icon(
+                          sortOrder == WatchlistSortOrder.descending ? Icons.sort_rounded : Icons.sort_by_alpha_rounded,
+                          color: context.colors.textMain,
+                        ),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'dateAdded',
+                            child: Row(
+                              children: [
+                                Icon(Icons.date_range_rounded, size: 18, color: sortBy == WatchlistSortOption.dateAdded ? context.colors.primary : context.colors.textMain),
+                                SizedBox(width: 8),
+                                Text('Date Added', style: TextStyle(color: sortBy == WatchlistSortOption.dateAdded ? context.colors.primary : context.colors.textMain)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'title',
+                            child: Row(
+                              children: [
+                                Icon(Icons.title_rounded, size: 18, color: sortBy == WatchlistSortOption.title ? context.colors.primary : context.colors.textMain),
+                                SizedBox(width: 8),
+                                Text('Title', style: TextStyle(color: sortBy == WatchlistSortOption.title ? context.colors.primary : context.colors.textMain)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'rating',
+                            child: Row(
+                              children: [
+                                Icon(Icons.star_rounded, size: 18, color: sortBy == WatchlistSortOption.rating ? context.colors.primary : context.colors.textMain),
+                                SizedBox(width: 8),
+                                Text('Rating', style: TextStyle(color: sortBy == WatchlistSortOption.rating ? context.colors.primary : context.colors.textMain)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'progress',
+                            child: Row(
+                              children: [
+                                Icon(Icons.show_chart_rounded, size: 18, color: sortBy == WatchlistSortOption.progress ? context.colors.primary : context.colors.textMain),
+                                SizedBox(width: 8),
+                                Text('Progress', style: TextStyle(color: sortBy == WatchlistSortOption.progress ? context.colors.primary : context.colors.textMain)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuDivider(),
+                          PopupMenuItem(
+                            value: 'toggle_order',
+                            child: Row(
+                              children: [
+                                Icon(sortOrder == WatchlistSortOrder.descending ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded, size: 18, color: context.colors.textMain),
+                                SizedBox(width: 8),
+                                Text(sortOrder == WatchlistSortOrder.descending ? 'Descending' : 'Ascending', style: TextStyle(color: context.colors.textMain)),
+                              ],
+                            ),
+                          ),
+                        ],
+                        onSelected: (value) {
+                          WatchlistSortOption? option;
+                          if (value == 'dateAdded') option = WatchlistSortOption.dateAdded;
+                          if (value == 'title') option = WatchlistSortOption.title;
+                          if (value == 'rating') option = WatchlistSortOption.rating;
+                          if (value == 'progress') option = WatchlistSortOption.progress;
+
+                          if (value == 'toggle_order') {
+                            ref.read(watchlistSortOrderProvider.notifier).set(
+                                  sortOrder == WatchlistSortOrder.descending ? WatchlistSortOrder.ascending : WatchlistSortOrder.descending,
+                                );
+                          } else if (option != null) {
+                            if (option == sortBy) {
+                              ref.read(watchlistSortOrderProvider.notifier).set(
+                                    sortOrder == WatchlistSortOrder.descending ? WatchlistSortOrder.ascending : WatchlistSortOrder.descending,
+                                  );
+                            } else {
+                              ref.read(watchlistSortOptionProvider.notifier).set(option);
+                              ref.read(watchlistSortOrderProvider.notifier).set(WatchlistSortOrder.descending);
+                            }
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
-            ).animate().fadeIn(duration: 300.ms, delay: 50.ms),
+            ).animate().fadeIn(duration: 400.ms, delay: 100.ms),
 
             SizedBox(height: 8),
 
             // ── Tab content ──
+            // ── Tab content ──
             Expanded(
-              child: RefreshIndicator(
-                color: context.colors.primary,
-                backgroundColor: context.colors.surfaceLight,
-                onRefresh: () async {
-                  await ref.read(watchlistProvider.notifier).refresh();
-                },
-                child: watchlistAsync.when(
-                  data: (items) {
-                    return TabBarView(
-                      controller: _tabController,
-                      children: _tabs.map((tab) {
-                        final filtered = items.where((i) {
-                          if (tab == WatchlistTab.favorites) {
-                            if (i is SingleDisplayItem) {
-                              if (i.item.reaction != Reaction.favorite) return false;
-                            } else if (i is FranchiseDisplayItem) {
-                              if (!i.items.any((child) => child.reaction == Reaction.favorite)) return false;
-                            }
-                          } else if (tab != WatchlistTab.all) {
-                            final status = _tabToStatus(tab);
-                            if (i.aggregateStatus != status) return false;
-                          }
-
-                          if (_searchQuery.isEmpty) return true;
-
-                          if (i is SingleDisplayItem) {
-                            return i.item.title.toLowerCase().contains(
-                              _searchQuery,
-                            );
-                          } else if (i is FranchiseDisplayItem) {
-                            return i.group.rootTitle.toLowerCase().contains(
-                                  _searchQuery,
-                                ) ||
-                                i.items.any(
-                                  (child) => child.title.toLowerCase().contains(
-                                    _searchQuery,
-                                  ),
-                                );
-                          }
-                          return false;
-                        }).toList();
-
-                        if (filtered.isEmpty) {
-                          return _EmptyTab(tab: tab);
-                        }
-                        return _WatchlistGrid(items: filtered);
-                      }).toList(),
-                    );
-                  },
-                  loading: () => Center(
-                    child: AestheticLoader(size: 50),
-                  ),
-                  error: (e, _) => Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          color: context.colors.error,
-                          size: 36,
-                        ),
-                        SizedBox(height: 12),
-                        Text(
-                          'Failed to load watchlist',
-                          style: TextStyle(color: context.colors.textMuted),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          e.toString(),
-                          style: TextStyle(
-                            color: context.colors.textSubtle,
-                            fontSize: 12,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              child: TabBarView(
+                controller: _tabController,
+                children: _tabs.map((tab) {
+                  return _WatchlistTabContent(
+                    tab: tab,
+                    searchQuery: _searchQuery,
+                  );
+                }).toList(),
               ),
             ),
           ],
@@ -304,6 +337,114 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
       case WatchlistTab.dropped:
         return Icons.cancel_outlined;
     }
+  }
+}
+
+class _WatchlistTabContent extends ConsumerWidget {
+  final WatchlistTab tab;
+  final String searchQuery;
+
+  const _WatchlistTabContent({
+    required this.tab,
+    required this.searchQuery,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final watchlistAsync = ref.watch(watchlistGroupsProvider);
+
+    return RefreshIndicator(
+      color: context.colors.primary,
+      backgroundColor: context.colors.surfaceLight,
+      onRefresh: () async {
+        await ref.read(watchlistProvider.notifier).refresh();
+      },
+      child: watchlistAsync.when(
+        data: (items) {
+          final filtered = items.where((i) {
+            if (tab == WatchlistTab.favorites) {
+              if (i is SingleDisplayItem) {
+                if (i.item.reaction != Reaction.favorite) return false;
+              } else if (i is FranchiseDisplayItem) {
+                if (!i.items.any((child) => child.reaction == Reaction.favorite)) return false;
+              }
+            } else if (tab != WatchlistTab.all) {
+              final status = _tabToStatus(tab);
+              if (i.aggregateStatus != status) return false;
+            }
+
+            if (searchQuery.isEmpty) return true;
+
+            if (i is SingleDisplayItem) {
+              return i.item.title.toLowerCase().contains(searchQuery);
+            } else if (i is FranchiseDisplayItem) {
+              return i.group.rootTitle.toLowerCase().contains(searchQuery) ||
+                  i.items.any((child) => child.title.toLowerCase().contains(searchQuery));
+            }
+            return false;
+          }).toList();
+
+          final sortBy = ref.watch(watchlistSortOptionProvider);
+          final sortOrder = ref.watch(watchlistSortOrderProvider);
+
+          filtered.sort((a, b) {
+            int cmp = 0;
+            switch (sortBy) {
+              case WatchlistSortOption.dateAdded:
+                cmp = a.sortDate.compareTo(b.sortDate);
+                break;
+              case WatchlistSortOption.title:
+                cmp = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+                break;
+              case WatchlistSortOption.rating:
+                cmp = a.rating.compareTo(b.rating);
+                break;
+              case WatchlistSortOption.progress:
+                cmp = a.progressPercentage.compareTo(b.progressPercentage);
+                break;
+            }
+            if (cmp == 0) {
+              cmp = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+            }
+            return sortOrder == WatchlistSortOrder.ascending ? cmp : -cmp;
+          });
+
+          if (filtered.isEmpty) {
+            return _EmptyTab(tab: tab);
+          }
+          return _WatchlistGrid(items: filtered);
+        },
+        loading: () => Center(
+          child: AestheticLoader(size: 50),
+        ),
+        error: (e, _) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                color: context.colors.error,
+                size: 36,
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Failed to load watchlist',
+                style: TextStyle(color: context.colors.textMuted),
+              ),
+              SizedBox(height: 6),
+              Text(
+                e.toString(),
+                style: TextStyle(
+                  color: context.colors.textSubtle,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   WatchStatus _tabToStatus(WatchlistTab tab) {
@@ -389,6 +530,18 @@ class _EmptyTab extends StatelessWidget {
             subtitle,
             style: TextStyle(color: context.colors.textSubtle, fontSize: 13),
           ),
+          SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/discover'),
+            icon: Icon(Icons.search_rounded, size: 20),
+            label: Text('Discover Titles', style: TextStyle(fontWeight: FontWeight.w700)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.colors.primary,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
         ],
       ),
     ).animate().fadeIn(duration: 400.ms);
@@ -464,7 +617,20 @@ class _WatchlistCard extends ConsumerWidget {
           if (mediaRouteId.contains('-season-')) {
             mediaRouteId = mediaRouteId.split('-season-').first;
           }
-          context.push('/media/$mediaRouteId');
+          context.push('/media/$mediaRouteId', extra: Media(
+            id: item.externalId,
+            externalId: item.externalId,
+            type: item.mediaType,
+            title: item.title,
+            overview: '',
+            posterUrl: item.posterUrl,
+            backdropUrl: item.backdropUrl,
+            genres: item.genres,
+            rating: item.rating,
+            voteCount: 0,
+            status: '',
+            releaseDate: item.releaseDate,
+          ));
         },
       ),
     );
@@ -505,18 +671,32 @@ class _FranchiseCard extends ConsumerWidget {
         final aDate = (a.releaseDate?.isEmpty ?? true) ? null : a.releaseDate;
         final bDate = (b.releaseDate?.isEmpty ?? true) ? null : b.releaseDate;
         if (aDate != null && bDate != null) {
-          return aDate.compareTo(bDate);
+          final res = aDate.compareTo(bDate);
+          if (res != 0) return res;
         }
-        if (aDate != null) return -1;
-        if (bDate != null) return 1;
+        
+        // Fallback to chronological ID sorting (newer shows have higher AniList/TMDB IDs)
+        final aId = int.tryParse(a.externalId.replaceAll(RegExp(r'[^0-9]'), ''));
+        final bId = int.tryParse(b.externalId.replaceAll(RegExp(r'[^0-9]'), ''));
+        if (aId != null && bId != null) {
+          return aId.compareTo(bId);
+        }
+        
         return a.title.toLowerCase().compareTo(b.title.toLowerCase());
       });
+      
+    debugPrint("=== SORT DEBUG FOR ${group.rootTitle} ===");
+    for (var i in sortedItems) {
+      debugPrint("Item: ${i.title} | ID: ${i.externalId} | Date: ${i.releaseDate} | Status: ${i.status}");
+    }
+
     final targetItem =
         watchingItem ??
-        sortedItems
-            .where((i) => i.status == WatchStatus.planToWatch)
-            .firstOrNull ??
-        sortedItems.first;
+        sortedItems.firstWhere(
+          (i) => i.status != WatchStatus.completed,
+          orElse: () => sortedItems.first,
+        );
+    debugPrint("Target Item selected: ${targetItem.title} with status ${targetItem.status}");
 
     final posterUrl = targetItem.posterUrl.isNotEmpty
         ? targetItem.posterUrl
@@ -546,7 +726,20 @@ class _FranchiseCard extends ConsumerWidget {
         if (mediaRouteId.contains('-season-')) {
           mediaRouteId = mediaRouteId.split('-season-').first;
         }
-        context.push('/media/$mediaRouteId');
+        context.push('/media/$mediaRouteId', extra: Media(
+            id: targetItem.externalId,
+            externalId: targetItem.externalId,
+            type: targetItem.mediaType,
+            title: targetItem.title,
+            overview: '',
+            posterUrl: targetItem.posterUrl,
+            backdropUrl: targetItem.backdropUrl,
+            genres: targetItem.genres,
+            rating: targetItem.rating,
+            voteCount: 0,
+            status: '',
+            releaseDate: targetItem.releaseDate,
+        ));
       },
       onLongPress: () => _showFranchiseManageSheet(context, ref, displayItem),
       child: Column(
@@ -602,25 +795,10 @@ class _FranchiseCard extends ConsumerWidget {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          posterUrl.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: posterUrl,
-                                  fit: BoxFit.cover,
-                                  memCacheHeight: 310, // ~155 * 2 for high DPI
-                                  placeholder: (_, _) =>
-                                      Container(color: context.colors.surfaceLight),
-                                  errorWidget: (_, _, _) => Container(
-                                    color: context.colors.surfaceLight,
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.broken_image_outlined,
-                                        color: context.colors.textSubtle,
-                                        size: 24,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Container(color: context.colors.surfaceLight),
+                          OptimizedNetworkImage(
+                            imageUrl: posterUrl,
+                            memCacheHeight: 310, // ~155 * 2 for high DPI
+                          ),
                           // Favorite badge
                           if (hasFavorite)
                             Positioned(
@@ -853,13 +1031,9 @@ void _showFranchiseManageSheet(BuildContext context, WidgetRef ref, FranchiseDis
                               width: 32,
                               height: 48,
                               child: item.posterUrl.isNotEmpty
-                                  ? CachedNetworkImage(
+                                  ? OptimizedNetworkImage(
                                       imageUrl: item.posterUrl,
-                                      fit: BoxFit.cover,
-                                      errorWidget: (_, _, _) => Container(
-                                        color: context.colors.surface,
-                                        child: Icon(Icons.broken_image_outlined, size: 16, color: context.colors.textSubtle),
-                                      ),
+                                      memCacheHeight: 96,
                                     )
                                   : Container(color: context.colors.surface),
                             ),

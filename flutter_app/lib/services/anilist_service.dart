@@ -571,26 +571,74 @@ class AnilistService {
 
       while (hasNextPage && page <= 30) {
         // limit to 30 pages (3000 eps) max to support long anime like One Piece
-        try {
-          final response = await _dio.get(
-            'https://api.jikan.moe/v4/anime/$idMal/episodes?page=$page',
-          );
-          final data = response.data['data'] as List<dynamic>?;
-          if (data == null) break;
+        int retries = 0;
+        bool pageSuccess = false;
 
-          allEpisodes.addAll(data);
-          hasNextPage = response.data['pagination']?['has_next_page'] ?? false;
+        while (retries < 3 && !pageSuccess) {
+          try {
+            final response = await _dio.get(
+              'https://api.jikan.moe/v4/anime/$idMal/episodes?page=$page',
+            );
+            
+            // Jikan sometimes returns HTTP 200 but body contains an error (e.g. {status: 500, type: UpstreamException})
+            if (response.data != null && response.data['status'] != null && (response.data['status'] == 500 || response.data['status'] == 503 || response.data['status'] == 429)) {
+              throw DioException(
+                requestOptions: response.requestOptions,
+                response: response..statusCode = response.data['status'] as int?,
+                type: DioExceptionType.badResponse,
+              );
+            }
 
-          if (hasNextPage) {
-            page++;
-            await Future.delayed(const Duration(milliseconds: 350));
+            final data = response.data['data'] as List<dynamic>?;
+            if (data == null) break;
+
+            allEpisodes.addAll(data);
+            hasNextPage = response.data['pagination']?['has_next_page'] ?? false;
+            pageSuccess = true;
+
+            if (hasNextPage) {
+              page++;
+              await Future.delayed(const Duration(milliseconds: 350));
+            }
+          } catch (e) {
+            retries++;
+            if (e is DioException && 
+                (e.response?.statusCode == 429 || 
+                 (e.response?.statusCode ?? 500) >= 500 || 
+                 e.type == DioExceptionType.connectionTimeout || 
+                 e.type == DioExceptionType.receiveTimeout ||
+                 e.type == DioExceptionType.badResponse)) {
+              await Future.delayed(Duration(seconds: retries));
+            } else {
+              break; // break the retry loop for other errors (e.g. 404)
+            }
           }
-        } catch (e) {
-          if (e is DioException && e.response?.statusCode == 429) {
-            await Future.delayed(const Duration(seconds: 1));
-            continue;
-          }
+        }
+        
+        if (!pageSuccess) {
+          // If we couldn't fetch this page after retries, just return what we have so far
           break;
+        }
+      }
+
+      // If Jikan completely failed (or timed out on page 1), fallback to generating dummy episodes from arc data
+      if (allEpisodes.isEmpty && animeArcs.isNotEmpty) {
+        int maxEpisode = 0;
+        for (var arc in animeArcs) {
+          if (arc.end > maxEpisode) maxEpisode = arc.end;
+        }
+        if (maxEpisode > 0) {
+          for (int i = 1; i <= maxEpisode; i++) {
+            allEpisodes.add({
+              'mal_id': i,
+              'title': 'Episode $i',
+              'title_japanese': '',
+              'aired': null,
+              'filler': false,
+              'recap': false,
+              'synopsis': 'Episode synopsis unavailable due to API timeout.',
+            });
+          }
         }
       }
 

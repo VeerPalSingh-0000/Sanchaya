@@ -3,6 +3,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/watchlist_item.dart';
+import '../utils/app_exceptions.dart';
+import '../utils/logger.dart';
 
 class SupabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -14,33 +16,47 @@ class SupabaseService {
   Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
 
   Future<void> signInWithGoogle() async {
-    if (kIsWeb) {
-      await _supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
+    try {
+      if (kIsWeb) {
+        await _supabase.auth.signInWithOAuth(
+          OAuthProvider.google,
+        );
+        return;
+      }
+
+      final googleUser = await GoogleSignIn.instance.authenticate();
+      if (googleUser == null) {
+        throw AppAuthException('Sign in aborted by user.');
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw AppAuthException('No ID Token found during Google Sign In.');
+      }
+
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
       );
-      return;
+    } catch (e, st) {
+      appLogger.e('SignIn error', error: e, stackTrace: st);
+      if (e is AppAuthException) rethrow;
+      throw AppAuthException('Failed to sign in with Google.', originalError: e);
     }
-
-    final googleUser = await GoogleSignIn.instance.authenticate();
-
-    final googleAuth = googleUser.authentication;
-    final idToken = googleAuth.idToken;
-
-    if (idToken == null) {
-      throw 'No ID Token found.';
-    }
-
-    await _supabase.auth.signInWithIdToken(
-      provider: OAuthProvider.google,
-      idToken: idToken,
-    );
   }
 
   Future<void> signOut() async {
     try {
-      await GoogleSignIn.instance.signOut();
-    } catch (_) {}
-    await _supabase.auth.signOut();
+      if (!kIsWeb) {
+        await GoogleSignIn.instance.signOut();
+      }
+      await _supabase.auth.signOut();
+    } catch (e, st) {
+      appLogger.e('SignOut error', error: e, stackTrace: st);
+      throw AppAuthException('Failed to sign out completely.', originalError: e);
+    }
   }
 
   // Get or Create Prisma User ID to sync with web app
@@ -109,6 +125,54 @@ class SupabaseService {
         .delete()
         .eq('userId', userId)
         .eq('mediaId', externalId)
+        .eq('mediaType', mediaType);
+  }
+
+  // --- Custom Lists ---
+  Future<List<Map<String, dynamic>>> getCustomLists(String userId) async {
+    final response = await _supabase
+        .from('CustomList')
+        .select()
+        .eq('userId', userId)
+        .order('createdAt', ascending: false);
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<void> createCustomList(String userId, String name, String? description) async {
+    await _supabase.from('CustomList').insert({
+      'userId': userId,
+      'name': name,
+      'description': description,
+    });
+  }
+
+  Future<void> deleteCustomList(String listId) async {
+    await _supabase.from('CustomList').delete().eq('id', listId);
+  }
+
+  Future<List<Map<String, dynamic>>> getCustomListItems(String customListId) async {
+    final response = await _supabase
+        .from('CustomListItem')
+        .select()
+        .eq('customListId', customListId)
+        .order('addedAt', ascending: false);
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<void> addMediaToCustomList(String customListId, String mediaId, String mediaType) async {
+    await _supabase.from('CustomListItem').upsert({
+      'customListId': customListId,
+      'mediaId': mediaId,
+      'mediaType': mediaType,
+    }, onConflict: 'customListId, mediaId, mediaType');
+  }
+
+  Future<void> removeMediaFromCustomList(String customListId, String mediaId, String mediaType) async {
+    await _supabase
+        .from('CustomListItem')
+        .delete()
+        .eq('customListId', customListId)
+        .eq('mediaId', mediaId)
         .eq('mediaType', mediaType);
   }
 }

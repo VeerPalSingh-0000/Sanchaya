@@ -53,23 +53,25 @@ class _WatchlistBottomSheetState extends ConsumerState<WatchlistBottomSheet> {
   ];
 
   Future<void> _handleStatusSelect(WatchStatus status) async {
+    if (mounted) Navigator.pop(context);
+    
     final watchlistNotifier = ref.read(watchlistProvider.notifier);
-    await watchlistNotifier.updateStatusWithPropagation(
+    // Execute asynchronously after popping to keep UI responsive
+    watchlistNotifier.updateStatusWithPropagation(
       widget.media,
       status,
       widget.franchiseTimeline,
     );
-
-    if (mounted) Navigator.pop(context);
   }
 
   Future<void> _handleRemove() async {
+    if (mounted) Navigator.pop(context);
+    
     final watchlistNotifier = ref.read(watchlistProvider.notifier);
     final franchiseItems = watchlistNotifier.getFranchiseItems(widget.media);
     if (franchiseItems.isNotEmpty) {
-      await watchlistNotifier.bulkRemoveFranchise(franchiseItems);
+      watchlistNotifier.bulkRemoveFranchise(franchiseItems);
     }
-    if (mounted) Navigator.pop(context);
   }
 
   @override

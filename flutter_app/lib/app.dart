@@ -10,11 +10,14 @@ import 'screens/settings_screen.dart';
 import 'screens/media_details_screen.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'screens/splash_screen.dart';
+import 'screens/statistics_screen.dart';
+import 'screens/watch_history_screen.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/auth_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/connectivity_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -52,10 +55,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: '/statistics',
+        builder: (context, state) => const StatisticsScreen(),
+      ),
+      GoRoute(
+        path: '/history',
+        builder: (context, state) => const WatchHistoryScreen(),
+      ),
+      GoRoute(
         path: '/media/:id',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return MediaDetailsScreen(mediaId: id);
+          final media = state.extra;
+          return MediaDetailsScreen(
+            mediaId: id,
+            initialMedia: media != null ? media as dynamic : null, // The import for Media might not be in app.dart so we cast to dynamic or import it
+          );
         },
       ),
       GoRoute(
@@ -77,7 +92,36 @@ final routerProvider = Provider<GoRouter>((ref) {
 
               return Scaffold(
                 extendBody: true,
-                body: child,
+                body: Stack(
+                  children: [
+                    child,
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final isOnline = ref.watch(connectivityProvider).asData?.value ?? true;
+                        if (isOnline) return const SizedBox.shrink();
+
+                        return Positioned(
+                          top: MediaQuery.paddingOf(context).top,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            color: Colors.redAccent.withValues(alpha: 0.9),
+                            child: const Text(
+                              'You are offline. Showing cached data.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
                 bottomNavigationBar: const AppBottomNavBar(),
               );
             },

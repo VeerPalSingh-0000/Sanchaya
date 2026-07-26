@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/watchlist_item.dart';
@@ -22,13 +23,14 @@ class _ReactionSelectorWidgetState extends ConsumerState<ReactionSelectorWidget>
   ];
 
   Future<void> _handleReactionSelect(Reaction? reactionId) async {
+    HapticFeedback.selectionClick();
     final watchlistNotifier = ref.read(watchlistProvider.notifier);
     
     // Toggle off if clicking the same one
     final newReaction = widget.item.reaction == reactionId ? null : reactionId;
 
     // We should ideally update all items in the franchise if it has one
-    final allItems = watchlistNotifier.state.value ?? [];
+    final allItems = ref.read(watchlistProvider).value ?? [];
     final franchiseItems = widget.item.franchiseId != null 
         ? allItems.where((i) => i.franchiseId == widget.item.franchiseId).toList()
         : [widget.item];

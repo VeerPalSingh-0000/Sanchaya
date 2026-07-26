@@ -30,9 +30,18 @@ class CacheService {
       return null;
     }
 
-    // Use jsonDecode/jsonEncode to recursively convert Map<dynamic, dynamic> to Map<String, dynamic>
+    // Deep cast to avoid expensive JSON serialization round-trips
     final payload = data['payload'];
-    return jsonDecode(jsonEncode(payload)) as Map<String, dynamic>;
+    return _deepCast(payload) as Map<String, dynamic>;
+  }
+
+  dynamic _deepCast(dynamic value) {
+    if (value is Map) {
+      return value.map((k, v) => MapEntry(k.toString(), _deepCast(v)));
+    } else if (value is List) {
+      return value.map((e) => _deepCast(e)).toList();
+    }
+    return value;
   }
 
   Future<void> _setCache(String boxName, String key, Map<String, dynamic> payload) async {
@@ -45,7 +54,7 @@ class CacheService {
 
   // Specific Methods
   Map<String, dynamic>? getTrendingCache(String key) {
-    return _getCache(_trendingBox, key, const Duration(hours: 1));
+    return _getCache(_trendingBox, key, const Duration(hours: 4));
   }
 
   Future<void> setTrendingCache(String key, Map<String, dynamic> data) async {
@@ -53,7 +62,7 @@ class CacheService {
   }
 
   Map<String, dynamic>? getMediaDetailsCache(String id) {
-    return _getCache(_mediaDetailsBox, id, const Duration(hours: 24));
+    return _getCache(_mediaDetailsBox, id, const Duration(hours: 72));
   }
 
   Future<void> setMediaDetailsCache(String id, Map<String, dynamic> data) async {

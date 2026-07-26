@@ -43,6 +43,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   Widget build(BuildContext context) {
     final query = ref.watch(widget.isSearchMode ? homeSearchQueryProvider : discoverSearchQueryProvider);
     final filter = ref.watch(widget.isSearchMode ? homeSearchFilterProvider : discoverSearchFilterProvider);
+    final genre = ref.watch(widget.isSearchMode ? homeSearchGenreProvider : discoverSearchGenreProvider);
     final results = ref.watch(widget.isSearchMode ? homeSearchResultsProvider : discoverSearchResultsProvider);
 
     return Scaffold(
@@ -61,6 +62,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                 controller: _controller,
                 focusNode: _focusNode,
                 onChanged: (value) {
+                  ref.read(widget.isSearchMode ? homeSearchGenreProvider.notifier : discoverSearchGenreProvider.notifier).updateGenre(null);
                   ref.read(widget.isSearchMode ? homeSearchQueryProvider.notifier : discoverSearchQueryProvider.notifier).updateQuery(value);
                 },
                 style: TextStyle(color: context.colors.textMain, fontSize: 15),
@@ -68,11 +70,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                   hintText: 'Search movies, TV shows & anime...',
                   prefixIcon: Icon(Icons.search_rounded,
                       color: context.colors.textSubtle, size: 22),
-                  suffixIcon: query.isNotEmpty
+                  suffixIcon: (query.isNotEmpty || genre != null)
                       ? GestureDetector(
                           onTap: () {
                             _controller.clear();
                             ref.read(widget.isSearchMode ? homeSearchQueryProvider.notifier : discoverSearchQueryProvider.notifier).updateQuery('');
+                            ref.read(widget.isSearchMode ? homeSearchGenreProvider.notifier : discoverSearchGenreProvider.notifier).updateGenre(null);
                           },
                           child: Icon(Icons.close_rounded,
                               color: context.colors.textSubtle, size: 20),
@@ -132,7 +135,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               ),
             ).animate().fadeIn(duration: 300.ms, delay: 100.ms),
 
-            if (query.startsWith('#genre:'))
+            if (genre != null)
               Padding(
                 padding: EdgeInsets.only(left: 20, right: 20, top: 16),
                 child: Row(
@@ -141,7 +144,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     SizedBox(width: 8),
                     Text('Browsing: ', style: TextStyle(color: context.colors.textSubtle, fontSize: 13)),
                     Text(
-                      _GenreChips.popularGenres[int.tryParse(query.split(':')[1])] ?? 'Unknown',
+                      _GenreChips.popularGenres[genre] ?? 'Unknown',
                       style: TextStyle(color: context.colors.primary, fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ],
@@ -152,7 +155,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
             // ── Results ──
             Expanded(
-              child: query.isEmpty
+              child: (query.isEmpty && genre == null)
                   ? _EmptySearchState(isSearchMode: widget.isSearchMode)
                   : results.when(
                       data: (result) {
@@ -306,8 +309,10 @@ class _GenreChips extends ConsumerWidget {
             children: popularGenres.entries.map((entry) {
               return GestureDetector(
                 onTap: () {
-                  final provider = isSearchMode ? homeSearchQueryProvider : discoverSearchQueryProvider;
-                  ref.read(provider.notifier).updateQuery('#genre:${entry.key}');
+                  final queryNotifier = ref.read((isSearchMode ? homeSearchQueryProvider : discoverSearchQueryProvider).notifier);
+                  final genreNotifier = ref.read((isSearchMode ? homeSearchGenreProvider : discoverSearchGenreProvider).notifier);
+                  queryNotifier.updateQuery('');
+                  genreNotifier.updateGenre(entry.key);
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -461,7 +466,7 @@ class _ResultsGridState extends ConsumerState<_ResultsGrid> {
                   height: 155, // Reduced slightly to ensure text fits
                   typeBadge: badge,
                   isAdded: ref.watch(watchlistProvider.notifier).isAdded(media),
-                  onTap: () => context.push('/media/${media.id}'),
+                  onTap: () => context.push('/media/${media.id}', extra: media),
                   onAddWatchlist: () {
                     final user = ref.read(currentUserProvider);
                     if (user == null) {
@@ -538,7 +543,7 @@ class _FeaturedCard extends ConsumerWidget {
     final year = media.releaseDate != null && media.releaseDate!.length >= 4 ? media.releaseDate!.substring(0, 4) : '';
     
     return GestureDetector(
-      onTap: () => context.push('/media/${media.id}'),
+      onTap: () => context.push('/media/${media.id}', extra: media),
       child: Container(
         height: 200,
         width: double.infinity,

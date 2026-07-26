@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../config/theme.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/service_providers.dart';
+import '../providers/watchlist_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -245,6 +249,90 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ).animate().fadeIn(duration: 300.ms, delay: 150.ms),
+
+            SizedBox(height: 24),
+
+            // ── Dashboard ──
+            _SectionTitle(title: 'Dashboard'),
+            SizedBox(height: 10),
+            _SettingsGroup(
+              tiles: [
+                _SettingsTile(
+                  icon: Icons.bar_chart_rounded,
+                  title: 'Watchlist Statistics',
+                  subtitle: 'View your watch habits',
+                  onTap: () => context.push('/statistics'),
+                ),
+                _SettingsTile(
+                  icon: Icons.history_rounded,
+                  title: 'Watch History',
+                  subtitle: 'Timeline of what you watched',
+                  onTap: () => context.push('/history'),
+                ),
+              ],
+            ).animate().fadeIn(duration: 300.ms, delay: 160.ms),
+
+            SizedBox(height: 24),
+
+            // ── Data & Storage ──
+            _SectionTitle(title: 'Data & Storage'),
+            SizedBox(height: 10),
+            _SettingsGroup(
+              tiles: [
+                _SettingsTile(
+                  icon: Icons.cleaning_services_rounded,
+                  title: 'Clear Cache',
+                  subtitle: 'Free up storage space',
+                  onTap: () async {
+                    await ref.read(cacheServiceProvider).clearAll();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Cache cleared successfully'),
+                          backgroundColor: context.colors.primary,
+                        ),
+                      );
+                    }
+                  },
+                ),
+                if (user != null)
+                  _SettingsTile(
+                    icon: Icons.download_rounded,
+                    title: 'Export Watchlist',
+                    subtitle: 'Copy watchlist data to clipboard',
+                    onTap: () {
+                      final watchlist = ref.read(watchlistProvider).value ?? [];
+                      if (watchlist.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Your watchlist is empty')),
+                        );
+                        return;
+                      }
+
+                      final jsonData = watchlist.map((item) => item.toJson()).toList();
+                      final jsonString = jsonEncode(jsonData);
+
+                      Clipboard.setData(ClipboardData(text: jsonString));
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text('Watchlist copied to clipboard!',
+                                    style: TextStyle(color: Colors.white)),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: context.colors.primary,
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ).animate().fadeIn(duration: 300.ms, delay: 175.ms),
 
             SizedBox(height: 24),
 
