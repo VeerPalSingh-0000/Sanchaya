@@ -17,7 +17,7 @@ import '../providers/watchlist_groups_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/search_provider.dart';
 import '../widgets/error_retry_widget.dart';
-import '../widgets/aesthetic_loader.dart';
+
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -27,22 +27,7 @@ class HomeScreen extends ConsumerWidget {
     final trendingMovies = ref.watch(trendingMoviesProvider);
     final trendingTV = ref.watch(trendingTVProvider);
     final trendingAnime = ref.watch(trendingAnimeProvider);
-    final watchlistAsync = ref.watch(watchlistProvider);
 
-    final isInitialLoading = !trendingMovies.hasValue || 
-                             !trendingTV.hasValue || 
-                             !trendingAnime.hasValue || 
-                             !watchlistAsync.hasValue;
-
-    if (isInitialLoading) {
-      return Scaffold(
-        appBar: ProfileAppBar(title: 'Sanchaya'),
-        backgroundColor: context.colors.background,
-        body: Center(
-          child: AestheticLoader(),
-        ),
-      );
-    }
 
 
     return Scaffold(
@@ -145,7 +130,7 @@ class HomeScreen extends ConsumerWidget {
                             if (displayItem is SingleDisplayItem) {
                               final item = displayItem.item;
                               title = item.title;
-                              posterUrl = item.franchisePosterUrl ?? item.posterUrl;
+                              posterUrl = item.posterUrl;
                               rating = item.rating;
                               mediaType = item.mediaType;
                               externalId = item.externalId;
@@ -153,11 +138,20 @@ class HomeScreen extends ConsumerWidget {
                                   ? 'EP ${item.progress}/${item.totalEpisodes}'
                                   : null;
                             } else if (displayItem is FranchiseDisplayItem) {
-                              title = displayItem.group.rootTitle;
-                              posterUrl = displayItem.group.rootPosterUrl;
-                              rating = displayItem.items.first.rating;
-                              mediaType = displayItem.items.first.mediaType;
-                              externalId = displayItem.group.rootId;
+                              // Show the specific part they are watching
+                              final watchingItem = displayItem.items.where((i) => i.status == WatchStatus.watching).firstOrNull;
+                              final item = watchingItem ?? displayItem.items.first;
+
+                              title = item.title;
+                              posterUrl = item.posterUrl.isNotEmpty == true 
+                                  ? item.posterUrl 
+                                  : displayItem.group.rootPosterUrl;
+                              rating = item.rating;
+                              mediaType = item.mediaType;
+                              externalId = item.externalId;
+                              progressText = (item.progress != null && item.totalEpisodes != null && item.totalEpisodes! > 0)
+                                  ? 'EP ${item.progress}/${item.totalEpisodes}'
+                                  : null;
                             } else {
                               return SizedBox.shrink();
                             }
@@ -567,7 +561,7 @@ class _MediaRow extends ConsumerWidget {
 
           return MediaCard(
             title: media.title,
-            posterUrl: media.franchisePosterUrl ?? media.posterUrl,
+            posterUrl: media.posterUrl,
             rating: media.rating,
             subtitle: year,
             typeBadge: typeBadge,

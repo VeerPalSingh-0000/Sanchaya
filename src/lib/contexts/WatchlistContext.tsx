@@ -11,6 +11,7 @@ interface WatchlistContextType {
   updateStatus: (id: string, status: WatchStatus) => void;
   updateProgress: (id: string, progress: number) => void;
   updateReaction: (id: string, reaction: 'LOVE' | 'GOOD' | 'BAD' | null) => void;
+  updateNotes: (id: string, notes: string | null) => void;
   isInWatchlist: (id: string) => boolean;
   isLoading: boolean;
 }
@@ -53,6 +54,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
               totalEpisodes: item.totalEpisodes || undefined,
               releaseDate: item.releaseDate || undefined,
               reaction: item.reaction as 'LOVE' | 'GOOD' | 'BAD' | undefined,
+              notes: item.notes || undefined,
             }));
             setWatchlist(mapped);
           }
@@ -184,6 +186,21 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session]);
 
+  const updateNotes = useCallback((id: string, notes: string | null) => {
+    setWatchlist((prev) =>
+      prev.map((item) =>
+        item.id === String(id) ? { ...item, notes: notes || undefined, updatedAt: new Date().toISOString() } : item
+      )
+    );
+    if (session) {
+      fetch(`/api/watchlist/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: notes || '' }) // API expects notes or empty string to clear
+      });
+    }
+  }, [session]);
+
   const isInWatchlist = useCallback(
     (id: string) => watchlist.some((item) => item.id === String(id)),
     [watchlist]
@@ -199,6 +216,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
         updateStatus,
         updateProgress,
         updateReaction,
+        updateNotes,
         isInWatchlist,
       }}
     >

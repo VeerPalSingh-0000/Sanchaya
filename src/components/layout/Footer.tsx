@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { ExternalLink, Coffee } from 'lucide-react';
+import { ExternalLink, Coffee, Smartphone, Download } from 'lucide-react';
 
 export default function Footer() {
+  const apkDownloadUrl = 'https://raw.githubusercontent.com/VeerPalSingh-0000/Sanchaya/main/releases/sanchaya-app.apk';
+
   return (
     <footer className="relative w-full overflow-hidden mt-auto bg-surface-container/20 backdrop-blur-md border-t border-white/5">
       {/* Background glow effects */}
@@ -30,14 +32,18 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-on-surface-variant font-body-md text-[13px] max-w-[250px] text-center md:text-left leading-relaxed">
-              Your personal entertainment universe. Track movies, series, and anime in one beautifully designed place.
+              Your personal entertainment universe. Track movies, series, and anime on Web & Mobile.
             </p>
           </div>
 
-          {/* Data Providers */}
+          {/* Data Providers & Apps */}
           <div className="flex flex-col items-center md:items-center gap-3">
-            <h3 className="text-on-surface font-bold text-[11px] tracking-widest uppercase opacity-80">Powered By</h3>
+            <h3 className="text-on-surface font-bold text-[11px] tracking-widest uppercase opacity-80">Apps & Data</h3>
             <div className="flex flex-col gap-2 text-center">
+              <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors text-[14px] flex items-center justify-center gap-2 group font-semibold">
+                <Smartphone className="w-4 h-4" /> Download Flutter App (APK)
+                <Download className="w-3.5 h-3.5 opacity-80 group-hover:translate-y-0.5 transition-transform" />
+              </a>
               <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer" className="text-on-surface-variant hover:text-primary transition-colors text-[14px] flex items-center justify-center md:justify-start gap-2 group font-medium">
                 The Movie Database (TMDb)
                 <ExternalLink className="w-4 h-4 opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
@@ -53,6 +59,9 @@ export default function Footer() {
           <div className="flex flex-col items-center md:items-end gap-3">
             <h3 className="text-on-surface font-bold text-[11px] tracking-widest uppercase opacity-80 hidden md:block">Connect</h3>
             <div className="flex items-center gap-3">
+              <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer" title="Download Mobile App" className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 hover:text-white hover:bg-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+                <Smartphone className="w-5 h-5" />
+              </a>
               <a href="https://github.com/VeerPalSingh-0000/Sanchaya" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-surface-container/50 border border-white/5 flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(255,255,255,0.05)]">
                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 .5C5.37.5 0 5.78 0 12.292c0 5.211 3.438 9.63 8.205 11.188.6.111.82-.254.82-.567 0-.28-.01-1.022-.015-2.005-3.338.711-4.042-1.582-4.042-1.582-.546-1.361-1.333-1.723-1.333-1.723-1.089-.731.083-.716.083-.716 1.205.082 1.838 1.215 1.838 1.215 1.07 1.803 2.809 1.282 3.493.98.108-.763.417-1.282.76-1.577-2.665-.295-5.466-1.309-5.466-5.827 0-1.287.465-2.339 1.235-3.164-.135-.298-.535-1.497.105-3.121 0 0 1.005-.316 3.3 1.209A11.616 11.616 0 0112 6.601c1.025.005 2.055.138 3.02.404 2.28-1.525 3.285-1.209 3.285-1.209.645 1.624.245 2.823.12 3.121.765.825 1.23 1.877 1.23 3.164 0 4.53-2.805 5.527-5.475 5.817.42.354.81 1.077.81 2.182 0 1.578-.015 2.846-.015 3.229 0 .309.21.682.825.567C20.565 21.917 24 17.5 24 12.292 24 5.78 18.627.5 12 .5z" />

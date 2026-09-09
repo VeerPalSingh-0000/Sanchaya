@@ -65,7 +65,7 @@ class AnilistService {
               'Accept': 'application/json',
             },
           ),
-        );
+        ).timeout(const Duration(seconds: 10));
 
         final data = response.data as Map<String, dynamic>;
         if (data.containsKey('errors') && (data['errors'] as List).isNotEmpty) {
@@ -74,6 +74,12 @@ class AnilistService {
         return data['data'] as T;
       } on DioException catch (e) {
         if (i == retries - 1) rethrow;
+        if (e.type == DioExceptionType.connectionError || 
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.unknown ||
+            e.error.toString().contains('SocketException')) {
+          rethrow;
+        }
         if (e.response?.statusCode == 429) {
           final retryAfter = e.response?.headers.value('Retry-After');
           final waitTime = retryAfter != null
@@ -81,6 +87,12 @@ class AnilistService {
               : 2000;
           await Future.delayed(Duration(milliseconds: waitTime));
           continue;
+        }
+        await Future.delayed(Duration(milliseconds: 500 * pow(2, i).toInt()));
+      } catch (e) {
+        if (i == retries - 1) rethrow;
+        if (e.toString().contains('SocketException') || e.toString().contains('TimeoutException')) {
+          rethrow;
         }
         await Future.delayed(Duration(milliseconds: 500 * pow(2, i).toInt()));
       }
@@ -298,6 +310,47 @@ class AnilistService {
       print('[AniListService] getAnimeDetails error for id $id: $e');
       print(stack);
       return null;
+    }
+  }
+
+  Future<List<Media>> getRecommendations(String id) async {
+    final numericId = int.parse(id.replaceAll(RegExp(r'\D'), ''));
+    final String gqlQuery = '''
+      query GetRecommendations(\$id: Int!) { 
+        Media(id: \$id, type: ANIME) { 
+          recommendations(sort: RATING_DESC, perPage: 15) { 
+            edges { 
+              node { 
+                mediaRecommendation { 
+                  ...MediaFields 
+                  studios { edges { isMain node { name } } }
+                } 
+              } 
+            } 
+          } 
+        } 
+      }
+      $mediaFragment
+    ''';
+
+    try {
+      final data = await _fetch<Map<String, dynamic>>(
+        gqlQuery,
+        variables: {'id': numericId},
+      );
+      final mediaData = data['Media'] as Map<String, dynamic>?;
+      if (mediaData == null) return [];
+      
+      final edges = mediaData['recommendations']?['edges'] as List<dynamic>? ?? [];
+      
+      return edges
+          .map((e) => e['node']?['mediaRecommendation'] as Map<String, dynamic>?)
+          .where((e) => e != null)
+          .map((e) => _mapAniListToMedia(e!))
+          .toList();
+    } catch (e) {
+      print('[AniListService] getRecommendations error: $e');
+      return [];
     }
   }
 

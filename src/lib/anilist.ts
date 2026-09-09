@@ -123,7 +123,7 @@ async function anilistFetch<T>(
   query: string,
   variables: Record<string, unknown> = {},
   retries = 3,
-): Promise<T> {
+): Promise<T | null> {
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetch(ANILIST_ENDPOINT, {
@@ -144,21 +144,28 @@ async function anilistFetch<T>(
           continue;
         }
         const text = await res.text();
-        throw new Error(`AniList API error: ${res.status} - ${text}`);
+        console.warn(`[AniList API] Request failed (${res.status}): ${text.slice(0, 150)}`);
+        return null;
       }
 
       const json = (await res.json()) as {
         data: T;
         errors?: { message: string }[];
       };
-      if (json.errors?.length) throw new Error(json.errors[0].message);
+      if (json.errors?.length) {
+        console.warn(`[AniList API] GraphQL error: ${json.errors[0].message}`);
+        return null;
+      }
       return json.data;
     } catch (err) {
-      if (i === retries - 1) throw err;
+      if (i === retries - 1) {
+        console.warn(`[AniList API] Network error:`, err instanceof Error ? err.message : String(err));
+        return null;
+      }
       await new Promise((r) => setTimeout(r, 500 * Math.pow(2, i)));
     }
   }
-  throw new Error("AniList fetch failed");
+  return null;
 }
 
 // Mappers & utilities
@@ -275,6 +282,7 @@ export async function searchAnime(
       page,
       perPage,
     });
+    if (!data?.Page) return { results: [], totalResults: 0, totalPages: 0, page: 1 };
     const { pageInfo, media } = data.Page;
     return {
       results: media.map(mapAniListToMedia),
@@ -295,6 +303,7 @@ export async function getAnimeDetails(id: string): Promise<Media | null> {
     const data = await anilistFetch<{ Media: AniListMedia }>(gql, {
       id: numericId,
     });
+    if (!data?.Media) return null;
     return mapAniListToMedia(data.Media);
   } catch (error) {
     console.error(`AniList getAnimeDetails(${id}) error:`, error);
@@ -331,7 +340,7 @@ export async function getAnimeSeasons(id: string): Promise<Season[]> {
     const visited = new Set<number>();
 
     const initialData = await anilistFetch<any>(gql, { id: numericId });
-    const rootMedia = initialData.Media;
+    const rootMedia = initialData?.Media;
     if (!rootMedia) return [];
 
     allNodesMap.set(rootMedia.id, { ...rootMedia, relationType: "CURRENT" });
@@ -480,6 +489,7 @@ export async function getTrendingAnime(
       page,
       perPage,
     });
+    if (!data?.Page?.media) return [];
     return data.Page.media.map(mapAniListToMedia);
   } catch (error) {
     console.error("AniList getTrendingAnime error:", error);
@@ -500,6 +510,7 @@ export async function discoverAnimeByGenres(
       page,
       perPage: 20,
     });
+    if (!data?.Page) return { results: [], totalResults: 0, totalPages: 0, page: 1 };
     const { pageInfo, media } = data.Page;
     const results = media
       .map(mapAniListToMedia)

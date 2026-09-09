@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { Home, PlaySquare, Compass, User, Settings, LogOut, Star, Coffee, LogIn, ArrowRight, Sparkles } from 'lucide-react';
+import { Home, PlaySquare, Compass, User, Settings, LogOut, Star, Coffee, LogIn, ArrowRight, Sparkles, Smartphone, History, BarChart2 } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home', icon: Home },
@@ -14,6 +14,7 @@ const NAV_LINKS = [
 ] as const;
 
 export default function Navbar() {
+  const apkDownloadUrl = 'https://raw.githubusercontent.com/VeerPalSingh-0000/Sanchaya/main/releases/sanchaya-app.apk';
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -104,6 +105,14 @@ export default function Navbar() {
                     </div>
                   </div>
                 </div>
+                <Link href="/watchlist/history" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all" onClick={() => setDropdownOpen(false)}>
+                  <History className="w-[18px] h-[18px] text-white/50" />
+                  <span className="text-sm font-medium text-white/80">Watch History</span>
+                </Link>
+                <Link href="/watchlist/statistics" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all" onClick={() => setDropdownOpen(false)}>
+                  <BarChart2 className="w-[18px] h-[18px] text-white/50" />
+                  <span className="text-sm font-medium text-white/80">Statistics</span>
+                </Link>
                 <Link href="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all" onClick={() => setDropdownOpen(false)}>
                   <Settings className="w-[18px] h-[18px] text-white/50" />
                   <span className="text-sm font-medium text-white/80">Preferences</span>
@@ -171,7 +180,17 @@ export default function Navbar() {
           </ul>
         </div>
         {/* Trailing Actions */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          <a
+            href={apkDownloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all"
+            title="Download Flutter App (APK)"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Get App</span>
+          </a>
           <div id="profile-menu-container" className="relative">
             {status === 'loading' ? (
               <div className="w-10 h-10 rounded-full bg-white/5 animate-pulse" />
@@ -218,6 +237,18 @@ export default function Navbar() {
                 </div>
 
                 {/* Menu Items */}
+                <Link href="/watchlist/history" className="flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-white/5 group transition-all" onClick={() => setDropdownOpen(false)}>
+                  <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-inner border border-white/5">
+                    <History className="w-[18px] h-[18px] text-on-surface-variant group-hover:text-primary transition-colors group-hover:rotate-45 duration-300" />
+                  </div>
+                  <span className="text-sm font-medium text-on-surface group-hover:translate-x-1 transition-transform">Watch History</span>
+                </Link>
+                <Link href="/watchlist/statistics" className="flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-white/5 group transition-all" onClick={() => setDropdownOpen(false)}>
+                  <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-inner border border-white/5">
+                    <BarChart2 className="w-[18px] h-[18px] text-on-surface-variant group-hover:text-primary transition-colors group-hover:rotate-45 duration-300" />
+                  </div>
+                  <span className="text-sm font-medium text-on-surface group-hover:translate-x-1 transition-transform">Statistics</span>
+                </Link>
                 <Link href="/settings" className="flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-white/5 group transition-all" onClick={() => setDropdownOpen(false)}>
                   <div className="w-9 h-9 rounded-full bg-surface-variant/50 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-inner border border-white/5">
                     <Settings className="w-[18px] h-[18px] text-on-surface-variant group-hover:text-primary transition-colors group-hover:rotate-45 duration-300" />

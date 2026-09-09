@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,7 +45,8 @@ class MediaDetailsScreen extends ConsumerWidget {
             return _buildError(context, ref, 'Media not found.');
           }
 
-          final coverUrl = baseMedia.backdropUrl ?? baseMedia.posterUrl;
+          final hasValidBackdrop = baseMedia.backdropUrl != null && baseMedia.backdropUrl!.isNotEmpty;
+          final coverUrl = hasValidBackdrop ? baseMedia.backdropUrl! : baseMedia.posterUrl;
           final paletteAsync = ref.watch(paletteProvider(baseMedia.posterUrl.isNotEmpty ? baseMedia.posterUrl : coverUrl));
           final dominantColor = paletteAsync.value?.dominantColor?.color;
           final vibrantColor = paletteAsync.value?.vibrantColor?.color ?? paletteAsync.value?.darkVibrantColor?.color;
@@ -80,10 +82,20 @@ class MediaDetailsScreen extends ConsumerWidget {
                     fit: StackFit.expand,
                     children: [
                       if (coverUrl.isNotEmpty)
-                        OptimizedNetworkImage(
-                          imageUrl: coverUrl,
-                          memCacheHeight: 600, // Large for headers
-                        ),
+                        if (!hasValidBackdrop)
+                          ImageFiltered(
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: 8.0,
+                              sigmaY: 8.0,
+                            ),
+                            child: OptimizedNetworkImage(
+                              imageUrl: coverUrl,
+                            ),
+                          )
+                        else
+                          OptimizedNetworkImage(
+                            imageUrl: coverUrl,
+                          ),
                       Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -397,7 +409,7 @@ class MediaDetailsScreen extends ConsumerWidget {
                         StoryArcsWidget(media: media),
 
                       // --- Similar Titles ---
-                      if (media != null && media.id.startsWith('tmdb-'))
+                      if (media != null)
                         _SimilarTitlesRow(mediaId: media.id),
 
                       // --- Loading Indicator for lower screen ---
@@ -586,7 +598,7 @@ class _SimilarTitlesRow extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               child: Text(
-                'Similar Titles',
+                'You might also like',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -595,7 +607,7 @@ class _SimilarTitlesRow extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 200,
+              height: 240, // Increased to fit poster and title text
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 scrollDirection: Axis.horizontal,
@@ -609,6 +621,13 @@ class _SimilarTitlesRow extends ConsumerWidget {
                         title: similar[index].title,
                         posterUrl: similar[index].posterUrl ?? '',
                         rating: similar[index].rating,
+                        height: 180, // Explicitly set height (120 width * 1.5 ratio = 180 height)
+                        onTap: () {
+                          context.push(
+                            '/media/${similar[index].id}',
+                            extra: similar[index],
+                          );
+                        },
                       ),
                     ),
                   );

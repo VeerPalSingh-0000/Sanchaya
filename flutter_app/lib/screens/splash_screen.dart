@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/trending_provider.dart';
 import '../providers/watchlist_provider.dart';
 import '../widgets/aesthetic_loader.dart';
+import '../models/media.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -29,10 +30,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // Pre-fetch critical home screen data in the background without awaiting them
     // so the user isn't stuck on the splash screen if the network is slow.
     // The home screen has its own loading (shimmer) states.
-    ref.read(trendingMoviesProvider.future).catchError((_) => []);
-    ref.read(trendingTVProvider.future).catchError((_) => []);
-    ref.read(trendingAnimeProvider.future).catchError((_) => []);
-    ref.read(watchlistProvider.future).catchError((_) => []);
+    ref.read(trendingMoviesProvider.future).catchError((_) => <Media>[]);
+    ref.read(trendingTVProvider.future).catchError((_) => <Media>[]);
+    ref.read(trendingAnimeProvider.future).catchError((_) => <Media>[]);
+    ref.read(watchlistProvider.future).catchError((_) => <Media>[]);
 
     // Wait for the minimum aesthetic delay
     await minimumDelay;

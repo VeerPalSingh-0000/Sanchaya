@@ -2,11 +2,16 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
-import { User, Bell, Palette, AlertTriangle, Loader2 } from "lucide-react";
+import { User, Bell, Palette, AlertTriangle, Loader2, BarChart2 } from "lucide-react";
 
 const UserIcon = () => (
   <User className="w-6 h-6 text-on-surface" />
+);
+
+const ChartIcon = () => (
+  <BarChart2 className="w-6 h-6 text-on-surface" />
 );
 
 const BellIcon = () => (
@@ -210,6 +215,34 @@ export default function SettingsPage() {
                 "Save Changes"
               )}
             </button>
+          </div>
+        </section>
+
+        {/* Dashboard Section */}
+        <section className="glass-panel rounded-2xl p-6 md:p-8 flex flex-col gap-6">
+          <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+            <ChartIcon />
+            <h2 className="font-headline-lg-mobile md:font-headline-lg text-[20px] md:text-[24px] font-bold text-on-surface">
+              Dashboard
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link 
+              href="/watchlist/statistics" 
+              className="p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all flex flex-col gap-2 group"
+            >
+              <div className="font-bold text-lg text-on-surface group-hover:text-primary transition-colors">Watchlist Statistics</div>
+              <div className="text-sm text-on-surface-variant">View your watch habits and trends</div>
+            </Link>
+            
+            <Link 
+              href="/watchlist/history" 
+              className="p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all flex flex-col gap-2 group"
+            >
+              <div className="font-bold text-lg text-on-surface group-hover:text-primary transition-colors">Watch History</div>
+              <div className="text-sm text-on-surface-variant">Timeline of what you watched</div>
+            </Link>
           </div>
         </section>
 

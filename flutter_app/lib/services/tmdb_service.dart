@@ -92,12 +92,26 @@ class TmdbService {
 
     for (int i = 0; i < retries; i++) {
       try {
-        final response = await _dio.get<T>(endpoint, queryParameters: queryParams);
+        final response = await _dio.get<T>(endpoint, queryParameters: queryParams).timeout(const Duration(seconds: 10));
         return response.data as T;
       } on DioException catch (e) {
         if (i == retries - 1) rethrow;
         if (e.response?.statusCode == 404) rethrow;
+        if (e.type == DioExceptionType.connectionError || 
+            e.type == DioExceptionType.connectionTimeout || 
+            e.type == DioExceptionType.unknown || 
+            e.error.toString().contains('SocketException')) {
+          rethrow; // Fail fast on no internet
+        }
         
+        final jitter = Random().nextDouble() * 300;
+        final waitTime = (500 * pow(2, i)) + jitter;
+        await Future.delayed(Duration(milliseconds: waitTime.toInt()));
+      } catch (e) {
+        if (i == retries - 1) rethrow;
+        if (e.toString().contains('SocketException') || e.toString().contains('TimeoutException')) {
+          rethrow;
+        }
         final jitter = Random().nextDouble() * 300;
         final waitTime = (500 * pow(2, i)) + jitter;
         await Future.delayed(Duration(milliseconds: waitTime.toInt()));
@@ -450,17 +464,121 @@ class TmdbService {
 
   Future<List<Media>> getSimilar(String id, MediaType type) async {
     final cleanId = id.replaceAll(RegExp(r'tmdb-(movie|tv)-'), '');
-    final endpoint = type == MediaType.movie ? '/movie/$cleanId/similar' : '/tv/$cleanId/similar';
+    final isMovie = type == MediaType.movie;
+    
     try {
-      final data = await _fetch<Map<String, dynamic>>(endpoint);
-      final results = (data['results'] as List<dynamic>).map((item) {
-        if (type == MediaType.movie) {
-          return _mapMovieToMedia(item as Map<String, dynamic>);
+      // 1. Fetch basic details to get language, genres, and release date
+      final detailsEndpoint = isMovie ? '/movie/$cleanId' : '/tv/$cleanId';
+      final detailsData = await _fetch<Map<String, dynamic>>(detailsEndpoint);
+      
+      final originalLang = detailsData['original_language'] as String?;
+      final genres = detailsData['genres'] as List<dynamic>?;
+      final releaseDateStr = isMovie
+          ? detailsData['release_date'] as String?
+          : detailsData['first_air_date'] as String?;
+      
+      final isNonEnglish = originalLang != null && originalLang != 'en';
+      
+      // Parse release year for era-based filtering
+      int? releaseYear;
+      if (releaseDateStr != null && releaseDateStr.length >= 4) {
+        releaseYear = int.tryParse(releaseDateStr.substring(0, 4));
+      }
+
+      // 2. Try TMDB's /similar endpoint first — it uses content-based matching
+      //    which is the best signal for finding genuinely similar titles.
+      final simEndpoint = isMovie ? '/movie/$cleanId/similar' : '/tv/$cleanId/similar';
+      try {
+        final simData = await _fetch<Map<String, dynamic>>(simEndpoint);
+        var simResults = (simData['results'] as List<dynamic>)
+            .where((item) => item['id'].toString() != cleanId)
+            .toList();
+        
+        // For non-English titles, prefer same-language results from /similar
+        if (isNonEnglish && simResults.isNotEmpty) {
+          final sameLangResults = simResults
+              .where((item) => item['original_language'] == originalLang)
+              .toList();
+          // Use same-language results if we have enough (≥3), otherwise keep all
+          if (sameLangResults.length >= 3) {
+            simResults = sameLangResults;
+          }
         }
-        return _mapTVToMedia(item as Map<String, dynamic>);
-      }).toList();
-      return results;
+        
+        if (simResults.isNotEmpty) {
+          return simResults
+              .map((item) => isMovie
+                  ? _mapMovieToMedia(item as Map<String, dynamic>)
+                  : _mapTVToMedia(item as Map<String, dynamic>))
+              .toList();
+        }
+      } catch (e) {
+        debugPrint('[TMDB] /similar failed for $cleanId, trying alternatives: $e');
+      }
+      
+      // 3. For non-English titles, use discover with language + genre + era constraints.
+      //    This avoids returning new blockbusters for old classics.
+      if (isNonEnglish) {
+        final genreIds = genres?.take(2).map((g) => g['id']).join('|') ?? '';
+        final discoverEndpoint = isMovie ? '/discover/movie' : '/discover/tv';
+        final params = <String, dynamic>{
+          'with_original_language': originalLang,
+          'sort_by': 'vote_average.desc',
+          'vote_count.gte': 10,
+        };
+        if (genreIds.isNotEmpty) {
+          params['with_genres'] = genreIds;
+        }
+        
+        // Add era-based date window so old classics get similar-era recommendations
+        if (releaseYear != null) {
+          final currentYear = DateTime.now().year;
+          // Wider window for older movies (±15yr), narrower for recent ones (±10yr)
+          final yearSpan = releaseYear < (currentYear - 30) ? 15 : 10;
+          final dateKey = isMovie ? 'primary_release_date' : 'first_air_date';
+          params['$dateKey.gte'] = '${releaseYear - yearSpan}-01-01';
+          params['$dateKey.lte'] = '${releaseYear + yearSpan}-12-31';
+        }
+        
+        try {
+          final discoverData = await _fetch<Map<String, dynamic>>(discoverEndpoint, params: params);
+          final results = (discoverData['results'] as List<dynamic>)
+              .where((item) => item['id'].toString() != cleanId)
+              .map((item) => isMovie
+                  ? _mapMovieToMedia(item as Map<String, dynamic>)
+                  : _mapTVToMedia(item as Map<String, dynamic>))
+              .toList();
+              
+          if (results.isNotEmpty) return results;
+        } catch (e) {
+          debugPrint('[TMDB] discover fallback failed for $cleanId: $e');
+        }
+      }
+      
+      // 4. Fallback to /recommendations endpoint
+      final recEndpoint = isMovie ? '/movie/$cleanId/recommendations' : '/tv/$cleanId/recommendations';
+      final recData = await _fetch<Map<String, dynamic>>(recEndpoint);
+      var results = (recData['results'] as List<dynamic>)
+          .where((item) => item['id'].toString() != cleanId)
+          .toList();
+      
+      // For non-English, filter recommendations to same language
+      if (isNonEnglish && results.isNotEmpty) {
+        final sameLangResults = results
+            .where((item) => item['original_language'] == originalLang)
+            .toList();
+        if (sameLangResults.isNotEmpty) {
+          results = sameLangResults;
+        }
+      }
+      
+      return results
+          .map((item) => isMovie
+              ? _mapMovieToMedia(item as Map<String, dynamic>)
+              : _mapTVToMedia(item as Map<String, dynamic>))
+          .toList();
     } catch (e) {
+      debugPrint('[TMDB] getSimilar error: $e');
       return [];
     }
   }

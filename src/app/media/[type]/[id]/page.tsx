@@ -7,6 +7,7 @@ import { getAnimeDetails, getAnimeSeasons, searchAnime } from '@/lib/anilist';
 import Badge from '@/components/ui/Badge';
 import WatchlistButton from '@/components/media/WatchlistButton';
 import ReactionSelector from '@/components/media/ReactionSelector';
+import NotesWidget from '@/components/media/NotesWidget';
 import AnimeTimeline from './AnimeTimeline';
 import EpisodesLoader from './EpisodesLoader';
 import BeautifulOverview from '@/components/media/BeautifulOverview';
@@ -230,7 +231,10 @@ export default async function MediaDetailPage({
             <div style={{ marginTop: '24px', marginBottom: '24px' }}>
               <div className="flex items-center gap-4 flex-wrap">
                 <WatchlistButton media={media} hideEpisodeTracker={!!(seasons && seasons.length > 0)} />
-                <ReactionSelector mediaId={id} />
+                <div className="flex flex-col gap-2">
+                  <ReactionSelector mediaId={id} />
+                  <NotesWidget mediaId={id} />
+                </div>
               </div>
               
               {/* Anime Episodes List */}

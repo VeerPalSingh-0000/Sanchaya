@@ -5,7 +5,7 @@ import MediaCard from "@/components/media/MediaCard";
 import FranchiseCard from "@/components/media/FranchiseCard";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
-import { ListFilter, PlaySquare, Search, X } from "lucide-react";
+import { ListFilter, PlaySquare, Search, X, ArrowUpDown, ChevronDown } from "lucide-react";
 import type { WatchStatus, WatchlistItem } from "@/types/media";
 import { getWatchlistFranchiseGroupings, FranchiseGroup } from "./actions";
 
@@ -20,6 +20,8 @@ export default function WatchlistPage() {
   const [filter, setFilter] = useState<WatchStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isMigrating, setIsMigrating] = useState(false);
+  const [sortBy, setSortBy] = useState<'date' | 'title' | 'rating' | 'progress'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     setMounted(true);
@@ -173,8 +175,30 @@ export default function WatchlistPage() {
       });
     }
     
+    filtered.sort((a, b) => {
+      let cmp = 0;
+      if (sortBy === 'date') {
+        const timeA = a.type === 'single' ? new Date(a.item.addedAt).getTime() : Math.max(...a.items.map(i => new Date(i.addedAt).getTime()));
+        const timeB = b.type === 'single' ? new Date(b.item.addedAt).getTime() : Math.max(...b.items.map(i => new Date(i.addedAt).getTime()));
+        cmp = timeA - timeB;
+      } else if (sortBy === 'title') {
+        const titleA = a.type === 'single' ? a.item.title : a.group.rootTitle;
+        const titleB = b.type === 'single' ? b.item.title : b.group.rootTitle;
+        cmp = titleA.localeCompare(titleB);
+      } else if (sortBy === 'rating') {
+        const ratingA = a.type === 'single' ? (a.item.rating || 0) : Math.max(...a.items.map(i => i.rating || 0));
+        const ratingB = b.type === 'single' ? (b.item.rating || 0) : Math.max(...b.items.map(i => i.rating || 0));
+        cmp = ratingA - ratingB;
+      } else if (sortBy === 'progress') {
+        const progA = a.type === 'single' ? (a.item.progress || 0) : Math.max(...a.items.map(i => i.progress || 0));
+        const progB = b.type === 'single' ? (b.item.progress || 0) : Math.max(...b.items.map(i => i.progress || 0));
+        cmp = progA - progB;
+      }
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+    
     return filtered;
-  }, [allGroups, filter, searchQuery]);
+  }, [allGroups, filter, searchQuery, sortBy, sortOrder]);
 
   if (!mounted) {
     return (
@@ -241,6 +265,42 @@ export default function WatchlistPage() {
                   </button>
                 ),
               )}
+            </div>
+
+            {/* Sorting */}
+            <div className="relative group">
+              <button
+                className="flex items-center gap-2 px-4 py-2 bg-surface-container/40 backdrop-blur-xl border border-white/5 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-all shadow-inner"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                <span className="text-[13px] font-medium hidden sm:inline capitalize">
+                  Sort: {sortBy}
+                </span>
+                <ChevronDown className="w-4 h-4 opacity-50" />
+              </button>
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#06090e] border border-white/10 shadow-2xl p-2 flex flex-col gap-1 z-50 transform origin-top-right opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                {(['date', 'title', 'rating', 'progress'] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => {
+                      if (sortBy === opt) {
+                        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+                      } else {
+                        setSortBy(opt);
+                        setSortOrder(opt === 'title' ? 'asc' : 'desc');
+                      }
+                    }}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+                      sortBy === opt ? 'bg-primary/20 text-primary' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <span className="capitalize">{opt}</span>
+                    {sortBy === opt && (
+                      <ArrowUpDown className={`w-3.5 h-3.5 transition-transform duration-300 ${sortOrder === 'asc' ? 'rotate-180' : ''}`} />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

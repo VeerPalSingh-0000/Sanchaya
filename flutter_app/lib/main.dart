@@ -58,11 +58,19 @@ void main() async {
     );
   }
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: Constants.supabaseUrl,
-    publishableKey: Constants.supabaseAnonKey,
-  );
+  // Initialize Supabase — wrapped in a timeout so the app starts even
+  // when the network is unreachable (DNS failure, offline, etc.).
+  // The underlying Future continues in the background even after timeout,
+  // so Supabase.instance will eventually become available.
+  try {
+    await Supabase.initialize(
+      url: Constants.supabaseUrl,
+      publishableKey: Constants.supabaseAnonKey,
+    ).timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('[Supabase] Initialization failed or timed out: $e — '
+        'app will start without auth; auth recovers when connectivity returns.');
+  }
 
   // Initialize Google Sign In (only on supported platforms)
   if (kIsWeb || 
@@ -82,7 +90,6 @@ void main() async {
   // Initialize Cache
   final cacheService = CacheService();
   await cacheService.init();
-  await cacheService.clearAll();
 
   runApp(
     ProviderScope(

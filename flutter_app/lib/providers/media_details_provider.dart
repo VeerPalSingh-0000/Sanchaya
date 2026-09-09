@@ -224,18 +224,18 @@ final mediaDetailsProvider = FutureProvider.family<Media?, String>((ref, rawId) 
 final similarTitlesProvider = FutureProvider.family<List<Media>, String>((ref, rawId) async {
   final id = normalizeMediaId(rawId);
 
-  // Similar titles are currently only supported for TMDB media
-  if (!id.startsWith('tmdb-')) {
-    return [];
-  }
-
-  final tmdbService = ref.read(tmdbServiceProvider);
-  final type = id.startsWith('tmdb-movie-') ? MediaType.movie : MediaType.series;
-  
   try {
-    return await tmdbService.getSimilar(id, type);
+    if (id.startsWith('anilist-')) {
+      final anilistService = ref.read(anilistServiceProvider);
+      return await anilistService.getRecommendations(id);
+    } else if (id.startsWith('tmdb-')) {
+      final tmdbService = ref.read(tmdbServiceProvider);
+      final type = id.startsWith('tmdb-movie-') ? MediaType.movie : MediaType.series;
+      return await tmdbService.getSimilar(id, type);
+    }
   } catch (e) {
     debugPrint('[SimilarTitles] Error fetching for $id: $e');
-    return [];
   }
+  
+  return [];
 });

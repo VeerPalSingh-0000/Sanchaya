@@ -93,6 +93,7 @@ export interface WatchlistItem {
   franchisePosterUrl?: string;
   releaseDate?: string;
   reaction?: 'LOVE' | 'GOOD' | 'BAD';
+  notes?: string;
 }
 
 // ─── Search & Recommendations ───────────────────────────────────────────────
