@@ -10,6 +10,7 @@
 [![Dart](https://img.shields.io/badge/Language-Dart-0175C2?style=for-the-badge&logo=dart)](#)
 [![Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](#)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](#)
+[![Android APK](https://img.shields.io/badge/Download-Android_APK-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://raw.githubusercontent.com/VeerPalSingh-0000/Sanchaya/main/releases/sanchaya-app.apk)
 
 <br/>
 
@@ -70,10 +71,34 @@ It hits different because it actually looks like a flagship app. No cap, the UI 
 
 <br/>
 
-## 📱 Download the App
+## 📱 Download & Install the Mobile App
 
-You can download the latest Android APK directly from this repository:
-[Download Sanchaya.apk](https://raw.githubusercontent.com/VeerPalSingh-0000/Sanchaya/main/releases/sanchaya-app.apk)
+Get the native Android app directly and track your media anywhere:
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/VeerPalSingh-0000/Sanchaya/main/releases/sanchaya-app.apk">
+    <img src="https://img.shields.io/badge/Direct_Download-Sanchaya.apk-brightgreen?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" height="42" />
+  </a>
+</p>
+
+| Source | Link | Notes |
+| :--- | :--- | :--- |
+| 🚀 **Direct APK (Recommended)** | [Download Sanchaya.apk](https://raw.githubusercontent.com/VeerPalSingh-0000/Sanchaya/main/releases/sanchaya-app.apk) | Instant download from repo (`releases/sanchaya-app.apk`) |
+| 📦 **GitHub Releases** | [Releases Page](https://github.com/VeerPalSingh-0000/Sanchaya/releases) | Release tags & changelogs |
+
+### 📲 Quick Install Guide:
+1. Tap the **[Download Sanchaya.apk](https://raw.githubusercontent.com/VeerPalSingh-0000/Sanchaya/main/releases/sanchaya-app.apk)** button on your Android phone.
+2. If prompted, tap **"Download anyway"** and open the downloaded `.apk` file.
+3. Allow **"Install unknown apps"** for your browser when requested.
+4. Tap **Install** and start tracking!
+
+### 🔨 Building the APK Yourself:
+```bash
+cd mobile
+flutter pub get
+flutter build apk --release
+# Output will be located at: mobile/build/app/outputs/flutter-apk/app-release.apk
+```
 
 ---
 
@@ -115,8 +140,8 @@ This app wasn't built on vibes alone.
 ### 🌐 Web App Setup
 **1. Clone it down**
 ```bash
-git clone https://github.com/yourusername/sanchaya.git
-cd sanchaya
+git clone https://github.com/VeerPalSingh-0000/Sanchaya.git
+cd Sanchaya/website
 ```
 
 **2. Install dependencies**
@@ -125,7 +150,7 @@ npm install
 ```
 
 **3. Set up environment variables**
-Create a `.env` file in the root directory:
+Create a `.env` file in the `website/` directory:
 ```env
 TMDB_API_KEY=your_key
 DATABASE_URL=your_postgres_url
@@ -145,7 +170,7 @@ Open `http://localhost:3000` and enjoy the aesthetic.
 
 **1. Navigate to the mobile directory**
 ```bash
-cd flutter_app
+cd Sanchaya/mobile
 ```
 
 **2. Install Flutter dependencies**
@@ -154,7 +179,7 @@ flutter pub get
 ```
 
 **3. Configure environment variables**
-Create a `.env` file in `flutter_app/`:
+Create a `.env` file in `mobile/`:
 ```env
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
