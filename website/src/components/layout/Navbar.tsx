@@ -66,12 +66,12 @@ export default function Navbar() {
         {status === 'loading' ? (
           <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
         ) : !session ? (
-          <button 
-            onClick={() => signIn()}
+          <Link 
+            href="/auth/signin"
             className="text-sm font-semibold bg-primary text-black px-4 py-1.5 rounded-full hover:bg-primary/90 transition-colors"
           >
             Sign In
-          </button>
+          </Link>
         ) : (
           <div id="profile-menu-container-mobile" className="relative">
             <div 
@@ -289,15 +289,16 @@ export default function Navbar() {
                     <span className="text-sm font-medium text-error group-hover:translate-x-1 transition-transform">Sign Out</span>
                   </button>
                 ) : (
-                  <button 
+                  <Link 
+                    href="/auth/signin"
                     className="flex items-center gap-4 px-3 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 group transition-all text-left w-full border border-primary/20 hover:border-primary/40 shadow-[0_0_15px_rgba(255,193,116,0.1)]" 
-                    onClick={() => { setDropdownOpen(false); signIn(); }}
+                    onClick={() => setDropdownOpen(false)}
                   >
                     <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors shadow-inner">
                       <LogIn className="w-[18px] h-[18px] text-primary group-hover:translate-x-1 transition-transform" />
                     </div>
                     <span className="text-sm font-bold text-primary group-hover:translate-x-1 transition-transform">Sign In</span>
-                  </button>
+                  </Link>
                 )}
               </div>
             )}

@@ -1,7 +1,7 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { signIn } from 'next-auth/react';
 import { Clapperboard, ListTodo, Compass, Sparkles, ArrowRight, CodeXml, Smartphone, Download, CheckCircle2, Zap } from 'lucide-react';
 
 const FEATURES = [
@@ -87,12 +87,12 @@ export default function LandingPage() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
         >
-          <button 
-            onClick={() => signIn()}
+          <Link 
+            href="/auth/signin"
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-primary text-black font-bold text-lg hover:scale-105 hover:shadow-[0_0_30px_rgba(255,193,116,0.4)] transition-all duration-300 flex items-center justify-center gap-2"
           >
             Get Started <ArrowRight className="w-5 h-5" />
-          </button>
+          </Link>
 
           <a 
             href={apkDownloadUrl}
